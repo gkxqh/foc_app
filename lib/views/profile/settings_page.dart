@@ -431,11 +431,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 ListTile(
                   leading: const Icon(Icons.support_agent_outlined),
                   title: const Text('联系客服'),
-                  subtitle: Text(
-                    isTech
-                        ? '请在技术员群中联系群主或管理员'
-                        : '请在会员群中联系群主或管理员',
-                  ),
+                  subtitle: Text(isTech ? '请在技术员群中联系群主或管理员' : '请在会员群中联系群主或管理员'),
                   onTap: () {
                     Clipboard.setData(
                       const ClipboardData(text: ApiConstants.supportPhone),
@@ -475,6 +471,23 @@ class _SettingsPageState extends State<SettingsPage> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : const Text('保存修改'),
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton(
+            onPressed: () async {
+              await auth.logout();
+              if (context.mounted) {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context)
+                    .showSnackBar(const SnackBar(content: Text('已退出登录')));
+              }
+            },
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Colors.red,
+              side: const BorderSide(color: Colors.red),
+              padding: const EdgeInsets.symmetric(vertical: 14),
+            ),
+            child: const Text('退出当前账号'),
           ),
           const SizedBox(height: 32),
         ],

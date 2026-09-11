@@ -354,13 +354,13 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
                 children: [
                   _buildStepItem('电脑报修', 0, stepIndex),
                   _buildStepDivider(0, stepIndex),
-                  _buildStepItem('技工接单', 1, stepIndex),
+                  _buildStepItem('技术员接单', 1, stepIndex),
                   _buildStepDivider(1, stepIndex),
                   _buildStepItem(
                     _ticket.repairStatus == 'UserConfirming'
                         ? '用户确认'
                         : _ticket.repairStatus == 'TechConfirming'
-                        ? '技工确认'
+                        ? '技术员确认'
                         : '维修确认',
                     2,
                     stepIndex,

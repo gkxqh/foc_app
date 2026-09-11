@@ -44,6 +44,7 @@ dependencies:
   package_info_plus: ^9.0.0
   qr_flutter: ^4.1.0
   mobile_scanner: ^5.2.3
+  flutter_dynamic_icon_plus: ^1.4.1
 
 dev_dependencies:
   flutter_test:
@@ -73,6 +74,7 @@ flutter:
 
   assets:
     - assets/icon/icon.png
+    - assets/icon/logo_alt.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:

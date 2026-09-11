@@ -2,7 +2,7 @@
     <!-- INTERNET 权限必须声明在主清单中，否则 release 包无法联网（debug/profile 清单的声明不生效） -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <application
-        android:label="foc_app"
+        android:label="云上飞扬"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
@@ -22,11 +22,33 @@
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme"
               />
+        </activity>
+        <!-- 双图标支持：LAUNCHER 入口放在 activity-alias 上（恰好一个 enabled），
+             切换 = disable 当前 alias + enable 目标 alias（软件设置 → 应用图标） -->
+        <activity-alias
+            android:name=".MainActivityRed"
+            android:enabled="true"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher"
+            android:label="云上飞扬"
+            android:targetActivity=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-        </activity>
+        </activity-alias>
+        <activity-alias
+            android:name=".MainActivityLogo"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_logo"
+            android:label="云上飞扬"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity-alias>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

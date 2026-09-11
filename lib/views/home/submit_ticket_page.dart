@@ -221,7 +221,7 @@ class _SubmitTicketPageState extends State<SubmitTicketPage> {
                       initialValue: _model,
                       decoration: const InputDecoration(
                         labelText: '具体型号 (选填)',
-                        hintText: '如联想小新Pro 16 / MacBook M1',
+                        hintText: '如联想小新Pro 16 / 华硕天选7 Pro Max',
                         border: OutlineInputBorder(),
                       ),
                       onSaved: (v) => _model = v?.trim() ?? '',

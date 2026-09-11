@@ -86,9 +86,7 @@ class _RepairTermsPageState extends State<RepairTermsPage> {
         : '1. 送修前请移除电源外其余外设配件（包括鼠标、接收器、U盘、内存卡等）；\n2. 如要更换配件，请提前购买准备好；\n3. 如需重装系统，送修前电脑充满电；\n4. 请备份好重要数据，飞扬不对任何数据丢失负责；\n5. 我们志愿服务并非万能，不保证100%能够修好。';
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('报修须知与服务条款'),
-      ),
+      appBar: AppBar(title: const Text('报修须知与服务条款')),
       body: SafeArea(
         child: Column(
           children: [
@@ -173,51 +171,51 @@ class _RepairTermsPageState extends State<RepairTermsPage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                  CheckboxListTile(
-                    value: _agreed,
-                    onChanged: _onCheckboxChanged,
-                    title: const Text(
-                      '我已阅读并同意上述报修须知与服务条款',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    contentPadding: EdgeInsets.zero,
-                    controlAffinity: ListTileControlAffinity.leading,
-                    dense: true,
-                  ),
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: _agreed ? _proceedToSubmit : null,
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        backgroundColor: AppTheme.primaryBlue,
-                        foregroundColor: Colors.white,
-                        disabledBackgroundColor: colorScheme.onSurface
-                            .withValues(alpha: 0.12),
-                        disabledForegroundColor: colorScheme.onSurface
-                            .withValues(alpha: 0.38),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      icon: const Icon(Icons.arrow_forward_rounded, size: 18),
-                      label: const Text(
-                        '我已知晓并同意，开始报修',
+                    CheckboxListTile(
+                      value: _agreed,
+                      onChanged: _onCheckboxChanged,
+                      title: const Text(
+                        '我已阅读并同意上述报修须知与服务条款',
                         style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      contentPadding: EdgeInsets.zero,
+                      controlAffinity: ListTileControlAffinity.leading,
+                      dense: true,
+                    ),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: _agreed ? _proceedToSubmit : null,
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          backgroundColor: AppTheme.primaryBlue,
+                          foregroundColor: Colors.white,
+                          disabledBackgroundColor: colorScheme.onSurface
+                              .withValues(alpha: 0.12),
+                          disabledForegroundColor: colorScheme.onSurface
+                              .withValues(alpha: 0.38),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        icon: const Icon(Icons.arrow_forward_rounded, size: 18),
+                        label: const Text(
+                          '我已知晓并同意，开始报修',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
           ],
         ),
       ),

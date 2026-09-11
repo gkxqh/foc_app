@@ -88,7 +88,9 @@ class _ScanGivePageState extends State<ScanGivePage> {
         _resultMessage = '正在解析图片中的二维码...';
       });
 
-      final BarcodeCapture? capture = await _controller.analyzeImage(image.path);
+      final BarcodeCapture? capture = await _controller.analyzeImage(
+        image.path,
+      );
       final code = capture?.barcodes.firstOrNull?.rawValue;
 
       if (code == null || code.isEmpty) {
@@ -140,9 +142,7 @@ class _ScanGivePageState extends State<ScanGivePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('扫码接单'),
-      ),
+      appBar: AppBar(title: const Text('扫码接单')),
       body: Column(
         children: [
           Expanded(
@@ -194,7 +194,10 @@ class _ScanGivePageState extends State<ScanGivePage> {
                     children: [
                       OutlinedButton.icon(
                         onPressed: _pickImageFromGallery,
-                        icon: const Icon(Icons.photo_library_outlined, size: 18),
+                        icon: const Icon(
+                          Icons.photo_library_outlined,
+                          size: 18,
+                        ),
                         label: const Text('相册导入'),
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(
@@ -238,7 +241,10 @@ class _ScanGivePageState extends State<ScanGivePage> {
                       const SizedBox(width: 8),
                       OutlinedButton.icon(
                         onPressed: _pickImageFromGallery,
-                        icon: const Icon(Icons.photo_library_outlined, size: 18),
+                        icon: const Icon(
+                          Icons.photo_library_outlined,
+                          size: 18,
+                        ),
                         label: const Text('相册'),
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(

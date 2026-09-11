@@ -160,7 +160,7 @@ class _GiveOrderPageState extends State<GiveOrderPage> {
                 controller: _codeController,
                 decoration: InputDecoration(
                   labelText: '转单码',
-                  hintText: '单号 + 6位验证码',
+                  hintText: '单号',
                   prefixIcon: const Icon(Icons.qr_code_2_rounded),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),

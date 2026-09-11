@@ -7,6 +7,7 @@ import '../services/config_service.dart';
 
 class ConfigProvider extends ChangeNotifier {
   static const _keyShowTechRank = 'pref_show_tech_rank';
+  static const _keyShowAnnouncement = 'pref_show_announcement';
 
   final ConfigService _configService = ConfigService();
 
@@ -21,6 +22,7 @@ class ConfigProvider extends ChangeNotifier {
   bool _isLoadingRank = false;
   int _rankRequestId = 0; // 竞态防护：快速切换 Tab 时只接受最后一次请求的结果
   bool _showTechRank = true; // 首页是否展示技术员英雄榜
+  bool _showAnnouncement = true; // 首页是否展示公告栏（仅技术员设置）
 
   ConfigProvider() {
     _loadLocalPreferences();
@@ -33,15 +35,20 @@ class ConfigProvider extends ChangeNotifier {
   List<TopTechModel> get topTechList => _topTechList;
   bool get isLoadingRank => _isLoadingRank;
   bool get showTechRank => _showTechRank;
+  bool get showAnnouncement => _showAnnouncement;
 
   Future<void> _loadLocalPreferences() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final saved = prefs.getBool(_keyShowTechRank);
-      if (saved != null) {
-        _showTechRank = saved;
-        notifyListeners();
+      final savedRank = prefs.getBool(_keyShowTechRank);
+      if (savedRank != null) {
+        _showTechRank = savedRank;
       }
+      final savedAnnounce = prefs.getBool(_keyShowAnnouncement);
+      if (savedAnnounce != null) {
+        _showAnnouncement = savedAnnounce;
+      }
+      notifyListeners();
     } catch (_) {}
   }
 
@@ -57,6 +64,16 @@ class ConfigProvider extends ChangeNotifier {
     if (value && _topTechList.isEmpty) {
       await fetchTopTech();
     }
+  }
+
+  Future<void> setShowAnnouncement(bool value) async {
+    if (_showAnnouncement == value) return;
+    _showAnnouncement = value;
+    notifyListeners();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_keyShowAnnouncement, value);
+    } catch (_) {}
   }
 
   Future<void> fetchConfig() async {

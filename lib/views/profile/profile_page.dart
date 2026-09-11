@@ -232,24 +232,6 @@ class ProfilePage extends StatelessWidget {
               ],
             ),
           ),
-          if (auth.isLoggedIn) ...[
-            const SizedBox(height: 24),
-            OutlinedButton(
-              onPressed: () async {
-                await auth.logout();
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context)
-                      .showSnackBar(const SnackBar(content: Text('已退出登录')));
-                }
-              },
-              style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.red,
-                side: const BorderSide(color: Colors.red),
-                padding: const EdgeInsets.symmetric(vertical: 12),
-              ),
-              child: const Text('退出当前账号'),
-            ),
-          ],
         ],
       ),
     );

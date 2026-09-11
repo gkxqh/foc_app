@@ -69,7 +69,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-
   void _showAnnouncementDialog() {
     final config = context.read<ConfigProvider>();
     final String body;
@@ -82,8 +81,8 @@ class _HomePageState extends State<HomePage> {
       body = config.globalTips.isNotEmpty
           ? config.globalTips
           : (config.submitTips.isNotEmpty
-              ? config.submitTips
-              : '1. 送修前请移除电源外其余外设配件（包括鼠标、接收器、U盘、内存卡等）；\n2. 如要更换配件，请提前购买准备好；\n3. 如需重装系统，送修前电脑充满电；\n4. 请备份好重要数据，飞扬不对任何数据丢失负责；\n5. 我们志愿服务并非万能，不保证100%能够修好。');
+                ? config.submitTips
+                : '1. 送修前请移除电源外其余外设配件（包括鼠标、接收器、U盘、内存卡等）；\n2. 如要更换配件，请提前购买准备好；\n3. 如需重装系统，送修前电脑充满电；\n4. 请备份好重要数据，飞扬不对任何数据丢失负责；\n5. 我们志愿服务并非万能，不保证100%能够修好。');
     }
 
     showDialog(
@@ -347,7 +346,7 @@ class _HomePageState extends State<HomePage> {
     return ListView(
       padding: const EdgeInsets.all(16.0),
       children: [
-        _buildAnnouncementBanner(config),
+        if (config.showAnnouncement) _buildAnnouncementBanner(config),
         _buildTicketErrorBanner(ticketProvider),
         if (!config.repairFlag) ...[
           Container(
@@ -437,7 +436,7 @@ class _HomePageState extends State<HomePage> {
     return ListView(
       padding: const EdgeInsets.all(16.0),
       children: [
-        _buildAnnouncementBanner(config),
+        if (config.showAnnouncement) _buildAnnouncementBanner(config),
         _buildTicketErrorBanner(ticketProvider),
         if (activeList.isNotEmpty) ...[
           Row(
