@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../auth/login_page.dart';
-import 'about_page.dart';
+import 'app_settings_page.dart';
 import 'feedback_page.dart';
 import 'history_page.dart';
 import 'settings_page.dart';
@@ -184,15 +184,36 @@ class ProfilePage extends StatelessWidget {
                 const Divider(height: 1),
                 ListTile(
                   leading: const Icon(
-                    Icons.info_outline_rounded,
+                    Icons.tune_rounded,
                     color: AppTheme.primaryBlue,
                   ),
-                  title: const Text('关于云上飞扬'),
+                  title: const Text('软件设置'),
+                  subtitle: const Text(
+                    '深色模式 · 文字大小',
+                    style: TextStyle(fontSize: 12),
+                  ),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => const AboutPage()),
+                      MaterialPageRoute(
+                        builder: (_) => const AppSettingsPage(),
+                      ),
+                    );
+                  },
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(
+                    Icons.chat_bubble_outline_rounded,
+                    color: AppTheme.primaryBlue,
+                  ),
+                  title: const Text('问题反馈'),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const FeedbackPage()),
                     );
                   },
                 ),
