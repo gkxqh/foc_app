@@ -38,10 +38,46 @@
             </intent-filter>
         </activity-alias>
         <activity-alias
+            android:name=".MainActivityLogoArt"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_logoart"
+            android:label="云上飞扬"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".MainActivityFyLogo"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_fylogo"
+            android:label="云上飞扬"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
             android:name=".MainActivityLogo"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_logo"
+            android:label="云上飞扬"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".MainActivityCharacter"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_character"
             android:label="云上飞扬"
             android:targetActivity=".MainActivity">
             <intent-filter>

@@ -110,19 +110,50 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
     }
   }
 
+  // 选择图片来源：拍照或相册，返回 null 表示用户取消
+  Future<ImageSource?> _pickImageSource() {
+    return showModalBottomSheet<ImageSource>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_camera_rounded),
+              title: const Text('拍照'),
+              onTap: () => Navigator.pop(ctx, ImageSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library_rounded),
+              title: const Text('从相册选择'),
+              onTap: () => Navigator.pop(ctx, ImageSource.gallery),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<void> _uploadCompleteImage() async {
+    final source = await _pickImageSource();
+    if (source == null || !mounted) return;
+
     final picker = ImagePicker();
     final XFile? file;
     try {
-      file = await picker.pickImage(
-        source: ImageSource.camera,
-        imageQuality: 80,
-      );
+      file = await picker.pickImage(source: source, imageQuality: 80);
     } catch (_) {
-      // 相机权限被拒等场景：image_picker 会抛出异常而非返回 null
+      // 相机/相册权限被拒等场景：image_picker 会抛出异常而非返回 null
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('无法打开相机，请检查相机权限设置')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            source == ImageSource.camera
+                ? '无法打开相机，请检查相机权限设置'
+                : '无法打开相册，请检查权限设置',
+          ),
+        ),
+      );
       return;
     }
     if (file == null) return;
@@ -160,9 +191,27 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
     if (isTech &&
         (_ticket.completeImageUrl == null ||
             _ticket.completeImageUrl!.isEmpty)) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('技术员结束前请先拍照上传维修完成凭证')));
-      _uploadCompleteImage();
+      // 未上传凭证：仅弹出提示要求上传，不自动进入拍照
+      final goUpload = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('请先上传维修凭证'),
+          content: const Text('请求用户确认完成前，需要先上传维修完成凭证图片。'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('我知道了'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('去上传'),
+            ),
+          ],
+        ),
+      );
+      if (goUpload == true) {
+        _uploadCompleteImage();
+      }
       return;
     }
 

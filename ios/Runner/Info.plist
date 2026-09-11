@@ -37,6 +37,33 @@
 					<key>UIPrerenderedIcon</key>
 					<true/>
 				</dict>
+				<key>foc_logoart</key>
+				<dict>
+					<key>CFBundleIconFiles</key>
+					<array>
+						<string>foc_logoart</string>
+					</array>
+					<key>UIPrerenderedIcon</key>
+					<true/>
+				</dict>
+				<key>foc_fylogo</key>
+				<dict>
+					<key>CFBundleIconFiles</key>
+					<array>
+						<string>foc_fylogo</string>
+					</array>
+					<key>UIPrerenderedIcon</key>
+					<true/>
+				</dict>
+				<key>foc_character</key>
+				<dict>
+					<key>CFBundleIconFiles</key>
+					<array>
+						<string>foc_character</string>
+					</array>
+					<key>UIPrerenderedIcon</key>
+					<true/>
+				</dict>
 			</dict>
 		</dict>
 		<key>LSRequiresIPhoneOS</key>

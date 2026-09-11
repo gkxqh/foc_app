@@ -52,7 +52,7 @@ class AppTheme {
       case 'UserConfirming':
         return '等待用户确认';
       case 'TechConfirming':
-        return '等待技工确认';
+        return '等待技术员确认';
       case 'Done':
         return '已完成';
       case 'Closed':
