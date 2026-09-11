@@ -191,7 +191,7 @@ class _LoginPageState extends State<LoginPage> {
     final auth = context.watch<AuthProvider>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('登录 / 注册')),
+      appBar: AppBar(title: const Text('手机验证码登录')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -363,7 +363,7 @@ class _LoginPageState extends State<LoginPage> {
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       labelText: '短信验证码',
-                      hintText: '请输入收到的6位验证码',
+                      hintText: '',
                       prefixIcon: const Icon(Icons.lock_clock_outlined),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -432,7 +432,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
             const SizedBox(height: 12),
             Text(
-              '首次使用请先在微信小程序「云上飞扬」注册并绑定手机号',
+              '未注册用户请先前往微信小程序「云上飞扬」完成注册',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 12,

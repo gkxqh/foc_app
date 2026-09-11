@@ -13,8 +13,8 @@ import '../../providers/config_provider.dart';
 import '../../providers/ticket_provider.dart';
 import '../auth/login_page.dart';
 import 'annual_summary_page.dart';
+import 'repair_terms_page.dart';
 import 'scan_give_page.dart';
-import 'submit_ticket_page.dart';
 import 'ticket_detail_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -62,64 +62,13 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void _showNoticeDialog() {
-    final config = context.read<ConfigProvider>();
-    final tips = config.globalTips.isNotEmpty
-        ? config.globalTips
-        : '1. 送修前请移除电源外其余外设配件（包括鼠标、接收器、U盘、内存卡等）；\n2. 如要更换配件，请提前购买准备好；\n3. 如需重装系统，送修前电脑充满电；\n4. 请备份好重要数据，飞扬不对任何数据丢失负责；\n5. 我们志愿服务并非万能，不保证100%能够修好。';
-
-    bool agreed = false;
-    showDialog(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) => AlertDialog(
-          title: const Text('报修须知与服务条款'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(
-                width: double.maxFinite,
-                height: 300,
-                child: Markdown(data: tips),
-              ),
-              CheckboxListTile(
-                value: agreed,
-                onChanged: (v) => setDialogState(() => agreed = v ?? false),
-                title: const Text(
-                  '我已阅读并同意上述须知',
-                  style: TextStyle(fontSize: 13),
-                ),
-                contentPadding: EdgeInsets.zero,
-                controlAffinity: ListTileControlAffinity.leading,
-                dense: true,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('取消'),
-            ),
-            ElevatedButton(
-              // 与小程序一致：必须勾选同意才能继续报修
-              onPressed: agreed
-                  ? () {
-                      Navigator.pop(ctx);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const SubmitTicketPage(),
-                        ),
-                      );
-                    }
-                  : null,
-              child: const Text('我已知晓并同意'),
-            ),
-          ],
-        ),
-      ),
+  void _openRepairTerms() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const RepairTermsPage()),
     );
   }
+
 
   void _showAnnouncementDialog() {
     final config = context.read<ConfigProvider>();
@@ -258,7 +207,7 @@ class _HomePageState extends State<HomePage> {
       floatingActionButton:
           (auth.isLoggedIn && !auth.isTechnician && config.repairFlag)
           ? FloatingActionButton.extended(
-              onPressed: _showNoticeDialog,
+              onPressed: _openRepairTerms,
               backgroundColor: AppTheme.primaryBlue,
               foregroundColor: Colors.white,
               icon: const Icon(Icons.build_rounded),
@@ -314,9 +263,19 @@ class _HomePageState extends State<HomePage> {
             );
           },
           icon: const Icon(Icons.login_rounded),
-          label: const Text('手机验证码登录 / 注册'),
+          label: const Text('登录'),
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 14),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Center(
+          child: Text(
+            '未注册用户请先前往微信小程序「云上飞扬」完成注册',
+            style: TextStyle(
+              fontSize: 12,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
         ),
       ],

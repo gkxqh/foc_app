@@ -431,7 +431,11 @@ class _SettingsPageState extends State<SettingsPage> {
                 ListTile(
                   leading: const Icon(Icons.support_agent_outlined),
                   title: const Text('联系客服'),
-                  subtitle: const Text('遇到问题？点击复制客服电话'),
+                  subtitle: Text(
+                    isTech
+                        ? '请在技术员群中联系群主或管理员'
+                        : '请在会员群中联系群主或管理员',
+                  ),
                   onTap: () {
                     Clipboard.setData(
                       const ClipboardData(text: ApiConstants.supportPhone),
