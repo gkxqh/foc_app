@@ -213,6 +213,8 @@ class _SettingsPageState extends State<SettingsPage> {
     if (!mounted) return;
 
     if (deleted) {
+      // 注销后移除本机保存的该账号，避免残留过期凭据
+      await auth.removeSavedAccount(auth.user?.phone ?? '');
       await auth.logout();
       if (!mounted) return;
       ScaffoldMessenger.of(context)

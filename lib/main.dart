@@ -28,29 +28,35 @@ class FeiyangApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = themeProvider ?? ThemeProvider();
     return MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: authProvider ?? AuthProvider()),
-        ChangeNotifierProvider.value(value: theme),
+        ChangeNotifierProvider.value(value: themeProvider ?? ThemeProvider()),
         ChangeNotifierProvider(create: (_) => ConfigProvider()),
         ChangeNotifierProvider(create: (_) => TicketProvider()),
       ],
-      child: MaterialApp(
-        title: '云上飞扬',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.lightTheme,
-        darkTheme: AppTheme.darkTheme,
-        themeMode: theme.themeMode,
-        builder: (context, child) {
-          // 全局文字缩放（软件设置 → 界面设置）
-          return MediaQuery(
-            data: MediaQuery.of(context)
-                .copyWith(textScaler: TextScaler.linear(theme.textScale)),
-            child: child!,
+      // Consumer 必须位于 MultiProvider 内部：订阅主题偏好变化，
+      // 保证软件设置页切换深色模式/文字大小时 MaterialApp 立即重建生效
+      child: Consumer<ThemeProvider>(
+        builder: (context, theme, child) {
+          return MaterialApp(
+            title: '云上飞扬',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: theme.themeMode,
+            builder: (context, child) {
+              // 全局文字缩放（软件设置 → 界面设置）
+              return MediaQuery(
+                data: MediaQuery.of(context)
+                    .copyWith(textScaler: TextScaler.linear(theme.textScale)),
+                child: child!,
+              );
+            },
+            home: child,
           );
         },
-        home: const MainScaffold(),
+        child: const MainScaffold(),
       ),
     );
   }

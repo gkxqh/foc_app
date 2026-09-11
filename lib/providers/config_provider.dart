@@ -1,10 +1,13 @@
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/sys_config_model.dart';
 import '../models/tech_stats_model.dart';
 import '../services/config_service.dart';
 
 class ConfigProvider extends ChangeNotifier {
+  static const _keyShowTechRank = 'pref_show_tech_rank';
+
   final ConfigService _configService = ConfigService();
 
   List<SysConfigItem> _configs = [];
@@ -17,6 +20,11 @@ class ConfigProvider extends ChangeNotifier {
   List<TopTechModel> _topTechList = [];
   bool _isLoadingRank = false;
   int _rankRequestId = 0; // 竞态防护：快速切换 Tab 时只接受最后一次请求的结果
+  bool _showTechRank = true; // 首页是否展示技术员英雄榜
+
+  ConfigProvider() {
+    _loadLocalPreferences();
+  }
 
   bool get repairFlag => _repairFlag;
   String get globalTips => _globalTips;
@@ -24,6 +32,32 @@ class ConfigProvider extends ChangeNotifier {
   String get selectedCampusTab => _selectedCampusTab;
   List<TopTechModel> get topTechList => _topTechList;
   bool get isLoadingRank => _isLoadingRank;
+  bool get showTechRank => _showTechRank;
+
+  Future<void> _loadLocalPreferences() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final saved = prefs.getBool(_keyShowTechRank);
+      if (saved != null) {
+        _showTechRank = saved;
+        notifyListeners();
+      }
+    } catch (_) {}
+  }
+
+  Future<void> setShowTechRank(bool value) async {
+    if (_showTechRank == value) return;
+    _showTechRank = value;
+    notifyListeners();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_keyShowTechRank, value);
+    } catch (_) {}
+
+    if (value && _topTechList.isEmpty) {
+      await fetchTopTech();
+    }
+  }
 
   Future<void> fetchConfig() async {
     try {

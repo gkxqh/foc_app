@@ -135,6 +135,10 @@ class ProfilePage extends StatelessWidget {
                     color: AppTheme.primaryBlue,
                   ),
                   title: const Text('历史工单'),
+                  subtitle: const Text(
+                    '已结束的报修记录',
+                    style: TextStyle(fontSize: 12),
+                  ),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                   onTap: () {
                     if (!auth.isLoggedIn) {
@@ -154,6 +158,10 @@ class ProfilePage extends StatelessWidget {
                     color: AppTheme.primaryBlue,
                   ),
                   title: const Text('个人设置'),
+                  subtitle: const Text(
+                    '修改个人资料',
+                    style: TextStyle(fontSize: 12),
+                  ),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                   onTap: () {
                     if (!auth.isLoggedIn) {
@@ -173,6 +181,7 @@ class ProfilePage extends StatelessWidget {
                     color: AppTheme.primaryBlue,
                   ),
                   title: const Text('问题反馈'),
+                  subtitle: const Text('意见与建议', style: TextStyle(fontSize: 12)),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                   onTap: () {
                     Navigator.push(
@@ -188,9 +197,12 @@ class ProfilePage extends StatelessWidget {
                     color: AppTheme.primaryBlue,
                   ),
                   title: const Text('软件设置'),
-                  subtitle: const Text(
-                    '深色模式 · 文字大小',
-                    style: TextStyle(fontSize: 12),
+                  subtitle: Text(
+                    '主题与文字大小',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                   onTap: () {

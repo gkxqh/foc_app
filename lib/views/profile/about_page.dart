@@ -50,7 +50,7 @@ class _AboutPageState extends State<AboutPage> {
             ),
             const SizedBox(height: 6),
             Text(
-              _version.isEmpty ? 'Flutter 跨平台版' : '版本 $_version (Flutter 跨平台版)',
+              _version.isEmpty ? 'Flutter 跨平台版' : '版本 $_version ',
               style: const TextStyle(fontSize: 13, color: Colors.grey),
             ),
             const SizedBox(height: 24),
@@ -58,7 +58,7 @@ class _AboutPageState extends State<AboutPage> {
               child: Padding(
                 padding: EdgeInsets.all(16.0),
                 child: Text(
-                  '“云上飞扬”是四川大学飞扬俱乐部研发部打造的校园个人设备一体化服务平台。其前身为“小川电脑管家”。\n\n全新 Flutter 跨平台 App 拥有更流畅的原生性能，支持设备报修、技术员派单转单接单、社团活动与现场互动抽奖等功能。',
+                  '“云上飞扬”是四川大学飞扬俱乐部研发部打造的校园个人设备一体化服务平台。其前身为“小川电脑管家”。',
                   style: TextStyle(fontSize: 14, height: 1.6),
                 ),
               ),

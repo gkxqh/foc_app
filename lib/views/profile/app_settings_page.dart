@@ -3,6 +3,8 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/theme/app_theme.dart';
+import '../../providers/auth_provider.dart';
+import '../../providers/config_provider.dart';
 import '../../providers/theme_provider.dart';
 import 'about_page.dart';
 
@@ -17,6 +19,7 @@ class AppSettingsPage extends StatefulWidget {
 
 class _AppSettingsPageState extends State<AppSettingsPage> {
   String _version = '';
+  bool _rememberLogin = true;
 
   @override
   void initState() {
@@ -26,11 +29,16 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
           if (mounted) setState(() => _version = info.version);
         })
         .catchError((_) {});
+    context.read<AuthProvider>().isRememberEnabled().then((v) {
+      if (mounted) setState(() => _rememberLogin = v);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = context.watch<ThemeProvider>();
+    final auth = context.watch<AuthProvider>();
+    final config = context.watch<ConfigProvider>();
 
     return Scaffold(
       appBar: AppBar(title: const Text('软件设置')),
@@ -47,18 +55,6 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
                   const Text(
                     '深色模式',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    switch (theme.themeMode) {
-                      ThemeMode.light => '当前：浅色，界面始终使用亮色主题',
-                      ThemeMode.dark => '当前：深色，界面始终使用暗色主题',
-                      _ => '当前：跟随系统，随系统深浅色自动切换',
-                    },
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
                   ),
                   const SizedBox(height: 12),
                   SegmentedButton<ThemeMode>(
@@ -87,14 +83,6 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
                   const Text(
                     '文字大小',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '调整应用内文字的整体大小',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
                   ),
                   const SizedBox(height: 12),
                   SegmentedButton<int>(
@@ -135,7 +123,7 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: const [
                         Text(
-                          '预览：工单 #10086',
+                          '预览：笔记本 · 设备清灰',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -143,18 +131,59 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
                         ),
                         SizedBox(height: 4),
                         Text(
-                          '笔记本 · 设备清灰 · 维修中',
+                          '戴尔 G15',
                           style: TextStyle(fontSize: 14),
                         ),
                         SizedBox(height: 2),
                         Text(
-                          '技术员已接单，将尽快与您联系',
+                          '小风扇嗡嗡嗡叫不停',
                           style: TextStyle(fontSize: 12, color: Colors.grey),
                         ),
                       ],
                     ),
                   ),
+                  if (auth.isTechnician) ...[
+                    const SizedBox(height: 16),
+                    const Divider(height: 1),
+                    const SizedBox(height: 8),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      value: config.showTechRank,
+                      onChanged: (v) async {
+                        await config.setShowTechRank(v);
+                      },
+                      title: const Text('首页显示技术员排行榜', style: TextStyle(fontSize: 15)),
+                      subtitle: Text(
+                        config.showTechRank
+                            ? '展示技术员排行榜'
+                            : '仅展示进行中工单',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          _groupTitle('登录'),
+          Card(
+            child: SwitchListTile(
+              value: _rememberLogin,
+              onChanged: (v) async {
+                setState(() => _rememberLogin = v);
+                await context.read<AuthProvider>().setRememberEnabled(v);
+              },
+              title: const Text('记住登录状态', style: TextStyle(fontSize: 15)),
+              subtitle: Text(
+                _rememberLogin ? '退出登录后，30 天内在本机重新打开无需验证码' : '已关闭：退出后需重新验证码登录',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
             ),
           ),
@@ -182,7 +211,7 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: Text(
-              '界面偏好保存在本设备，云端账号数据不受影响',
+              '以上仅保存在本设备',
               style: TextStyle(
                 fontSize: 12,
                 color: Theme.of(context).colorScheme.onSurfaceVariant,

@@ -275,9 +275,11 @@ class _ActivityPageState extends State<ActivityPage> {
                               const SizedBox(height: 8),
                               Text(
                                 event.description,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 13,
-                                  color: Colors.black87,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
                                   height: 1.4,
                                 ),
                               ),
@@ -285,9 +287,11 @@ class _ActivityPageState extends State<ActivityPage> {
                               if (event.signupStartTime.isNotEmpty)
                                 Text(
                                   '报名时间：${event.signupStartTime} ~ ${event.signupEndTime}',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 11,
-                                    color: Colors.grey,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
                                   ),
                                 ),
                               const SizedBox(height: 16),

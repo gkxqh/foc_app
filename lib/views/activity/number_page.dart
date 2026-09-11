@@ -62,9 +62,9 @@ class NumberPage extends StatelessWidget {
                           ? '请凭此号码前往飞扬俱乐部摊位或活动负责人处领奖！'
                           : '活动现场将根据该号码进行互动与抽奖，请妥善保存！',
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
-                        color: Colors.black54,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],

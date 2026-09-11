@@ -13,7 +13,6 @@ import '../../providers/config_provider.dart';
 import '../../providers/ticket_provider.dart';
 import '../auth/login_page.dart';
 import 'annual_summary_page.dart';
-import 'give_order_page.dart';
 import 'scan_give_page.dart';
 import 'submit_ticket_page.dart';
 import 'ticket_detail_page.dart';
@@ -55,7 +54,9 @@ class _HomePageState extends State<HomePage> {
     final ticket = context.read<TicketProvider>();
 
     await config.fetchConfig();
-    await config.fetchTopTech();
+    if (auth.isTechnician && config.showTechRank) {
+      await config.fetchTopTech();
+    }
     if (auth.isLoggedIn && auth.user != null) {
       await ticket.fetchTickets(role: auth.user!.role, uid: auth.user!.uid);
     }
@@ -120,6 +121,41 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  void _showAnnouncementDialog() {
+    final config = context.read<ConfigProvider>();
+    final String body;
+    if (config.submitTips.isNotEmpty &&
+        config.globalTips.isNotEmpty &&
+        config.submitTips != config.globalTips) {
+      body =
+          '**【最新公告】**\n\n${config.submitTips}\n\n---\n\n**【服务须知与条款】**\n\n${config.globalTips}';
+    } else {
+      body = config.globalTips.isNotEmpty
+          ? config.globalTips
+          : (config.submitTips.isNotEmpty
+              ? config.submitTips
+              : '1. 送修前请移除电源外其余外设配件（包括鼠标、接收器、U盘、内存卡等）；\n2. 如要更换配件，请提前购买准备好；\n3. 如需重装系统，送修前电脑充满电；\n4. 请备份好重要数据，飞扬不对任何数据丢失负责；\n5. 我们志愿服务并非万能，不保证100%能够修好。');
+    }
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('公告与服务须知'),
+        content: SizedBox(
+          width: double.maxFinite,
+          height: 320,
+          child: Markdown(data: body, selectable: true),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('我知道了'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildAnnouncementBanner(ConfigProvider config) {
     final tipText = config.submitTips.isNotEmpty
         ? config.submitTips
@@ -134,7 +170,7 @@ class _HomePageState extends State<HomePage> {
         borderRadius: BorderRadius.circular(10),
         child: InkWell(
           borderRadius: BorderRadius.circular(10),
-          onTap: _showNoticeDialog,
+          onTap: _showAnnouncementDialog,
           child: Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: 12.0,
@@ -187,22 +223,15 @@ class _HomePageState extends State<HomePage> {
           if (auth.isTechnician) ...[
             IconButton(
               icon: const Icon(Icons.qr_code_scanner_rounded),
-              tooltip: '扫码接单',
-              onPressed: () {
-                Navigator.push(
+              tooltip: '接单',
+              onPressed: () async {
+                final changed = await Navigator.push<bool>(
                   context,
                   MaterialPageRoute(builder: (_) => const ScanGivePage()),
                 );
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.qr_code_rounded),
-              tooltip: '接单',
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const GiveOrderPage()),
-                );
+                if (changed == true && mounted) {
+                  _refreshData();
+                }
               },
             ),
             IconButton(
@@ -372,7 +401,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             child: Column(
-              children: const [
+              children: [
                 Icon(
                   Icons.bedtime_outlined,
                   size: 48,
@@ -391,7 +420,10 @@ class _HomePageState extends State<HomePage> {
                 Text(
                   '当前为假期或技术员休整时间，系统已暂停接收新工单。感谢您的理解！',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 13, color: Colors.grey),
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ],
             ),
@@ -469,31 +501,42 @@ class _HomePageState extends State<HomePage> {
           ...activeList.map((t) => _buildTicketCard(t)),
           const SizedBox(height: 20),
         ],
-        // 技术员排行榜
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              '技术员英雄榜',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        // 技术员排行榜（受软件设置开关控制）
+        if (config.showTechRank) ...[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                '技术员英雄榜',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              Row(
+                children: ['总榜', '江安', '望江'].map((tab) {
+                  final isSelected = config.selectedCampusTab == tab;
+                  return Padding(
+                    padding: const EdgeInsets.only(left: 6.0),
+                    child: ChoiceChip(
+                      label: Text(tab),
+                      selected: isSelected,
+                      onSelected: (_) => config.setCampusTab(tab),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _buildPodiumView(config),
+        ] else if (activeList.isEmpty) ...[
+          const SizedBox(
+            height: 220,
+            child: EmptyState(
+              icon: Icons.done_all_rounded,
+              title: '当前没有进行中的工单',
+              subtitle: '如需接单，请点击右上角扫码接单',
             ),
-            Row(
-              children: ['总榜', '江安', '望江'].map((tab) {
-                final isSelected = config.selectedCampusTab == tab;
-                return Padding(
-                  padding: const EdgeInsets.only(left: 6.0),
-                  child: ChoiceChip(
-                    label: Text(tab),
-                    selected: isSelected,
-                    onSelected: (_) => config.setCampusTab(tab),
-                  ),
-                );
-              }).toList(),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        _buildPodiumView(config),
+          ),
+        ],
       ],
     );
   }
@@ -609,22 +652,26 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   Hero(
                     tag: 'ticket-status-${ticket.id}',
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppTheme.getStatusColor(ticket.repairStatus)
-                            .withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        AppTheme.getStatusText(ticket.repairStatus),
-                        style: TextStyle(
-                          color: AppTheme.getStatusColor(ticket.repairStatus),
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
+                    child: Material(
+                      type: MaterialType.transparency,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppTheme.getStatusColor(ticket.repairStatus)
+                              .withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          AppTheme.getStatusText(ticket.repairStatus),
+                          style: TextStyle(
+                            color: AppTheme.getStatusColor(ticket.repairStatus),
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            decoration: TextDecoration.none,
+                          ),
                         ),
                       ),
                     ),
@@ -652,7 +699,10 @@ class _HomePageState extends State<HomePage> {
                 ticket.repairDescription,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 13, color: Colors.black54),
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
               const SizedBox(height: 10),
               Row(

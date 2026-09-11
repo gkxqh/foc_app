@@ -3,7 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/theme/app_theme.dart';
+import '../../models/saved_account.dart';
 import '../../providers/auth_provider.dart';
+import '../common/confirm_dialog.dart';
 
 const String _privacyText = '''
 1. 本应用会收集您的手机号、邮箱地址和昵称。
@@ -27,6 +29,60 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _codeController = TextEditingController();
+  bool _rememberLogin = true; // 记住此设备：登录成功后保存账号到本机列表
+  List<SavedAccount> _savedAccounts = [];
+  String? _switchingPhone; // 正在切换的账号（显示 loading）
+
+  @override
+  void initState() {
+    super.initState();
+    // 读取用户的记住登录偏好（默认开启）与本机已保存账号
+    SharedPreferences.getInstance().then((prefs) {
+      if (mounted) {
+        setState(
+          () => _rememberLogin = prefs.getBool('remember_enabled') ?? true,
+        );
+      }
+    });
+    _loadSavedAccounts();
+  }
+
+  Future<void> _loadSavedAccounts() async {
+    final list = await context.read<AuthProvider>().loadSavedAccounts();
+    if (mounted) setState(() => _savedAccounts = list);
+  }
+
+  // 点击已保存账号：静默验证 token 直接进入
+  Future<void> _switchToAccount(SavedAccount account) async {
+    if (_switchingPhone != null) return;
+    setState(() => _switchingPhone = account.phone);
+
+    final auth = context.read<AuthProvider>();
+    final err = await auth.switchToSavedAccount(account);
+
+    if (!mounted) return;
+    setState(() => _switchingPhone = null);
+
+    if (err == null) {
+      Navigator.pop(context);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(err)));
+      await _loadSavedAccounts(); // 过期账号已被移除，刷新列表
+    }
+  }
+
+  Future<void> _removeAccount(SavedAccount account) async {
+    final ok = await showConfirmDialog(
+      context,
+      title: '删除保存的账号',
+      content: '删除后（${account.maskedPhone}）再次登录需要重新验证码，确认删除？',
+      confirmText: '删除',
+      danger: true,
+    );
+    if (ok != true || !mounted) return;
+    await context.read<AuthProvider>().removeSavedAccount(account.phone);
+    await _loadSavedAccounts();
+  }
 
   @override
   void dispose() {
@@ -174,6 +230,118 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
             const SizedBox(height: 28),
+            // 已保存账号（QQ 式快速切换）：点击直接进入，可单独删除
+            if (_savedAccounts.isNotEmpty) ...[
+              ..._savedAccounts.map((account) {
+                final isSwitching = _switchingPhone == account.phone;
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  child: ListTile(
+                    onTap: isSwitching ? null : () => _switchToAccount(account),
+                    leading: CircleAvatar(
+                      backgroundColor: AppTheme.primaryBlue.withValues(
+                        alpha: 0.12,
+                      ),
+                      backgroundImage: account.avatarUrl.isNotEmpty
+                          ? NetworkImage(account.avatarUrl)
+                          : null,
+                      child: account.avatarUrl.isNotEmpty
+                          ? null
+                          : Text(
+                              account.nickname.isNotEmpty
+                                  ? account.nickname.characters.first
+                                  : account.maskedPhone.substring(0, 1),
+                              style: const TextStyle(
+                                color: AppTheme.primaryBlue,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                    ),
+                    title: Text(
+                      account.nickname.isNotEmpty
+                          ? account.nickname
+                          : account.maskedPhone,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    subtitle: Row(
+                      children: [
+                        Text(
+                          account.maskedPhone,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurfaceVariant,
+                          ),
+                        ),
+                        if (account.role == 'technician') ...[
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 5,
+                              vertical: 1,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppTheme.accentColor.withValues(
+                                alpha: 0.15,
+                              ),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: const Text(
+                              '技术员',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: AppTheme.accentColor,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    trailing: _switchingPhone != null
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : IconButton(
+                            icon: Icon(
+                              Icons.delete_outline_rounded,
+                              size: 20,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
+                            tooltip: '删除此账号',
+                            onPressed: () => _removeAccount(account),
+                          ),
+                  ),
+                );
+              }),
+              Row(
+                children: [
+                  const Expanded(child: Divider()),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Text(
+                      '或使用其他手机号登录',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                  const Expanded(child: Divider()),
+                ],
+              ),
+              const SizedBox(height: 16),
+            ],
             TextField(
               controller: _phoneController,
               keyboardType: TextInputType.phone,
@@ -214,7 +382,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     child: Text(
-                      auth.isCountingDown ? '${auth.countdown}s' : '发送真实短信',
+                      auth.isCountingDown ? '${auth.countdown}s' : '发送',
                       style: const TextStyle(fontSize: 12),
                     ),
                   ),
@@ -241,7 +409,28 @@ class _LoginPageState extends State<LoginPage> {
                     )
                   : const Text('验证码登录', style: TextStyle(fontSize: 16)),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 8),
+            // 「记住登录」：开启时备份 30 天 token，退出登录后重开 App 免验证码
+            CheckboxListTile(
+              value: _rememberLogin,
+              onChanged: (v) async {
+                setState(() => _rememberLogin = v ?? true);
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setBool('remember_enabled', _rememberLogin);
+                if (!_rememberLogin) {
+                  await prefs.remove('remembered_token');
+                }
+              },
+              title: const Text('记住此设备', style: TextStyle(fontSize: 14)),
+              subtitle: const Text(
+                '30 天内在本机重新打开无需验证码',
+                style: TextStyle(fontSize: 12),
+              ),
+              contentPadding: EdgeInsets.zero,
+              dense: true,
+              controlAffinity: ListTileControlAffinity.leading,
+            ),
+            const SizedBox(height: 12),
             Text(
               '首次使用请先在微信小程序「云上飞扬」注册并绑定手机号',
               textAlign: TextAlign.center,

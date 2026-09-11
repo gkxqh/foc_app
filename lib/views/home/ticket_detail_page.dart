@@ -294,10 +294,30 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
 
     return Scaffold(
       appBar: AppBar(
-        // 与首页工单卡状态徽章共享 Hero tag，实现列表→详情的飞行转场
+        // 与首页工单卡状态徽章共享 Hero tag：转场时徽章从卡片飞到标题栏。
+        // 两端 child 必须保持同构（同款徽章样式），否则样式突变会产生闪烁
         title: Hero(
           tag: 'ticket-status-${_ticket.id}',
-          child: Text('工单 #${_ticket.id}'),
+          child: Material(
+            type: MaterialType.transparency,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+              decoration: BoxDecoration(
+                color: AppTheme.getStatusColor(_ticket.repairStatus)
+                    .withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                AppTheme.getStatusText(_ticket.repairStatus),
+                style: TextStyle(
+                  color: AppTheme.getStatusColor(_ticket.repairStatus),
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  decoration: TextDecoration.none,
+                ),
+              ),
+            ),
+          ),
         ),
         actions: [
           // 转单码 = 工单号 + 服务端下发的 6 位 tvcode（与小程序原版一致）；
