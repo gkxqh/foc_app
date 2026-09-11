@@ -97,24 +97,27 @@ void main() {
       expect(updated.id, 'T1001');
     });
 
-    test('fromJson 使用 fy_workorders 真实列名（user_phone / machine_purchase_date）', () {
-      // 按 uid 查询时服务端会把 assigned_technician_id 覆写为「昵称 - 电话」并回填昵称
-      final ticket = TicketModel.fromJson({
-        'id': 'T1001',
-        'repair_status': 'Repairing',
-        'user_phone': '13800000000',
-        'machine_purchase_date': '2024-06-01',
-        'qq_number': 'QQ号|123456',
-        'transcode': '483920',
-        'assigned_technician_id': '张三 - 13900000000',
-        'assigned_technician_nickname': '张三',
-      });
+    test(
+      'fromJson 使用 fy_workorders 真实列名（user_phone / machine_purchase_date）',
+      () {
+        // 按 uid 查询时服务端会把 assigned_technician_id 覆写为「昵称 - 电话」并回填昵称
+        final ticket = TicketModel.fromJson({
+          'id': 'T1001',
+          'repair_status': 'Repairing',
+          'user_phone': '13800000000',
+          'machine_purchase_date': '2024-06-01',
+          'qq_number': 'QQ号|123456',
+          'transcode': '483920',
+          'assigned_technician_id': '张三 - 13900000000',
+          'assigned_technician_nickname': '张三',
+        });
 
-      expect(ticket.phone, '13800000000');
-      expect(ticket.purchaseDate, '2024-06-01');
-      expect(ticket.technicianName, '张三');
-      expect(ticket.qqNumber, 'QQ号|123456');
-    });
+        expect(ticket.phone, '13800000000');
+        expect(ticket.purchaseDate, '2024-06-01');
+        expect(ticket.technicianName, '张三');
+        expect(ticket.qqNumber, 'QQ号|123456');
+      },
+    );
   });
 
   group('EventModel tests', () {
@@ -147,7 +150,7 @@ void main() {
         "signup_end_time": "2025-12-20 21:00:00",
         "isLucky": "1",
         "registered": false,
-        "max_luckynum": "103"
+        "max_luckynum": "103",
       };
 
       final event = EventModel.fromJson(json);

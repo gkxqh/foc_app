@@ -64,7 +64,8 @@ class TicketModel {
       phone: (json['user_phone'] ?? json['phone'])?.toString(),
       model: json['model']?.toString(),
       warrantyStatus: json['warranty_status']?.toString(),
-      purchaseDate: (json['machine_purchase_date'] ?? json['purchase_date'])?.toString(),
+      purchaseDate: (json['machine_purchase_date'] ?? json['purchase_date'])
+          ?.toString(),
       technicianId: json['assigned_technician_id']?.toString(),
       technicianName: json['assigned_technician_nickname']?.toString(),
       transcode: json['transcode']?.toString(),

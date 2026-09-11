@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+
 import '../../providers/auth_provider.dart';
 import '../../services/auth_service.dart';
 
@@ -101,7 +102,10 @@ class _NewPhonePageState extends State<NewPhonePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('第一步：输入新手机号', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                  const Text(
+                    '第一步：输入新手机号',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                  ),
                   const SizedBox(height: 12),
                   Row(
                     children: [
@@ -118,9 +122,13 @@ class _NewPhonePageState extends State<NewPhonePage> {
                       ),
                       const SizedBox(width: 12),
                       OutlinedButton(
-                        onPressed: _isLoading || (_codeSent && _countdown > 0) ? null : _sendCode,
+                        onPressed: _isLoading || (_codeSent && _countdown > 0)
+                            ? null
+                            : _sendCode,
                         child: Text(
-                          _codeSent ? (_countdown > 0 ? '${_countdown}s' : '重新发送') : '发送验证码',
+                          _codeSent
+                              ? (_countdown > 0 ? '${_countdown}s' : '重新发送')
+                              : '发送验证码',
                         ),
                       ),
                     ],
@@ -136,12 +144,18 @@ class _NewPhonePageState extends State<NewPhonePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('第二步：输入收到的验证码', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                  const Text(
+                    '第二步：输入收到的验证码',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                  ),
                   const SizedBox(height: 12),
                   TextField(
                     controller: _codeController,
                     keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(6)],
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(6),
+                    ],
                     enabled: _codeSent,
                     decoration: const InputDecoration(
                       labelText: '验证码',
@@ -153,7 +167,9 @@ class _NewPhonePageState extends State<NewPhonePage> {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: _isLoading || !_codeSent ? null : _submit,
-                      style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14)),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
                       child: const Text('确认换绑'),
                     ),
                   ),
@@ -162,11 +178,15 @@ class _NewPhonePageState extends State<NewPhonePage> {
             ),
           ),
           const SizedBox(height: 8),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 4.0),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: Text(
               '换绑成功后，维修进度短信将发送至新手机号；原手机号将无法再登录本应用。',
-              style: TextStyle(fontSize: 12, color: Colors.grey, height: 1.5),
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                height: 1.5,
+              ),
             ),
           ),
         ],

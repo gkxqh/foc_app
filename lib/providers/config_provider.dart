@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+
 import '../models/sys_config_model.dart';
 import '../models/tech_stats_model.dart';
 import '../services/config_service.dart';

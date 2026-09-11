@@ -11,12 +11,17 @@ class TicketService {
     if (uid != null && uid.isNotEmpty) query['uid'] = uid;
     if (tid != null && tid.isNotEmpty) query['tid'] = tid;
 
-    final res = await _client.get(ApiConstants.getTicket, queryParameters: query);
+    final res = await _client.get(
+      ApiConstants.getTicket,
+      queryParameters: query,
+    );
     if (res.success && res.raw != null && res.raw is Map) {
       final listData = res.raw['data'];
       if (listData is List) {
         return listData
-            .map((item) => TicketModel.fromJson(Map<String, dynamic>.from(item)))
+            .map(
+              (item) => TicketModel.fromJson(Map<String, dynamic>.from(item)),
+            )
             .toList();
       }
     }
@@ -40,7 +45,9 @@ class TicketService {
     required String warrantyStatus, // expired, under, unknown
     required String model,
   }) async {
-    final finalImageUrl = imageUrl.isEmpty ? ApiConstants.defaultTicketImage : imageUrl;
+    final finalImageUrl = imageUrl.isEmpty
+        ? ApiConstants.defaultTicketImage
+        : imageUrl;
 
     return await _client.post(
       ApiConstants.addTicket,
@@ -72,11 +79,7 @@ class TicketService {
   }) async {
     return await _client.post(
       ApiConstants.giveTicket,
-      data: {
-        'order_id': orderId,
-        'order_hash': ?orderHash,
-        'tvcode': ?tvcode,
-      },
+      data: {'order_id': orderId, 'order_hash': ?orderHash, 'tvcode': ?tvcode},
     );
   }
 
@@ -89,24 +92,24 @@ class TicketService {
   }
 
   // 设置工单状态 (取消 Canceled / 双向确认 UserConfirming / TechConfirming / Closed)
-  Future<ApiResponse<dynamic>> setTicketStatus(String orderId, String status) async {
+  Future<ApiResponse<dynamic>> setTicketStatus(
+    String orderId,
+    String status,
+  ) async {
     return await _client.post(
       ApiConstants.setTicketStatus,
-      data: {
-        'tid': orderId,
-        'repair_status': status,
-      },
+      data: {'tid': orderId, 'repair_status': status},
     );
   }
 
   // 上传维修完成凭证图片
-  Future<ApiResponse<dynamic>> setCompleteImage(String orderId, String imageUrl) async {
+  Future<ApiResponse<dynamic>> setCompleteImage(
+    String orderId,
+    String imageUrl,
+  ) async {
     return await _client.post(
       ApiConstants.setCompleteImage,
-      data: {
-        'tid': orderId,
-        'complete_image_url': imageUrl,
-      },
+      data: {'tid': orderId, 'complete_image_url': imageUrl},
     );
   }
 }

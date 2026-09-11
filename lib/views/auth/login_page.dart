@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../../core/theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 
@@ -37,9 +38,8 @@ class _LoginPageState extends State<LoginPage> {
   void _sendCode() async {
     final phone = _phoneController.text.trim();
     if (phone.length != 11) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请输入正确的11位手机号码')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('请输入正确的11位手机号码')));
       return;
     }
 
@@ -51,13 +51,11 @@ class _LoginPageState extends State<LoginPage> {
     if (res.success) {
       // phonesend 对未注册/待迁移用户直接返回 success:false 与中文提示，
       // 这里只处理发码成功；失败分支统一展示服务端 message
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('验证码已发送，请注意查收')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('验证码已发送，请注意查收')));
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(res.message ?? '验证码发送失败')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(res.message ?? '验证码发送失败')));
     }
   }
 
@@ -72,11 +70,20 @@ class _LoginPageState extends State<LoginPage> {
       builder: (ctx) => AlertDialog(
         title: const Text('隐私保护声明'),
         content: SingleChildScrollView(
-          child: Text(_privacyText, style: const TextStyle(fontSize: 13, height: 1.6)),
+          child: Text(
+            _privacyText,
+            style: const TextStyle(fontSize: 13, height: 1.6),
+          ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('不同意')),
-          ElevatedButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('同意并继续')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('不同意'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('同意并继续'),
+          ),
         ],
       ),
     );
@@ -86,9 +93,8 @@ class _LoginPageState extends State<LoginPage> {
       return true;
     }
     if (!mounted) return false;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('需同意隐私声明后才能登录使用报修功能')),
-    );
+    ScaffoldMessenger.of(context)
+        .showSnackBar(const SnackBar(content: Text('需同意隐私声明后才能登录使用报修功能')));
     return false;
   }
 
@@ -97,15 +103,13 @@ class _LoginPageState extends State<LoginPage> {
     final code = _codeController.text.trim();
 
     if (phone.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请填写手机号码')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('请填写手机号码')));
       return;
     }
     if (code.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请输入短信验证码')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('请输入短信验证码')));
       return;
     }
 
@@ -117,14 +121,12 @@ class _LoginPageState extends State<LoginPage> {
     if (!mounted) return;
 
     if (ok) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('登录成功！')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('登录成功！')));
       Navigator.pop(context);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('验证码错误或登录失败')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('验证码错误或登录失败')));
     }
   }
 
@@ -141,17 +143,13 @@ class _LoginPageState extends State<LoginPage> {
           children: [
             const SizedBox(height: 10),
             Center(
-              child: Container(
-                width: 72,
-                height: 72,
-                decoration: BoxDecoration(
-                  color: AppTheme.primaryBlue.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.cloud_sync_rounded,
-                  size: 44,
-                  color: AppTheme.primaryBlue,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(24),
+                child: Image.asset(
+                  'assets/icon/icon.png',
+                  width: 88,
+                  height: 88,
+                  fit: BoxFit.contain,
                 ),
               ),
             ),
@@ -166,10 +164,13 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
             ),
-            const Center(
+            Center(
               child: Text(
                 '四川大学飞扬俱乐部设备报修一体化平台',
-                style: TextStyle(fontSize: 13, color: Colors.grey),
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
             ),
             const SizedBox(height: 28),
@@ -180,7 +181,9 @@ class _LoginPageState extends State<LoginPage> {
                 labelText: '手机号码',
                 hintText: '请输入手机号',
                 prefixIcon: const Icon(Icons.phone_android_rounded),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
             const SizedBox(height: 16),
@@ -194,7 +197,9 @@ class _LoginPageState extends State<LoginPage> {
                       labelText: '短信验证码',
                       hintText: '请输入收到的6位验证码',
                       prefixIcon: const Icon(Icons.lock_clock_outlined),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
                 ),
@@ -204,7 +209,9 @@ class _LoginPageState extends State<LoginPage> {
                   child: OutlinedButton(
                     onPressed: auth.isCountingDown ? null : _sendCode,
                     style: OutlinedButton.styleFrom(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                     child: Text(
                       auth.isCountingDown ? '${auth.countdown}s' : '发送真实短信',
@@ -219,24 +226,30 @@ class _LoginPageState extends State<LoginPage> {
               onPressed: auth.isLoading ? null : _login,
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
               child: auth.isLoading
                   ? const SizedBox(
                       width: 20,
                       height: 20,
-                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
                     )
-                  : const Text(
-                      '验证码登录',
-                      style: TextStyle(fontSize: 16),
-                    ),
+                  : const Text('验证码登录', style: TextStyle(fontSize: 16)),
             ),
             const SizedBox(height: 20),
-            const Text(
+            Text(
               '首次使用请先在微信小程序「云上飞扬」注册并绑定手机号',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 12, color: Colors.grey, height: 1.5),
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                height: 1.5,
+              ),
             ),
           ],
         ),

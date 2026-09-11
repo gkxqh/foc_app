@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../core/theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/ticket_provider.dart';
+import '../common/empty_state.dart';
+import '../common/skeleton_list.dart';
 import '../home/ticket_detail_page.dart';
 
 class HistoryPage extends StatefulWidget {
@@ -24,9 +27,9 @@ class _HistoryPageState extends State<HistoryPage> {
     final auth = context.read<AuthProvider>();
     if (auth.user != null) {
       context.read<TicketProvider>().fetchTickets(
-            role: auth.user!.role,
-            uid: auth.user!.uid,
-          );
+        role: auth.user!.role,
+        uid: auth.user!.uid,
+      );
     }
   }
 
@@ -49,14 +52,18 @@ class _HistoryPageState extends State<HistoryPage> {
           }
         },
         child: ticketProvider.isLoading && historyList.isEmpty
-            ? const Center(child: CircularProgressIndicator())
+            ? const SkeletonList()
             : historyList.isEmpty
             ? ListView(
-                children: const [
-                  SizedBox(height: 100),
-                  Icon(Icons.history_toggle_off_rounded, size: 64, color: Colors.grey),
-                  SizedBox(height: 16),
-                  Center(child: Text('暂无历史已结束工单', style: TextStyle(color: Colors.grey))),
+                children: [
+                  const SizedBox(height: 80),
+                  SizedBox(
+                    height: 220,
+                    child: EmptyState(
+                      icon: Icons.history_toggle_off_rounded,
+                      title: '暂无历史已结束工单',
+                    ),
+                  ),
                 ],
               )
             : ListView.builder(
@@ -76,13 +83,15 @@ class _HistoryPageState extends State<HistoryPage> {
                         );
                       },
                       leading: CircleAvatar(
-                        backgroundColor: AppTheme.getStatusColor(ticket.repairStatus).withValues(alpha: 0.15),
+                        backgroundColor: AppTheme.getStatusColor(
+                          ticket.repairStatus,
+                        ).withValues(alpha: 0.15),
                         child: Icon(
                           ticket.repairStatus == 'Done'
                               ? Icons.check
                               : ticket.repairStatus == 'Canceled'
-                                  ? Icons.cancel_outlined
-                                  : Icons.close,
+                              ? Icons.cancel_outlined
+                              : Icons.close,
                           color: AppTheme.getStatusColor(ticket.repairStatus),
                           size: 20,
                         ),

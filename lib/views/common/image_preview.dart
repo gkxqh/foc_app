@@ -34,7 +34,11 @@ class _ImagePreviewPage extends StatelessWidget {
                 errorBuilder: (_, _, _) => const Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.broken_image_outlined, color: Colors.white70, size: 48),
+                    Icon(
+                      Icons.broken_image_outlined,
+                      color: Colors.white70,
+                      size: 48,
+                    ),
                     SizedBox(height: 8),
                     Text('图片加载失败', style: TextStyle(color: Colors.white70)),
                   ],
@@ -46,7 +50,11 @@ class _ImagePreviewPage extends StatelessWidget {
             child: Align(
               alignment: Alignment.topRight,
               child: IconButton(
-                icon: const Icon(Icons.close_rounded, color: Colors.white, size: 28),
+                icon: const Icon(
+                  Icons.close_rounded,
+                  color: Colors.white,
+                  size: 28,
+                ),
                 onPressed: () => Navigator.pop(context),
               ),
             ),

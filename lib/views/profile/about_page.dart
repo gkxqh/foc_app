@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import '../../core/theme/app_theme.dart';
 
 class AboutPage extends StatefulWidget {
   const AboutPage({super.key});
@@ -15,11 +14,13 @@ class _AboutPageState extends State<AboutPage> {
   @override
   void initState() {
     super.initState();
-    PackageInfo.fromPlatform().then((info) {
-      if (mounted) {
-        setState(() => _version = info.version);
-      }
-    }).catchError((_) {});
+    PackageInfo.fromPlatform()
+        .then((info) {
+          if (mounted) {
+            setState(() => _version = info.version);
+          }
+        })
+        .catchError((_) {});
   }
 
   @override
@@ -32,14 +33,14 @@ class _AboutPageState extends State<AboutPage> {
           children: [
             const SizedBox(height: 40),
             Center(
-              child: Container(
-                width: 90,
-                height: 90,
-                decoration: BoxDecoration(
-                  color: AppTheme.primaryBlue.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(28),
+                child: Image.asset(
+                  'assets/icon/icon.png',
+                  width: 100,
+                  height: 100,
+                  fit: BoxFit.contain,
                 ),
-                child: const Icon(Icons.flight_takeoff_rounded, size: 50, color: AppTheme.primaryBlue),
               ),
             ),
             const SizedBox(height: 16),

@@ -3,11 +3,7 @@ class SysConfigItem {
   final String info;
   final String data;
 
-  SysConfigItem({
-    required this.name,
-    required this.info,
-    required this.data,
-  });
+  SysConfigItem({required this.name, required this.info, required this.data});
 
   factory SysConfigItem.fromJson(Map<String, dynamic> json) {
     return SysConfigItem(

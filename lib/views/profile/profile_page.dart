@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../core/theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../auth/login_page.dart';
@@ -35,7 +36,11 @@ class ProfilePage extends StatelessWidget {
                         : null,
                     child: (user?.avatarUrl.isNotEmpty ?? false)
                         ? null
-                        : const Icon(Icons.person_rounded, size: 40, color: Colors.grey),
+                        : const Icon(
+                            Icons.person_rounded,
+                            size: 40,
+                            color: Colors.grey,
+                          ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -44,28 +49,44 @@ class ProfilePage extends StatelessWidget {
                       children: [
                         Text(
                           auth.isLoggedIn
-                              ? (user?.nickname.isNotEmpty == true ? user!.nickname : '同学')
+                              ? (user?.nickname.isNotEmpty == true
+                                    ? user!.nickname
+                                    : '同学')
                               : '点击登录',
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         const SizedBox(height: 6),
                         if (auth.isLoggedIn) ...[
                           Row(
                             children: [
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
                                 decoration: BoxDecoration(
                                   color: user?.isTechnician == true
-                                      ? Colors.green.withValues(alpha: 0.15)
-                                      : AppTheme.primaryBlue.withValues(alpha: 0.15),
+                                      ? AppTheme.accentColor.withValues(
+                                          alpha: 0.15,
+                                        )
+                                      : AppTheme.primaryBlue.withValues(
+                                          alpha: 0.15,
+                                        ),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(
-                                  user?.isTechnician == true ? '技术员 ${user?.uid ?? ''}' : '普通用户',
+                                  user?.isTechnician == true
+                                      ? '技术员 ${user?.uid ?? ''}'
+                                      : '普通用户',
                                   style: TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.bold,
-                                    color: user?.isTechnician == true ? Colors.green : AppTheme.primaryBlue,
+                                    color: user?.isTechnician == true
+                                        ? Colors.green
+                                        : AppTheme.primaryBlue,
                                   ),
                                 ),
                               ),
@@ -73,7 +94,10 @@ class ProfilePage extends StatelessWidget {
                                 const SizedBox(width: 6),
                                 Text(
                                   user!.campus,
-                                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey,
+                                  ),
                                 ),
                               ],
                             ],
@@ -106,7 +130,10 @@ class ProfilePage extends StatelessWidget {
             child: Column(
               children: [
                 ListTile(
-                  leading: const Icon(Icons.history_rounded, color: AppTheme.primaryBlue),
+                  leading: const Icon(
+                    Icons.history_rounded,
+                    color: AppTheme.primaryBlue,
+                  ),
                   title: const Text('历史工单'),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                   onTap: () {
@@ -122,7 +149,10 @@ class ProfilePage extends StatelessWidget {
                 ),
                 const Divider(height: 1),
                 ListTile(
-                  leading: const Icon(Icons.settings_outlined, color: Colors.orange),
+                  leading: const Icon(
+                    Icons.settings_outlined,
+                    color: AppTheme.primaryBlue,
+                  ),
                   title: const Text('个人设置'),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                   onTap: () {
@@ -138,7 +168,10 @@ class ProfilePage extends StatelessWidget {
                 ),
                 const Divider(height: 1),
                 ListTile(
-                  leading: const Icon(Icons.chat_bubble_outline_rounded, color: Colors.teal),
+                  leading: const Icon(
+                    Icons.chat_bubble_outline_rounded,
+                    color: AppTheme.primaryBlue,
+                  ),
                   title: const Text('问题反馈'),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                   onTap: () {
@@ -150,7 +183,10 @@ class ProfilePage extends StatelessWidget {
                 ),
                 const Divider(height: 1),
                 ListTile(
-                  leading: const Icon(Icons.info_outline_rounded, color: Colors.indigo),
+                  leading: const Icon(
+                    Icons.info_outline_rounded,
+                    color: AppTheme.primaryBlue,
+                  ),
                   title: const Text('关于云上飞扬'),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                   onTap: () {
@@ -169,9 +205,8 @@ class ProfilePage extends StatelessWidget {
               onPressed: () async {
                 await auth.logout();
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('已退出登录')),
-                  );
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(const SnackBar(content: Text('已退出登录')));
                 }
               },
               style: OutlinedButton.styleFrom(
@@ -196,9 +231,8 @@ class ProfilePage extends StatelessWidget {
     // 返回后仍未登录才提示，避免登录成功后的多余打扰
     final auth = context.read<AuthProvider>();
     if (!auth.isLoggedIn) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('登录后即可使用该功能')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('登录后即可使用该功能')));
     }
   }
 }

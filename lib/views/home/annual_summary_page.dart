@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../core/theme/app_theme.dart';
 import '../../models/tech_stats_model.dart';
 import '../../services/config_service.dart';
@@ -48,7 +49,10 @@ class _AnnualSummaryPageState extends State<AnnualSummaryPage> {
                 children: [
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 32,
+                      horizontal: 20,
+                    ),
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
                         colors: [AppTheme.primaryBlue, AppTheme.primaryDark],

@@ -46,7 +46,8 @@ class UserModel {
           ? json['canDuo']
           : int.tryParse(json['canDuo']?.toString() ?? '0') ?? 0,
       nickname: json['nickname']?.toString() ?? '',
-      avatarUrl: json['avatar']?.toString() ?? json['avatarUrl']?.toString() ?? '',
+      avatarUrl:
+          json['avatar']?.toString() ?? json['avatarUrl']?.toString() ?? '',
       wants: json['wants']?.toString(),
       available: json['available']?.toString(),
       maxConcurrent: (json['max_concurrent'] is int)

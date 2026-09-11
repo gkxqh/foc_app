@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+
 import '../../core/constants/api_constants.dart';
 import '../../core/network/api_client.dart';
 import '../../models/user_model.dart';
@@ -51,7 +52,8 @@ class _SettingsPageState extends State<SettingsPage> {
   void _applyUser(UserModel user) {
     _nicknameInitialValue = user.nickname;
     _nicknameController = TextEditingController(text: user.nickname);
-    _campus = user.campus.isNotEmpty && ApiConstants.campuses.contains(user.campus)
+    _campus =
+        user.campus.isNotEmpty && ApiConstants.campuses.contains(user.campus)
         ? user.campus
         : ApiConstants.campuses.first;
 
@@ -79,7 +81,8 @@ class _SettingsPageState extends State<SettingsPage> {
         _nicknameController.text = user.nickname;
       }
       _nicknameInitialValue = user.nickname;
-      if (user.campus.isNotEmpty && ApiConstants.campuses.contains(user.campus)) {
+      if (user.campus.isNotEmpty &&
+          ApiConstants.campuses.contains(user.campus)) {
         _campus = user.campus;
       }
       final wantsLetter = user.wants ?? 'c';
@@ -101,13 +104,15 @@ class _SettingsPageState extends State<SettingsPage> {
     final picker = ImagePicker();
     final XFile? picked;
     try {
-      picked = await picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
+      picked = await picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 80,
+      );
     } catch (_) {
       // 相册权限被拒等场景：image_picker 会抛出异常而非返回 null
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('无法打开相册，请检查相册权限设置')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('无法打开相册，请检查相册权限设置')));
       return;
     }
     if (picked == null) return;
@@ -120,13 +125,11 @@ class _SettingsPageState extends State<SettingsPage> {
 
     if (res.success && res.data != null) {
       setState(() => _avatarUrl = res.data!);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('头像上传成功，请保存设置')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('头像上传成功，请保存设置')));
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(res.message ?? '头像上传失败')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(res.message ?? '头像上传失败')));
     }
   }
 
@@ -159,18 +162,16 @@ class _SettingsPageState extends State<SettingsPage> {
     setState(() => _isSaving = false);
 
     if (okProfile && okTech) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('个人资料更新成功！')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('个人资料更新成功！')));
       Navigator.pop(context);
     } else if (okProfile && !okTech) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('个人资料已保存，但技术员设置保存失败，请重试')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('个人资料已保存，但技术员设置保存失败，请重试')));
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('保存失败，请稍后重试')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('保存失败，请稍后重试')));
     }
   }
 
@@ -184,15 +185,14 @@ class _SettingsPageState extends State<SettingsPage> {
     final ok = await _authService.newEmail(email);
     if (!mounted) return;
     if (!ok) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('变更失败，请稍后重试')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('变更失败，请稍后重试')));
       return;
     }
     // 服务端 newemail 只把新邮箱存为待验证状态并发验证邮件，验证完成后才真正生效
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('验证邮件已发送至新邮箱，请查收邮件完成验证后生效')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('验证邮件已发送至新邮箱，请查收邮件完成验证后生效')));
     context.read<AuthProvider>().refreshUserInfo();
   }
 
@@ -215,15 +215,13 @@ class _SettingsPageState extends State<SettingsPage> {
     if (deleted) {
       await auth.logout();
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('账号已成功注销')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('账号已成功注销')));
       Navigator.pop(context);
     } else {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('注销失败，请稍后重试或联系管理员')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('注销失败，请稍后重试或联系管理员')));
     }
   }
 
@@ -250,10 +248,16 @@ class _SettingsPageState extends State<SettingsPage> {
                           radius: 40,
                           backgroundColor: Colors.grey.shade200,
                           // 无头像时显示本地图标兜底，不向第三方图床发起请求
-                          backgroundImage: _avatarUrl.isNotEmpty ? NetworkImage(_avatarUrl) : null,
+                          backgroundImage: _avatarUrl.isNotEmpty
+                              ? NetworkImage(_avatarUrl)
+                              : null,
                           child: _avatarUrl.isNotEmpty
                               ? null
-                              : const Icon(Icons.person_rounded, size: 44, color: Colors.grey),
+                              : const Icon(
+                                  Icons.person_rounded,
+                                  size: 44,
+                                  color: Colors.grey,
+                                ),
                         ),
                         Positioned(
                           bottom: 0,
@@ -265,16 +269,26 @@ class _SettingsPageState extends State<SettingsPage> {
                                 ? const SizedBox(
                                     width: 12,
                                     height: 12,
-                                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
                                   )
-                                : const Icon(Icons.camera_alt, size: 14, color: Colors.white),
+                                : const Icon(
+                                    Icons.camera_alt,
+                                    size: 14,
+                                    color: Colors.white,
+                                  ),
                           ),
                         ),
                       ],
                     ),
                   ),
                   const SizedBox(height: 8),
-                  const Text('点击更换头像', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                  const Text(
+                    '点击更换头像',
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
                   const SizedBox(height: 16),
                   TextField(
                     controller: _nicknameController,
@@ -307,15 +321,26 @@ class _SettingsPageState extends State<SettingsPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('技术员接单意愿与设置', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    const Text(
+                      '技术员接单意愿与设置',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
                     const SizedBox(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text('接单意向：'),
                         Text(
-                          _wantsLabels[_wantsLetters[_wantsSliderValue.round()]] ?? '',
-                          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue),
+                          _wantsLabels[_wantsLetters[_wantsSliderValue
+                                  .round()]] ??
+                              '',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue,
+                          ),
                         ),
                       ],
                     ),
@@ -332,7 +357,10 @@ class _SettingsPageState extends State<SettingsPage> {
                         const Text('同时接单上限：'),
                         Text(
                           '$_maxConcurrent 单',
-                          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue,
+                          ),
                         ),
                       ],
                     ),
@@ -342,11 +370,15 @@ class _SettingsPageState extends State<SettingsPage> {
                       max: 10,
                       divisions: 9,
                       label: '$_maxConcurrent',
-                      onChanged: (v) => setState(() => _maxConcurrent = v.round()),
+                      onChanged: (v) =>
+                          setState(() => _maxConcurrent = v.round()),
                     ),
-                    const Text(
+                    Text(
                       '同时维修中的工单达到上限后，系统将暂停自动派新单给您',
-                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                     ),
                     SwitchListTile(
                       title: const Text('多校区接单意愿'),
@@ -367,7 +399,11 @@ class _SettingsPageState extends State<SettingsPage> {
                 ListTile(
                   leading: const Icon(Icons.email_outlined),
                   title: const Text('接收进度通知邮箱'),
-                  subtitle: Text(auth.user?.email.isNotEmpty == true ? auth.user!.email : '未绑定'),
+                  subtitle: Text(
+                    auth.user?.email.isNotEmpty == true
+                        ? auth.user!.email
+                        : '未绑定',
+                  ),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                   onTap: _changeEmail,
                 ),
@@ -375,7 +411,11 @@ class _SettingsPageState extends State<SettingsPage> {
                 ListTile(
                   leading: const Icon(Icons.phone_android_outlined),
                   title: const Text('更换手机号'),
-                  subtitle: Text(auth.user?.phone.isNotEmpty == true ? auth.user!.phone : '未绑定'),
+                  subtitle: Text(
+                    auth.user?.phone.isNotEmpty == true
+                        ? auth.user!.phone
+                        : '未绑定',
+                  ),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                   onTap: () async {
                     await Navigator.push(
@@ -391,16 +431,26 @@ class _SettingsPageState extends State<SettingsPage> {
                   title: const Text('联系客服'),
                   subtitle: const Text('遇到问题？点击复制客服电话'),
                   onTap: () {
-                    Clipboard.setData(const ClipboardData(text: ApiConstants.supportPhone));
+                    Clipboard.setData(
+                      const ClipboardData(text: ApiConstants.supportPhone),
+                    );
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('客服电话 ${ApiConstants.supportPhone} 已复制')),
+                      SnackBar(
+                        content: Text('客服电话 ${ApiConstants.supportPhone} 已复制'),
+                      ),
                     );
                   },
                 ),
                 const Divider(height: 1),
                 ListTile(
-                  leading: const Icon(Icons.delete_forever_outlined, color: Colors.red),
-                  title: const Text('注销云上飞扬账号', style: TextStyle(color: Colors.red)),
+                  leading: const Icon(
+                    Icons.delete_forever_outlined,
+                    color: Colors.red,
+                  ),
+                  title: const Text(
+                    '注销云上飞扬账号',
+                    style: TextStyle(color: Colors.red),
+                  ),
                   onTap: _deleteAccount,
                 ),
               ],
@@ -409,7 +459,9 @@ class _SettingsPageState extends State<SettingsPage> {
           const SizedBox(height: 24),
           ElevatedButton(
             onPressed: _isSaving ? null : _saveSettings,
-            style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14)),
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+            ),
             child: _isSaving
                 ? const SizedBox(
                     width: 20,
@@ -449,17 +501,22 @@ class _EmailDialogState extends State<_EmailDialog> {
       content: TextField(
         controller: _emailController,
         keyboardType: TextInputType.emailAddress,
-        decoration: const InputDecoration(labelText: '新邮箱地址', hintText: 'example@scu.edu.cn'),
+        decoration: const InputDecoration(
+          labelText: '新邮箱地址',
+          hintText: 'example@scu.edu.cn',
+        ),
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: const Text('取消')),
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('取消'),
+        ),
         ElevatedButton(
           onPressed: () {
             final email = _emailController.text.trim();
             if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email)) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('请输入有效的邮箱地址')),
-              );
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(const SnackBar(content: Text('请输入有效的邮箱地址')));
               return;
             }
             Navigator.pop(context, email);

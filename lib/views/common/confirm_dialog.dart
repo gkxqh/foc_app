@@ -22,7 +22,9 @@ Future<bool> showConfirmDialog(
         ),
         ElevatedButton(
           onPressed: () => Navigator.pop(ctx, true),
-          style: danger ? ElevatedButton.styleFrom(backgroundColor: Colors.red) : null,
+          style: danger
+              ? ElevatedButton.styleFrom(backgroundColor: Colors.red)
+              : null,
           child: Text(confirmText),
         ),
       ],

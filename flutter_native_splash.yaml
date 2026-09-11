@@ -1,0 +1,9 @@
+# 启动屏生成：黑底 + 吉祥物居中（与 App 图标同视觉）。更新后执行：
+# dart run flutter_native_splash:create
+flutter_native_splash:
+  color: "#000000"
+  image: assets/icon/icon.png
+  android_12:
+    color: "#000000"
+    image: assets/icon/icon.png
+  fullscreen: true

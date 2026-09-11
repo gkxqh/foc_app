@@ -3,11 +3,7 @@ class TopTechModel {
   final int count;
   final String? campus;
 
-  TopTechModel({
-    required this.nickname,
-    required this.count,
-    this.campus,
-  });
+  TopTechModel({required this.nickname, required this.count, this.campus});
 
   factory TopTechModel.fromJson(Map<String, dynamic> json) {
     return TopTechModel(

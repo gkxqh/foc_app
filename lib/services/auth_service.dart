@@ -21,7 +21,9 @@ class AuthService {
   }
 
   // 发送手机注册/登录短信验证码
-  Future<ApiResponse<Map<String, dynamic>>> sendRegisterCode(String phone) async {
+  Future<ApiResponse<Map<String, dynamic>>> sendRegisterCode(
+    String phone,
+  ) async {
     return await _client.post<Map<String, dynamic>>(
       ApiConstants.userRegister,
       data: {'phone': phone},
@@ -37,13 +39,13 @@ class AuthService {
   }
 
   // App 端短信登录：验证码校验并换取 30 天长效 token（对应服务端 phonelogin.php）
-  Future<ApiResponse<Map<String, dynamic>>> loginWithCode(String phone, String code) async {
+  Future<ApiResponse<Map<String, dynamic>>> loginWithCode(
+    String phone,
+    String code,
+  ) async {
     final res = await _client.post<Map<String, dynamic>>(
       ApiConstants.phoneLogin,
-      data: {
-        'phone': phone,
-        'code': code,
-      },
+      data: {'phone': phone, 'code': code},
     );
     if (res.success && res.raw != null && res.raw is Map) {
       final token = res.raw['access_token']?.toString();
@@ -55,13 +57,13 @@ class AuthService {
   }
 
   // 手机号+验证码验证
-  Future<ApiResponse<Map<String, dynamic>>> verifyCode(String phone, String code) async {
+  Future<ApiResponse<Map<String, dynamic>>> verifyCode(
+    String phone,
+    String code,
+  ) async {
     final res = await _client.post<Map<String, dynamic>>(
       ApiConstants.userVerify,
-      data: {
-        'phone': phone,
-        'code': code,
-      },
+      data: {'phone': phone, 'code': code},
     );
     if (res.success && res.raw != null && res.raw is Map) {
       final token = res.raw['access_token']?.toString();
@@ -73,13 +75,13 @@ class AuthService {
   }
 
   // 老账号数据迁移
-  Future<ApiResponse<Map<String, dynamic>>> userMigration(String phone, String code) async {
+  Future<ApiResponse<Map<String, dynamic>>> userMigration(
+    String phone,
+    String code,
+  ) async {
     final res = await _client.post<Map<String, dynamic>>(
       ApiConstants.userMigration,
-      data: {
-        'phone': phone,
-        'code': code,
-      },
+      data: {'phone': phone, 'code': code},
     );
     if (res.success && res.raw != null && res.raw is Map) {
       final token = res.raw['access_token']?.toString();
@@ -116,11 +118,7 @@ class AuthService {
   }) async {
     final res = await _client.post(
       ApiConstants.setUserInfo,
-      data: {
-        'wants': wants,
-        'canDuo': canDuo,
-        'max_concurrent': maxConcurrent,
-      },
+      data: {'wants': wants, 'canDuo': canDuo, 'max_concurrent': maxConcurrent},
     );
     return res.success;
   }
@@ -153,10 +151,7 @@ class AuthService {
 
   // 注销账号
   Future<bool> deleteAccount() async {
-    final res = await _client.post(
-      ApiConstants.userDelete,
-      data: {},
-    );
+    final res = await _client.post(ApiConstants.userDelete, data: {});
     if (res.success) {
       await _client.clearToken();
     }

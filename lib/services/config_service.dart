@@ -18,7 +18,9 @@ class ConfigService {
 
     if (list != null) {
       return list
-          .map((item) => SysConfigItem.fromJson(Map<String, dynamic>.from(item)))
+          .map(
+            (item) => SysConfigItem.fromJson(Map<String, dynamic>.from(item)),
+          )
           .toList();
     }
     return [];
@@ -33,7 +35,10 @@ class ConfigService {
       query['campus'] = 'm';
     }
 
-    final res = await _client.get(ApiConstants.getTopTech, queryParameters: query);
+    final res = await _client.get(
+      ApiConstants.getTopTech,
+      queryParameters: query,
+    );
     List? list;
     if (res.raw is Map && res.raw['top_technicians'] is List) {
       list = res.raw['top_technicians'] as List;
@@ -54,7 +59,9 @@ class ConfigService {
   Future<TechSummaryModel?> getTechSum() async {
     final res = await _client.get(ApiConstants.getTechSum);
     if (res.success && res.raw is Map && res.raw['data'] is Map) {
-      return TechSummaryModel.fromJson(Map<String, dynamic>.from(res.raw['data']));
+      return TechSummaryModel.fromJson(
+        Map<String, dynamic>.from(res.raw['data']),
+      );
     }
     return null;
   }
@@ -63,10 +70,7 @@ class ConfigService {
   Future<bool> putFeedback(String contact, String text) async {
     final res = await _client.post(
       ApiConstants.feedbackAdd,
-      data: {
-        'contact': contact,
-        'text': text,
-      },
+      data: {'contact': contact, 'text': text},
     );
     return res.success;
   }

@@ -1,7 +1,9 @@
 import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
+
 import '../constants/api_constants.dart';
 
 class ApiResponse<T> {
@@ -109,7 +111,11 @@ class ApiClient {
     Map<String, dynamic>? queryParameters,
   }) async {
     try {
-      final response = await _dio.post(path, data: data, queryParameters: queryParameters);
+      final response = await _dio.post(
+        path,
+        data: data,
+        queryParameters: queryParameters,
+      );
       return _handleResponse<T>(response);
     } on DioException catch (e) {
       return _handleDioError<T>(e);
@@ -141,13 +147,11 @@ class ApiClient {
         resData = jsonDecode(resData);
       }
 
-      if (resData is Map && (resData['success'] == true || resData['success'] == 1)) {
-        final url = resData['rawdata']?.toString() ?? resData['data']?.toString() ?? '';
-        return ApiResponse<String>(
-          success: true,
-          statusCode: 200,
-          data: url,
-        );
+      if (resData is Map &&
+          (resData['success'] == true || resData['success'] == 1)) {
+        final url =
+            resData['rawdata']?.toString() ?? resData['data']?.toString() ?? '';
+        return ApiResponse<String>(success: true, statusCode: 200, data: url);
       }
       String? message;
       if (resData is Map) {
@@ -177,14 +181,17 @@ class ApiClient {
       } catch (_) {}
     }
 
-    final bool success = data is Map && (data['success'] == true || data['success'] == 1);
+    final bool success =
+        data is Map && (data['success'] == true || data['success'] == 1);
     final String? message = data is Map ? data['message']?.toString() : null;
 
     return ApiResponse<T>(
       success: success,
       statusCode: response.statusCode ?? 200,
       message: message,
-      data: (data is Map && data.containsKey('data')) ? data['data'] as T? : data as T?,
+      data: (data is Map && data.containsKey('data'))
+          ? data['data'] as T?
+          : data as T?,
       raw: data,
     );
   }

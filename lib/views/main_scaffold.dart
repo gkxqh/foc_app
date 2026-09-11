@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../core/theme/app_theme.dart';
 import 'activity/activity_page.dart';
 import 'home/home_page.dart';
@@ -14,19 +15,12 @@ class MainScaffold extends StatefulWidget {
 class _MainScaffoldState extends State<MainScaffold> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = const [
-    HomePage(),
-    ActivityPage(),
-    ProfilePage(),
-  ];
+  final List<Widget> _pages = const [HomePage(), ActivityPage(), ProfilePage()];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _pages,
-      ),
+      body: IndexedStack(index: _currentIndex, children: _pages),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: (idx) => setState(() => _currentIndex = idx),
@@ -39,12 +33,18 @@ class _MainScaffoldState extends State<MainScaffold> {
           ),
           NavigationDestination(
             icon: Icon(Icons.local_activity_outlined),
-            selectedIcon: Icon(Icons.local_activity_rounded, color: AppTheme.primaryBlue),
+            selectedIcon: Icon(
+              Icons.local_activity_rounded,
+              color: AppTheme.primaryBlue,
+            ),
             label: '活动',
           ),
           NavigationDestination(
             icon: Icon(Icons.person_outline_rounded),
-            selectedIcon: Icon(Icons.person_rounded, color: AppTheme.primaryBlue),
+            selectedIcon: Icon(
+              Icons.person_rounded,
+              color: AppTheme.primaryBlue,
+            ),
             label: '我的',
           ),
         ],

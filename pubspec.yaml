@@ -51,6 +51,7 @@ dev_dependencies:
 
   flutter_launcher_icons: ^0.14.1
   image: ^4.2.0
+  flutter_native_splash: ^2.4.4
 
   # The "flutter_lints" package below contains a set of lints to
   # encourage good coding practices. The lint set provided by the package
@@ -65,10 +66,13 @@ dev_dependencies:
 # The following section is specific to Flutter packages.
 flutter:
 
-  # The following line ensures that the Material Icons font is
-  # included with your application, so that you can use the icons in
+  # The following line ensures that the Material Icons font
+  # is included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  assets:
+    - assets/icon/icon.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:

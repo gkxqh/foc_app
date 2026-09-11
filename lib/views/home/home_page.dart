@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:provider/provider.dart';
+
 import '../../core/theme/app_theme.dart';
+import '../common/empty_state.dart';
+import '../common/skeleton_list.dart';
+import '../common/rank_badge.dart';
 import '../../models/ticket_model.dart';
 import '../../models/tech_stats_model.dart';
 import '../../providers/auth_provider.dart';
@@ -80,7 +84,10 @@ class _HomePageState extends State<HomePage> {
               CheckboxListTile(
                 value: agreed,
                 onChanged: (v) => setDialogState(() => agreed = v ?? false),
-                title: const Text('我已阅读并同意上述须知', style: TextStyle(fontSize: 13)),
+                title: const Text(
+                  '我已阅读并同意上述须知',
+                  style: TextStyle(fontSize: 13),
+                ),
                 contentPadding: EdgeInsets.zero,
                 controlAffinity: ListTileControlAffinity.leading,
                 dense: true,
@@ -99,7 +106,9 @@ class _HomePageState extends State<HomePage> {
                       Navigator.pop(ctx);
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const SubmitTicketPage()),
+                        MaterialPageRoute(
+                          builder: (_) => const SubmitTicketPage(),
+                        ),
                       );
                     }
                   : null,
@@ -127,21 +136,36 @@ class _HomePageState extends State<HomePage> {
           borderRadius: BorderRadius.circular(10),
           onTap: _showNoticeDialog,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 12.0,
+              vertical: 10.0,
+            ),
             child: Row(
               children: [
-                const Icon(Icons.campaign_rounded, color: AppTheme.primaryBlue, size: 20),
+                const Icon(
+                  Icons.campaign_rounded,
+                  color: AppTheme.primaryBlue,
+                  size: 20,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     tipText,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 13, color: AppTheme.primaryBlue, fontWeight: FontWeight.w500),
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: AppTheme.primaryBlue,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 4),
-                const Icon(Icons.chevron_right_rounded, color: AppTheme.primaryBlue, size: 18),
+                const Icon(
+                  Icons.chevron_right_rounded,
+                  color: AppTheme.primaryBlue,
+                  size: 18,
+                ),
               ],
             ),
           ),
@@ -199,10 +223,11 @@ class _HomePageState extends State<HomePage> {
         child: !auth.isLoggedIn
             ? _buildNotLoggedInView()
             : auth.isTechnician
-                ? _buildTechnicianView(config, ticketProvider)
-                : _buildUserView(config, ticketProvider),
+            ? _buildTechnicianView(config, ticketProvider)
+            : _buildUserView(config, ticketProvider),
       ),
-      floatingActionButton: (auth.isLoggedIn && !auth.isTechnician && config.repairFlag)
+      floatingActionButton:
+          (auth.isLoggedIn && !auth.isTechnician && config.repairFlag)
           ? FloatingActionButton.extended(
               onPressed: _showNoticeDialog,
               backgroundColor: AppTheme.primaryBlue,
@@ -227,7 +252,11 @@ class _HomePageState extends State<HomePage> {
               color: AppTheme.primaryBlue.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.cloud_outlined, size: 50, color: AppTheme.primaryBlue),
+            child: const Icon(
+              Icons.cloud_outlined,
+              size: 50,
+              color: AppTheme.primaryBlue,
+            ),
           ),
         ),
         const SizedBox(height: 20),
@@ -238,10 +267,13 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         const SizedBox(height: 8),
-        const Center(
+        Center(
           child: Text(
             '四川大学飞扬俱乐部设备报修及维护服务',
-            style: TextStyle(fontSize: 13, color: Colors.grey),
+            style: TextStyle(
+              fontSize: 13,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
         ),
         const SizedBox(height: 32),
@@ -270,26 +302,45 @@ class _HomePageState extends State<HomePage> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
       child: Material(
-        color: Colors.orange.withValues(alpha: 0.12),
+        color: AppTheme.warningOrange.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(10),
         child: InkWell(
           borderRadius: BorderRadius.circular(10),
           onTap: () {
             final auth = context.read<AuthProvider>();
             if (auth.isLoggedIn && auth.user != null) {
-              ticketProvider.fetchTickets(role: auth.user!.role, uid: auth.user!.uid);
+              ticketProvider.fetchTickets(
+                role: auth.user!.role,
+                uid: auth.user!.uid,
+              );
             }
           },
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 12.0,
+              vertical: 10.0,
+            ),
             child: Row(
               children: [
-                const Icon(Icons.wifi_off_rounded, color: Colors.orange, size: 20),
+                const Icon(
+                  Icons.wifi_off_rounded,
+                  color: AppTheme.warningOrange,
+                  size: 20,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text(error, style: const TextStyle(fontSize: 13, color: Colors.orange)),
+                  child: Text(
+                    error,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: AppTheme.warningOrange,
+                    ),
+                  ),
                 ),
-                const Text('点击重试', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                const Text(
+                  '点击重试',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                ),
               ],
             ),
           ),
@@ -301,8 +352,8 @@ class _HomePageState extends State<HomePage> {
   Widget _buildUserView(ConfigProvider config, TicketProvider ticketProvider) {
     final activeList = ticketProvider.activeTickets;
 
-    if (ticketProvider.isLoading) {
-      return const Center(child: CircularProgressIndicator());
+    if (ticketProvider.isLoading && activeList.isEmpty) {
+      return const SkeletonList();
     }
 
     return ListView(
@@ -314,17 +365,27 @@ class _HomePageState extends State<HomePage> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.orange.withValues(alpha: 0.1),
+              color: AppTheme.warningOrange.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+              border: Border.all(
+                color: AppTheme.warningOrange.withValues(alpha: 0.3),
+              ),
             ),
             child: Column(
               children: const [
-                Icon(Icons.bedtime_outlined, size: 48, color: Colors.orange),
+                Icon(
+                  Icons.bedtime_outlined,
+                  size: 48,
+                  color: AppTheme.warningOrange,
+                ),
                 SizedBox(height: 12),
                 Text(
                   '报修通道暂未开启',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.orange),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.warningOrange,
+                  ),
                 ),
                 SizedBox(height: 8),
                 Text(
@@ -347,7 +408,10 @@ class _HomePageState extends State<HomePage> {
               ),
               Text(
                 '共 ${activeList.length} 单',
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
             ],
           ),
@@ -355,21 +419,12 @@ class _HomePageState extends State<HomePage> {
           ...activeList.map((t) => _buildTicketCard(t)),
           const SizedBox(height: 20),
         ] else if (config.repairFlag) ...[
-          Card(
-            elevation: 0,
-            color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 16.0),
-              child: Column(
-                children: const [
-                  Icon(Icons.assignment_turned_in_outlined, size: 48, color: Colors.grey),
-                  SizedBox(height: 10),
-                  Text('您当前没有进行中的报修工单', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
-                  SizedBox(height: 6),
-                  Text('如遇电脑软硬件故障，请点击右下方按钮发起报修', style: TextStyle(color: Colors.grey, fontSize: 12)),
-                ],
-              ),
+          SizedBox(
+            height: 220,
+            child: EmptyState(
+              icon: Icons.assignment_turned_in_outlined,
+              title: '您当前没有进行中的报修工单',
+              subtitle: '如遇电脑软硬件故障，请点击右下方按钮发起报修',
             ),
           ),
           const SizedBox(height: 20),
@@ -378,11 +433,14 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildTechnicianView(ConfigProvider config, TicketProvider ticketProvider) {
+  Widget _buildTechnicianView(
+    ConfigProvider config,
+    TicketProvider ticketProvider,
+  ) {
     final activeList = ticketProvider.activeTickets;
 
-    if (ticketProvider.isLoading) {
-      return const Center(child: CircularProgressIndicator());
+    if (ticketProvider.isLoading && activeList.isEmpty) {
+      return const SkeletonList();
     }
 
     return ListView(
@@ -400,7 +458,10 @@ class _HomePageState extends State<HomePage> {
               ),
               Text(
                 '共 ${activeList.length} 单',
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
             ],
           ),
@@ -448,12 +509,11 @@ class _HomePageState extends State<HomePage> {
     }
 
     if (list.isEmpty) {
-      return const Card(
-        child: Padding(
-          padding: EdgeInsets.all(24.0),
-          child: Center(
-            child: Text('本期暂无上榜技术员', style: TextStyle(color: Colors.grey)),
-          ),
+      return const SizedBox(
+        height: 160,
+        child: EmptyState(
+          icon: Icons.emoji_events_outlined,
+          title: '本期暂无上榜技术员',
         ),
       );
     }
@@ -465,31 +525,44 @@ class _HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            if (list.length > 1) _buildPodiumColumn(list[1], 2, Colors.blueGrey, 110),
-            if (list.isNotEmpty) _buildPodiumColumn(list[0], 1, Colors.amber, 140),
-            if (list.length > 2) _buildPodiumColumn(list[2], 3, Colors.brown, 90),
+            if (list.length > 1) _buildPodiumColumn(context, list[1], 2, 110),
+            if (list.isNotEmpty) _buildPodiumColumn(context, list[0], 1, 140),
+            if (list.length > 2) _buildPodiumColumn(context, list[2], 3, 90),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildPodiumColumn(TopTechModel item, int rank, Color color, double height) {
+  Widget _buildPodiumColumn(
+    BuildContext context,
+    TopTechModel item,
+    int rank,
+    double height,
+  ) {
+    final Color color = switch (rank) {
+      1 => const Color(0xFFF5B301),
+      2 => const Color(0xFF9EA7B3),
+      _ => const Color(0xFFB07A4B),
+    };
     return Column(
       children: [
-        Text(
-          rank == 1 ? '🥇' : rank == 2 ? '🥈' : '🥉',
-          style: const TextStyle(fontSize: 24),
-        ),
-        const SizedBox(height: 4),
+        RankBadge(rank: rank, size: 30),
+        const SizedBox(height: 6),
         Text(
           item.nickname,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
         ),
         const SizedBox(height: 4),
         Text(
           '${item.count} 台',
-          style: TextStyle(fontSize: 12, color: color, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: 12,
+            color: color,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 8),
         Container(
@@ -497,16 +570,15 @@ class _HomePageState extends State<HomePage> {
           height: height - 60,
           decoration: BoxDecoration(
             color: color.withValues(alpha: 0.2),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
             border: Border.all(color: color.withValues(alpha: 0.5)),
           ),
-          child: Center(
-            child: Text(
-              'No.$rank',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
+          alignment: Alignment.center,
+          child: Text(
+            'No.$rank',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
         ),
@@ -522,9 +594,7 @@ class _HomePageState extends State<HomePage> {
         onTap: () async {
           await Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (_) => TicketDetailPage(ticket: ticket),
-            ),
+            MaterialPageRoute(builder: (_) => TicketDetailPage(ticket: ticket)),
           );
           if (mounted) {
             _refreshData();
@@ -537,32 +607,45 @@ class _HomePageState extends State<HomePage> {
             children: [
               Row(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: AppTheme.getStatusColor(ticket.repairStatus).withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      AppTheme.getStatusText(ticket.repairStatus),
-                      style: TextStyle(
-                        color: AppTheme.getStatusColor(ticket.repairStatus),
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
+                  Hero(
+                    tag: 'ticket-status-${ticket.id}',
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppTheme.getStatusColor(ticket.repairStatus)
+                            .withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        AppTheme.getStatusText(ticket.repairStatus),
+                        style: TextStyle(
+                          color: AppTheme.getStatusColor(ticket.repairStatus),
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
                   const Spacer(),
                   Text(
                     ticket.createTime,
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
               const SizedBox(height: 10),
               Text(
                 '${ticket.deviceType} • ${ticket.faultType}',
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 4),
               Text(
@@ -575,13 +658,19 @@ class _HomePageState extends State<HomePage> {
               Row(
                 children: [
                   Chip(
-                    label: Text(ticket.campus, style: const TextStyle(fontSize: 11)),
+                    label: Text(
+                      ticket.campus,
+                      style: const TextStyle(fontSize: 11),
+                    ),
                     visualDensity: VisualDensity.compact,
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 6),
                   Chip(
-                    label: Text(ticket.computerBrand, style: const TextStyle(fontSize: 11)),
+                    label: Text(
+                      ticket.computerBrand,
+                      style: const TextStyle(fontSize: 11),
+                    ),
                     visualDensity: VisualDensity.compact,
                     padding: EdgeInsets.zero,
                   ),

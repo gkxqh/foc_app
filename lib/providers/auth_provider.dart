@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../core/network/api_client.dart';
 import '../models/user_model.dart';
 import '../services/auth_service.dart';
@@ -54,7 +56,8 @@ class AuthProvider extends ChangeNotifier {
 
     // 优先读取本地持久化缓存的用户信息，实现秒开与状态保持。
     // 登录态必须同时持有 token：仅有缓存而无 token 时视为未登录，避免缓存独立造成假登录。
-    final hasToken = _client.accessToken != null && _client.accessToken!.isNotEmpty;
+    final hasToken =
+        _client.accessToken != null && _client.accessToken!.isNotEmpty;
     try {
       final prefs = await SharedPreferences.getInstance();
       final cachedJson = prefs.getString('cached_user_info');
@@ -108,7 +111,11 @@ class AuthProvider extends ChangeNotifier {
   }
 
   // 验证码登录 / 校验（App 端走 phonelogin 30 天 token；迁移分支保留旧接口）
-  Future<bool> verifyAndLogin(String phone, String code, {bool isMigration = false}) async {
+  Future<bool> verifyAndLogin(
+    String phone,
+    String code, {
+    bool isMigration = false,
+  }) async {
     _isLoading = true;
     notifyListeners();
 

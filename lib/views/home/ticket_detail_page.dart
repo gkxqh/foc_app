@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+
 import '../../core/network/api_client.dart';
 import '../../core/theme/app_theme.dart';
 import '../../models/ticket_model.dart';
@@ -46,9 +47,8 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
 
   void _copyToClipboard(String label, String value) {
     Clipboard.setData(ClipboardData(text: value));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$label已复制：$value')),
-    );
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text('$label已复制：$value')));
   }
 
   // 联系方式行：有值时附复制按钮
@@ -58,7 +58,13 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
         children: [
-          Text(label, style: const TextStyle(color: Colors.grey, fontSize: 13)),
+          Text(
+            label,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              fontSize: 13,
+            ),
+          ),
           const Spacer(),
           Text(
             hasValue ? value : '未预留',
@@ -69,9 +75,15 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
             InkWell(
               borderRadius: BorderRadius.circular(6),
               onTap: () => _copyToClipboard(label, value),
-              child: const Padding(
-                padding: EdgeInsets.all(4.0),
-                child: Icon(Icons.copy_rounded, size: 15, color: Colors.grey),
+              child: Padding(
+                padding: const EdgeInsets.all(
+                  10.0,
+                ), // 15px 图标 + 10px 边距 ≈ 35px，接近最小触摸目标
+                child: Icon(
+                  Icons.copy_rounded,
+                  size: 18,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
             ),
           ],
@@ -80,7 +92,8 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
     );
   }
 
-  int _getStepIndex(String status) {    switch (status) {
+  int _getStepIndex(String status) {
+    switch (status) {
       case 'Pending':
         return 0;
       case 'Repairing':
@@ -101,13 +114,15 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
     final picker = ImagePicker();
     final XFile? file;
     try {
-      file = await picker.pickImage(source: ImageSource.camera, imageQuality: 80);
+      file = await picker.pickImage(
+        source: ImageSource.camera,
+        imageQuality: 80,
+      );
     } catch (_) {
       // 相机权限被拒等场景：image_picker 会抛出异常而非返回 null
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('无法打开相机，请检查相机权限设置')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('无法打开相机，请检查相机权限设置')));
       return;
     }
     if (file == null) return;
@@ -126,29 +141,27 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
           _ticket = _ticket.copyWith(completeImageUrl: res.data);
         });
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('维修凭证上传成功')),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('维修凭证上传成功')));
       } else {
         // 图片已上传但未关联到工单，必须明确告知，否则技术员以为凭证已生效
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('凭证上传成功但关联工单失败，请重新上传')),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('凭证上传成功但关联工单失败，请重新上传')));
       }
     } else {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(res.message ?? '图片上传失败')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(res.message ?? '图片上传失败')));
     }
     if (mounted) setState(() => _isUploadingCompleteImg = false);
   }
 
   void _confirmTicket(bool isTech) async {
-    if (isTech && (_ticket.completeImageUrl == null || _ticket.completeImageUrl!.isEmpty)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('技术员结束前请先拍照上传维修完成凭证')),
-      );
+    if (isTech &&
+        (_ticket.completeImageUrl == null ||
+            _ticket.completeImageUrl!.isEmpty)) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('技术员结束前请先拍照上传维修完成凭证')));
       _uploadCompleteImage();
       return;
     }
@@ -166,7 +179,10 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
     setState(() => _isActionBusy = true);
 
     final ticketProvider = context.read<TicketProvider>();
-    final success = await ticketProvider.changeTicketStatus(_ticket.id, newStatus);
+    final success = await ticketProvider.changeTicketStatus(
+      _ticket.id,
+      newStatus,
+    );
 
     if (!mounted) return;
     setState(() => _isActionBusy = false);
@@ -175,13 +191,11 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
       setState(() {
         _ticket = _ticket.copyWith(repairStatus: newStatus);
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('已提交完成确认')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('已提交完成确认')));
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('操作失败')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('操作失败')));
     }
   }
 
@@ -201,14 +215,12 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
     if (!mounted) return;
     setState(() => _isActionBusy = false);
     if (okDone) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('工单已结束')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('工单已结束')));
       Navigator.pop(context);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('操作失败，请稍后重试')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('操作失败，请稍后重试')));
     }
   }
 
@@ -227,16 +239,21 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
     setState(() => _isActionBusy = true);
 
     final ticketProvider = context.read<TicketProvider>();
-    final success = await ticketProvider.changeTicketStatus(_ticket.id, 'Closed');
+    final success = await ticketProvider.changeTicketStatus(
+      _ticket.id,
+      'Closed',
+    );
     if (!mounted) return;
     setState(() => _isActionBusy = false);
     if (success) {
       setState(() {
         _ticket = _ticket.copyWith(repairStatus: 'Closed');
       });
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('工单已强制关闭')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('工单已强制关闭')));
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('操作失败，请稍后重试')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('操作失败，请稍后重试')));
     }
   }
 
@@ -253,14 +270,19 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
     setState(() => _isActionBusy = true);
 
     final ticketProvider = context.read<TicketProvider>();
-    final success = await ticketProvider.changeTicketStatus(_ticket.id, 'Canceled');
+    final success = await ticketProvider.changeTicketStatus(
+      _ticket.id,
+      'Canceled',
+    );
     if (!mounted) return;
     setState(() => _isActionBusy = false);
     if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('工单已取消')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('工单已取消')));
       Navigator.pop(context, true);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('取消失败，请稍后重试')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('取消失败，请稍后重试')));
     }
   }
 
@@ -272,11 +294,17 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('工单 #${_ticket.id}'),
+        // 与首页工单卡状态徽章共享 Hero tag，实现列表→详情的飞行转场
+        title: Hero(
+          tag: 'ticket-status-${_ticket.id}',
+          child: Text('工单 #${_ticket.id}'),
+        ),
         actions: [
           // 转单码 = 工单号 + 服务端下发的 6 位 tvcode（与小程序原版一致）；
           // 服务端会校验 tvcode，未获取到时隐藏入口而非伪造
-          if (isTech && !_ticket.isFinished && (_ticket.transcode?.isNotEmpty ?? false))
+          if (isTech &&
+              !_ticket.isFinished &&
+              (_ticket.transcode?.isNotEmpty ?? false))
             IconButton(
               icon: const Icon(Icons.qr_code_rounded),
               tooltip: '生成转单凭证',
@@ -298,7 +326,10 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
           // 步骤条
           Card(
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 8.0),
+              padding: const EdgeInsets.symmetric(
+                vertical: 20.0,
+                horizontal: 8.0,
+              ),
               child: Row(
                 children: [
                   _buildStepItem('电脑报修', 0, stepIndex),
@@ -309,8 +340,8 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
                     _ticket.repairStatus == 'UserConfirming'
                         ? '用户确认'
                         : _ticket.repairStatus == 'TechConfirming'
-                            ? '技工确认'
-                            : '维修确认',
+                        ? '技工确认'
+                        : '维修确认',
                     2,
                     stepIndex,
                   ),
@@ -319,11 +350,13 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
                     _ticket.repairStatus == 'Canceled'
                         ? '已取消'
                         : _ticket.repairStatus == 'Closed'
-                            ? '已关闭'
-                            : '工单完成',
+                        ? '已关闭'
+                        : '工单完成',
                     3,
                     stepIndex,
-                    isSpecial: _ticket.repairStatus == 'Canceled' || _ticket.repairStatus == 'Closed',
+                    isSpecial:
+                        _ticket.repairStatus == 'Canceled' ||
+                        _ticket.repairStatus == 'Closed',
                   ),
                 ],
               ),
@@ -334,10 +367,12 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppTheme.getStatusColor(_ticket.repairStatus).withValues(alpha: 0.12),
+              color: AppTheme.getStatusColor(_ticket.repairStatus)
+                  .withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                color: AppTheme.getStatusColor(_ticket.repairStatus).withValues(alpha: 0.4),
+                color: AppTheme.getStatusColor(_ticket.repairStatus)
+                    .withValues(alpha: 0.4),
               ),
             ),
             child: Row(
@@ -360,7 +395,10 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
                       ),
                       Text(
                         '创建时间：${_ticket.createTime}',
-                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
                       ),
                     ],
                   ),
@@ -379,7 +417,10 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: AppTheme.primaryBlue.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(4),
@@ -395,15 +436,18 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
                       ),
                       const SizedBox(width: 8),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
-                          color: Colors.orange.withValues(alpha: 0.1),
+                          color: AppTheme.warningOrange.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
                           _ticket.computerBrand,
                           style: const TextStyle(
-                            color: Colors.orange,
+                            color: AppTheme.warningOrange,
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                           ),
@@ -426,14 +470,21 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
                     _ticket.warrantyStatus == 'under'
                         ? '在保'
                         : _ticket.warrantyStatus == 'expired'
-                            ? '过保'
-                            : '未知',
+                        ? '过保'
+                        : '未知',
                   ),
                   _buildDetailRow('设备问题', _ticket.faultType),
-                  if (_ticket.purchaseDate != null && _ticket.purchaseDate!.isNotEmpty)
+                  if (_ticket.purchaseDate != null &&
+                      _ticket.purchaseDate!.isNotEmpty)
                     _buildDetailRow('购买日期', _ticket.purchaseDate!),
                   const SizedBox(height: 8),
-                  const Text('故障描述：', style: TextStyle(color: Colors.grey, fontSize: 13)),
+                  Text(
+                    '故障描述：',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      fontSize: 13,
+                    ),
+                  ),
                   const SizedBox(height: 4),
                   Text(
                     _ticket.repairDescription,
@@ -442,7 +493,8 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
                   if (_ticket.repairImageUrl.isNotEmpty) ...[
                     const SizedBox(height: 12),
                     GestureDetector(
-                      onTap: () => showImagePreview(context, _ticket.repairImageUrl),
+                      onTap: () =>
+                          showImagePreview(context, _ticket.repairImageUrl),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(8),
                         child: Image.network(
@@ -453,7 +505,12 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
                           errorBuilder: (_, _, _) => Container(
                             height: 180,
                             color: Colors.grey.withValues(alpha: 0.1),
-                            child: const Center(child: Icon(Icons.broken_image_outlined, color: Colors.grey)),
+                            child: const Center(
+                              child: Icon(
+                                Icons.broken_image_outlined,
+                                color: Colors.grey,
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -471,7 +528,10 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('联系信息', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const Text(
+                    '联系信息',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 8),
                   _buildContactRow('联系电话', _plainPhone),
                   _buildContactRow('QQ号', _plainQq),
@@ -481,17 +541,22 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
           ),
           const SizedBox(height: 12),
           // 维修完成凭证 (如果已上传)
-          if (_ticket.completeImageUrl != null && _ticket.completeImageUrl!.isNotEmpty)
+          if (_ticket.completeImageUrl != null &&
+              _ticket.completeImageUrl!.isNotEmpty)
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('技术员维修完成凭证', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const Text(
+                      '技术员维修完成凭证',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
                     const SizedBox(height: 12),
                     GestureDetector(
-                      onTap: () => showImagePreview(context, _ticket.completeImageUrl!),
+                      onTap: () =>
+                          showImagePreview(context, _ticket.completeImageUrl!),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(8),
                         child: Image.network(
@@ -502,7 +567,12 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
                           errorBuilder: (_, _, _) => Container(
                             height: 180,
                             color: Colors.grey.withValues(alpha: 0.1),
-                            child: const Center(child: Icon(Icons.broken_image_outlined, color: Colors.grey)),
+                            child: const Center(
+                              child: Icon(
+                                Icons.broken_image_outlined,
+                                color: Colors.grey,
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -516,10 +586,13 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
           if (!_ticket.isFinished) ...[
             if (isTech) ...[
               OutlinedButton.icon(
-                onPressed: _isUploadingCompleteImg ? null : _uploadCompleteImage,
+                onPressed: _isUploadingCompleteImg
+                    ? null
+                    : _uploadCompleteImage,
                 icon: const Icon(Icons.add_a_photo_rounded),
                 label: Text(
-                  _ticket.completeImageUrl != null && _ticket.completeImageUrl!.isNotEmpty
+                  _ticket.completeImageUrl != null &&
+                          _ticket.completeImageUrl!.isNotEmpty
                       ? '重新上传维修凭证'
                       : '上传维修完成凭证图片',
                 ),
@@ -534,14 +607,20 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
                 const SizedBox(height: 8),
                 TextButton(
                   onPressed: _completeDirectly,
-                  child: const Text('无需确认直接结束工单', style: TextStyle(color: Colors.grey)),
+                  child: const Text(
+                    '无需确认直接结束工单',
+                    style: TextStyle(color: Colors.grey),
+                  ),
                 ),
               ],
               const SizedBox(height: 8),
               TextButton.icon(
                 onPressed: _forceCloseTicket,
                 icon: const Icon(Icons.warning_amber_rounded, size: 18),
-                label: const Text('强制关闭工单', style: TextStyle(color: Colors.red)),
+                label: const Text(
+                  '强制关闭工单',
+                  style: TextStyle(color: Colors.red),
+                ),
               ),
             ] else ...[
               if (_ticket.repairStatus == 'Repairing')
@@ -566,13 +645,18 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
     );
   }
 
-  Widget _buildStepItem(String title, int step, int currentStep, {bool isSpecial = false}) {
+  Widget _buildStepItem(
+    String title,
+    int step,
+    int currentStep, {
+    bool isSpecial = false,
+  }) {
     final bool isDone = currentStep >= step;
     final Color color = isSpecial
         ? Colors.red
         : isDone
-            ? AppTheme.primaryBlue
-            : Colors.grey;
+        ? AppTheme.primaryBlue
+        : Colors.grey;
 
     return Expanded(
       child: Column(
@@ -616,8 +700,17 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(color: Colors.grey, fontSize: 13)),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13)),
+          Text(
+            label,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              fontSize: 13,
+            ),
+          ),
+          Text(
+            value,
+            style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
+          ),
         ],
       ),
     );

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../core/theme/app_theme.dart';
 import '../../models/event_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/event_service.dart';
 import '../auth/login_page.dart';
+import '../common/empty_state.dart';
 import 'number_page.dart';
 
 class ActivityPage extends StatefulWidget {
@@ -21,7 +23,12 @@ class _ActivityPageState extends State<ActivityPage> {
   bool _wasLoggedIn = false;
 
   final List<String> _departmentList = ["维修部", "研发部", "行政部", "设计部", "流媒部"];
-  final List<String> _freeTimeList = ['08:00-10:00', '10:00-12:00', '14:00-16:00', '16:00-18:00'];
+  final List<String> _freeTimeList = [
+    '08:00-10:00',
+    '10:00-12:00',
+    '14:00-16:00',
+    '16:00-18:00',
+  ];
 
   @override
   void initState() {
@@ -102,9 +109,8 @@ class _ActivityPageState extends State<ActivityPage> {
         freeTimes: result.freeTimes,
       );
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(ok ? '报名成功！' : '报名失败，请稍后重试')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(ok ? '报名成功！' : '报名失败，请稍后重试')));
       // 成功后重新拉取列表，让"已报名"状态与按钮可用性与服务端保持同步
       if (ok) {
         _fetchEvents();
@@ -120,9 +126,8 @@ class _ActivityPageState extends State<ActivityPage> {
     }
     final uid = auth.user?.uid ?? '';
     if (uid.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('用户信息未加载完成，请稍后重试')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('用户信息未加载完成，请稍后重试')));
       return;
     }
 
@@ -139,9 +144,8 @@ class _ActivityPageState extends State<ActivityPage> {
         ),
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('暂无您的抽奖号码或活动尚未开奖')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('暂无您的抽奖号码或活动尚未开奖')));
     }
   }
 
@@ -163,138 +167,166 @@ class _ActivityPageState extends State<ActivityPage> {
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : _events.isEmpty
-                ? ListView(
-                    children: [
-                      const SizedBox(height: 100),
-                      const Icon(Icons.event_busy_outlined, size: 64, color: Colors.grey),
-                      const SizedBox(height: 16),
-                      const Center(child: Text('近期暂无正在进行的招新或技术活动', style: TextStyle(color: Colors.grey))),
-                      const SizedBox(height: 16),
-                      Center(
-                        child: OutlinedButton.icon(
-                          onPressed: _fetchEvents,
-                          icon: const Icon(Icons.refresh_rounded),
-                          label: const Text('重新加载'),
-                        ),
+            ? ListView(
+                children: [
+                  const SizedBox(height: 80),
+                  SizedBox(
+                    height: 240,
+                    child: EmptyState(
+                      icon: Icons.event_busy_outlined,
+                      title: '近期暂无正在进行的招新或技术活动',
+                      action: OutlinedButton.icon(
+                        onPressed: _fetchEvents,
+                        icon: const Icon(Icons.refresh_rounded),
+                        label: const Text('重新加载'),
                       ),
-                    ],
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.all(16.0),
-                    itemCount: _events.length,
-                    itemBuilder: (ctx, i) {
-                      final event = _events[i];
-                      final isSignUp = event.status == 1; // 报名进行中
+                    ),
+                  ),
+                ],
+              )
+            : ListView.builder(
+                padding: const EdgeInsets.all(16.0),
+                itemCount: _events.length,
+                itemBuilder: (ctx, i) {
+                  final event = _events[i];
+                  final isSignUp = event.status == 1; // 报名进行中
 
-                      return Card(
-                        clipBehavior: Clip.antiAlias,
-                        margin: const EdgeInsets.only(bottom: 16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (event.poster != null && event.poster!.isNotEmpty)
-                              Image.network(
-                                event.poster!,
-                                height: 160,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
-                              ),
-                            Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                  return Card(
+                    clipBehavior: Clip.antiAlias,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (event.poster != null && event.poster!.isNotEmpty)
+                          Image.network(
+                            event.poster!,
+                            height: 160,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                const SizedBox.shrink(),
+                          ),
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
                                 children: [
-                                  Row(
-                                    children: [
-                                      if (event.type != null && event.type!.isNotEmpty) ...[
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                          decoration: BoxDecoration(
-                                            color: AppTheme.primaryBlue.withValues(alpha: 0.1),
-                                            borderRadius: BorderRadius.circular(4),
-                                          ),
-                                          child: Text(
-                                            event.type!,
-                                            style: const TextStyle(
-                                              color: AppTheme.primaryBlue,
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
+                                  if (event.type != null &&
+                                      event.type!.isNotEmpty) ...[
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: AppTheme.primaryBlue.withValues(
+                                          alpha: 0.1,
                                         ),
-                                        const SizedBox(width: 8),
-                                      ],
-                                      Expanded(
-                                        child: Text(
-                                          event.title,
-                                          style: const TextStyle(
-                                            fontSize: 17,
-                                            fontWeight: FontWeight.bold,
-                                          ),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Text(
+                                        event.type!,
+                                        style: const TextStyle(
+                                          color: AppTheme.primaryBlue,
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold,
                                         ),
                                       ),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                        decoration: BoxDecoration(
-                                          color: isSignUp
-                                              ? AppTheme.accentColor.withValues(alpha: 0.15)
-                                              : Colors.grey.withValues(alpha: 0.15),
-                                          borderRadius: BorderRadius.circular(6),
-                                        ),
-                                        child: Text(
-                                          event.statusText,
-                                          style: TextStyle(
-                                            color: isSignUp ? AppTheme.accentColor : Colors.grey,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    event.description,
-                                    style: const TextStyle(fontSize: 13, color: Colors.black87, height: 1.4),
-                                  ),
-                                  const SizedBox(height: 12),
-                                  if (event.signupStartTime.isNotEmpty)
-                                    Text(
-                                      '报名时间：${event.signupStartTime} ~ ${event.signupEndTime}',
-                                      style: const TextStyle(fontSize: 11, color: Colors.grey),
                                     ),
-                                  const SizedBox(height: 16),
-                                  Align(
-                                    alignment: Alignment.centerRight,
-                                    child: Wrap(
-                                      alignment: WrapAlignment.end,
-                                      spacing: 8,
-                                      runSpacing: 8,
-                                      children: [
-                                        if (event.isLucky)
-                                          OutlinedButton.icon(
-                                            onPressed: () => _checkLuckyNumber(event),
-                                            icon: const Icon(Icons.confirmation_number_outlined, size: 16),
-                                            label: const Text('我的抽奖号'),
-                                          ),
-                                        ElevatedButton(
-                                          onPressed: (isSignUp && !event.registered)
-                                              ? () => _showSignUpDialog(event)
-                                              : null,
-                                          child: Text(event.registered ? '已报名' : '立即报名'),
-                                        ),
-                                      ],
+                                    const SizedBox(width: 8),
+                                  ],
+                                  Expanded(
+                                    child: Text(
+                                      event.title,
+                                      style: const TextStyle(
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: isSignUp
+                                          ? AppTheme.accentColor.withValues(
+                                              alpha: 0.15,
+                                            )
+                                          : Colors.grey.withValues(alpha: 0.15),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Text(
+                                      event.statusText,
+                                      style: TextStyle(
+                                        color: isSignUp
+                                            ? AppTheme.accentColor
+                                            : Colors.grey,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ),
                                 ],
                               ),
-                            ),
-                          ],
+                              const SizedBox(height: 8),
+                              Text(
+                                event.description,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.black87,
+                                  height: 1.4,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              if (event.signupStartTime.isNotEmpty)
+                                Text(
+                                  '报名时间：${event.signupStartTime} ~ ${event.signupEndTime}',
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              const SizedBox(height: 16),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: Wrap(
+                                  alignment: WrapAlignment.end,
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: [
+                                    if (event.isLucky)
+                                      OutlinedButton.icon(
+                                        onPressed: () =>
+                                            _checkLuckyNumber(event),
+                                        icon: const Icon(
+                                          Icons.confirmation_number_outlined,
+                                          size: 16,
+                                        ),
+                                        label: const Text('我的抽奖号'),
+                                      ),
+                                    ElevatedButton(
+                                      onPressed: (isSignUp && !event.registered)
+                                          ? () => _showSignUpDialog(event)
+                                          : null,
+                                      child: Text(
+                                        event.registered ? '已报名' : '立即报名',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      );
-                    },
-                  ),
+                      ],
+                    ),
+                  );
+                },
+              ),
       ),
     );
   }
@@ -353,7 +385,10 @@ class _SignUpDialogState extends State<_SignUpDialog> {
           children: [
             TextField(
               controller: _nameController,
-              decoration: const InputDecoration(labelText: '真实姓名', hintText: '请输入姓名'),
+              decoration: const InputDecoration(
+                labelText: '真实姓名',
+                hintText: '请输入姓名',
+              ),
             ),
             const SizedBox(height: 12),
             Row(
@@ -366,12 +401,16 @@ class _SignUpDialogState extends State<_SignUpDialog> {
                     ButtonSegment(value: '女', label: Text('女')),
                   ],
                   selected: {_gender},
-                  onSelectionChanged: (set) => setState(() => _gender = set.first),
+                  onSelectionChanged: (set) =>
+                      setState(() => _gender = set.first),
                 ),
               ],
             ),
             const SizedBox(height: 12),
-            const Text('意向部门（可多选）：', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+            const Text(
+              '意向部门（可多选）：',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+            ),
             Wrap(
               spacing: 6,
               children: widget.departmentList.map((dept) {
@@ -392,7 +431,10 @@ class _SignUpDialogState extends State<_SignUpDialog> {
               }).toList(),
             ),
             const SizedBox(height: 12),
-            const Text('空闲面试/值班时段（可多选）：', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+            const Text(
+              '空闲面试/值班时段（可多选）：',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+            ),
             Wrap(
               spacing: 6,
               children: widget.freeTimeList.map((time) {
@@ -416,20 +458,21 @@ class _SignUpDialogState extends State<_SignUpDialog> {
         ),
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: const Text('取消')),
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('取消'),
+        ),
         ElevatedButton(
           onPressed: () {
             final name = _nameController.text.trim();
             if (name.isEmpty) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('请填写姓名')),
-              );
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(const SnackBar(content: Text('请填写姓名')));
               return;
             }
             if (_selectedDepts.isEmpty) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('请至少选择一个意向部门')),
-              );
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(const SnackBar(content: Text('请至少选择一个意向部门')));
               return;
             }
             Navigator.pop(

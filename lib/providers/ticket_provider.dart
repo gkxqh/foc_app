@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+
 import '../models/ticket_model.dart';
 import '../services/ticket_service.dart';
 
@@ -106,7 +107,8 @@ class TicketProvider extends ChangeNotifier {
     } else {
       final code = input;
       // 服务端会校验 tvcode（"Transfer vcode mismatch"），格式不符直接本地拦截
-      if (code.length <= 6 || !RegExp(r'^\d{6}$').hasMatch(code.substring(code.length - 6))) {
+      if (code.length <= 6 ||
+          !RegExp(r'^\d{6}$').hasMatch(code.substring(code.length - 6))) {
         return '转单码格式错误（应为 工单号 + 6位数字验证码）';
       }
       orderId = code.substring(0, code.length - 6);
@@ -117,7 +119,9 @@ class TicketProvider extends ChangeNotifier {
 
     final res = await _ticketService.giveTicket(
       orderId: orderId,
-      tvcode: input.startsWith('[give];') ? null : input.substring(input.length - 6),
+      tvcode: input.startsWith('[give];')
+          ? null
+          : input.substring(input.length - 6),
       orderHash: input.startsWith('[give];') ? input.split(';')[2] : null,
     );
     _isLoading = false;

@@ -1,6 +1,7 @@
 class ApiConstants {
   static const String rootApiUrl = 'https://focapi.feiyang.ac.cn';
-  static const String defaultTicketImage = 'https://focapp.feiyang.ac.cn/public/ticketdefault.svg';
+  static const String defaultTicketImage =
+      'https://focapp.feiyang.ac.cn/public/ticketdefault.svg';
   // 客服/激活电话（服务端 config.php activephone，2026-09-11 核实）
   static const String supportPhone = '19150105675';
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../services/config_service.dart';
 
 class FeedbackPage extends StatefulWidget {
@@ -25,9 +26,8 @@ class _FeedbackPageState extends State<FeedbackPage> {
     final content = _contentController.text.trim();
 
     if (content.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请填写您的宝贵意见')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('请填写您的宝贵意见')));
       return;
     }
 
@@ -37,14 +37,12 @@ class _FeedbackPageState extends State<FeedbackPage> {
     setState(() => _isSubmitting = false);
 
     if (ok) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('感谢您的反馈，研发部将尽快优化！')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('感谢您的反馈，研发部将尽快优化！')));
       Navigator.pop(context);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('提交失败，请稍后重试')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('提交失败，请稍后重试')));
     }
   }
 
@@ -89,7 +87,10 @@ class _FeedbackPageState extends State<FeedbackPage> {
                   ? const SizedBox(
                       width: 20,
                       height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
                     )
                   : const Text('提交反馈'),
             ),

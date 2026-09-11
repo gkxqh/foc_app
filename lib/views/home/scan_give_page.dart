@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:provider/provider.dart';
+
 import '../../core/theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/ticket_provider.dart';
@@ -84,7 +85,9 @@ class _ScanGivePageState extends State<ScanGivePage> {
                 if (_submitting)
                   Container(
                     color: Colors.black38,
-                    child: const Center(child: CircularProgressIndicator(color: Colors.white)),
+                    child: const Center(
+                      child: CircularProgressIndicator(color: Colors.white),
+                    ),
                   ),
               ],
             ),
@@ -95,8 +98,9 @@ class _ScanGivePageState extends State<ScanGivePage> {
             color: _success
                 ? AppTheme.accentColor.withValues(alpha: 0.12)
                 : (_resultMessage == null
-                    ? Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.35)
-                    : Colors.orange.withValues(alpha: 0.12)),
+                      ? Theme.of(context).colorScheme.surfaceContainerHighest
+                            .withValues(alpha: 0.35)
+                      : Colors.orange.withValues(alpha: 0.12)),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -105,8 +109,12 @@ class _ScanGivePageState extends State<ScanGivePage> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,
-                    color: _resultMessage == null ? Colors.grey : null,
-                    fontWeight: _resultMessage == null ? FontWeight.normal : FontWeight.bold,
+                    color: _resultMessage == null
+                        ? Theme.of(context).colorScheme.onSurfaceVariant
+                        : null,
+                    fontWeight: _resultMessage == null
+                        ? FontWeight.normal
+                        : FontWeight.bold,
                   ),
                 ),
                 // 失败后相机已暂停，提供手动重扫入口

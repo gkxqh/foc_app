@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
+
 import '../../core/theme/app_theme.dart';
 
 class NumberPage extends StatelessWidget {
   final String luckyNum;
   final bool isWinner;
 
-  const NumberPage({
-    super.key,
-    required this.luckyNum,
-    required this.isWinner,
-  });
+  const NumberPage({super.key, required this.luckyNum, required this.isWinner});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +20,10 @@ class NumberPage extends StatelessWidget {
             children: [
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 40,
+                  horizontal: 20,
+                ),
                 decoration: BoxDecoration(
                   color: isWinner ? Colors.amber.shade100 : Colors.blue.shade50,
                   borderRadius: BorderRadius.circular(16),
@@ -39,7 +39,9 @@ class NumberPage extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: isWinner ? Colors.amber.shade900 : AppTheme.primaryBlue,
+                        color: isWinner
+                            ? Colors.amber.shade900
+                            : AppTheme.primaryBlue,
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -49,7 +51,9 @@ class NumberPage extends StatelessWidget {
                         fontSize: 52,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 4,
-                        color: isWinner ? Colors.amber.shade900 : AppTheme.primaryBlue,
+                        color: isWinner
+                            ? Colors.amber.shade900
+                            : AppTheme.primaryBlue,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -58,7 +62,10 @@ class NumberPage extends StatelessWidget {
                           ? '请凭此号码前往飞扬俱乐部摊位或活动负责人处领奖！'
                           : '活动现场将根据该号码进行互动与抽奖，请妥善保存！',
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 13, color: Colors.black54),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: Colors.black54,
+                      ),
                     ),
                   ],
                 ),

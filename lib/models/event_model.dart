@@ -31,7 +31,9 @@ class EventModel {
 
   factory EventModel.fromJson(Map<String, dynamic> json) {
     final event = EventModel(
-      id: (json['id'] is int) ? json['id'] : int.tryParse(json['id']?.toString() ?? '0') ?? 0,
+      id: (json['id'] is int)
+          ? json['id']
+          : int.tryParse(json['id']?.toString() ?? '0') ?? 0,
       title: json['name']?.toString() ?? json['title']?.toString() ?? '',
       description: json['description']?.toString() ?? '',
       signupStartTime: json['signup_start_time']?.toString() ?? '',
@@ -63,9 +65,12 @@ class EventModel {
   void calculateStatus() {
     final now = DateTime.now().millisecondsSinceEpoch;
     try {
-      final sStart = DateTime.parse(signupStartTime.replaceAll('/', '-')).millisecondsSinceEpoch;
-      final sEnd = DateTime.parse(signupEndTime.replaceAll('/', '-')).millisecondsSinceEpoch;
-      final eEnd = DateTime.parse(endTime.replaceAll('/', '-')).millisecondsSinceEpoch;
+      final sStart = DateTime.parse(signupStartTime.replaceAll('/', '-'))
+          .millisecondsSinceEpoch;
+      final sEnd = DateTime.parse(signupEndTime.replaceAll('/', '-'))
+          .millisecondsSinceEpoch;
+      final eEnd = DateTime.parse(endTime.replaceAll('/', '-'))
+          .millisecondsSinceEpoch;
 
       if (now < sStart) {
         status = 0; // 报名未开始
@@ -105,10 +110,7 @@ class LuckyNumberModel {
   final String luckyNum;
   final bool isWinner;
 
-  LuckyNumberModel({
-    required this.luckyNum,
-    required this.isWinner,
-  });
+  LuckyNumberModel({required this.luckyNum, required this.isWinner});
 
   factory LuckyNumberModel.fromJson(Map<String, dynamic> json) {
     return LuckyNumberModel(

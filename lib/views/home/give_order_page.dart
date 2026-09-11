@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+
 import '../../core/theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/ticket_provider.dart';
@@ -36,9 +37,8 @@ class _GiveOrderPageState extends State<GiveOrderPage> {
     if (_isSubmitting) return;
     final code = _codeController.text.trim();
     if (code.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请填写完整的转单码')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('请填写完整的转单码')));
       return;
     }
 
@@ -52,9 +52,8 @@ class _GiveOrderPageState extends State<GiveOrderPage> {
     setState(() => _isSubmitting = false);
 
     if (err == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('接单成功！')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('接单成功！')));
       if (authProvider.user != null) {
         ticketProvider.fetchTickets(
           role: authProvider.user!.role,
@@ -63,20 +62,18 @@ class _GiveOrderPageState extends State<GiveOrderPage> {
       }
       Navigator.pop(context);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('接单失败: $err')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('接单失败: $err')));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final isShowingShare = widget.transcodeToShare != null && widget.transcodeToShare!.isNotEmpty;
+    final isShowingShare =
+        widget.transcodeToShare != null && widget.transcodeToShare!.isNotEmpty;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(isShowingShare ? '转单凭证' : '接单 / 转单'),
-      ),
+      appBar: AppBar(title: Text(isShowingShare ? '转单凭证' : '接单 / 转单')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -137,7 +134,9 @@ class _GiveOrderPageState extends State<GiveOrderPage> {
                 labelText: '转单码',
                 hintText: '单号 + 6位验证码',
                 prefixIcon: const Icon(Icons.qr_code_2_rounded),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
             const SizedBox(height: 24),
@@ -153,7 +152,9 @@ class _GiveOrderPageState extends State<GiveOrderPage> {
               label: const Text('确认接单'),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
           ],
