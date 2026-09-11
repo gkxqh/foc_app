@@ -25,7 +25,7 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
   String _version = '';
   bool _rememberLogin = true;
   bool _iconSwitching = false;
-  String _currentIcon = 'red'; // red: 飞扬娘（默认）/ logo: 黑底标志
+  String _currentIcon = 'character'; // character: 飞扬娘（默认主图标）/ red: 飞扬娘头像
 
   bool get _canSwitchIcon => !kIsWeb && (Platform.isIOS || Platform.isAndroid);
 
@@ -66,11 +66,11 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
   // （兼容曾切换到这两个图标的设备），此处不再提供入口。
   static const List<({String value, String asset, String label})> _iconOptions =
       [
-        (value: 'red', asset: 'assets/icon/icon.png', label: '飞扬娘'),
+        (value: 'red', asset: 'assets/icon/red_avatar.png', label: '飞扬娘头像'),
         (
           value: 'character',
           asset: 'assets/icon/character_icon.png',
-          label: '工作台立绘',
+          label: '飞扬娘',
         ),
         (value: 'logo', asset: 'assets/icon/logo_alt.png', label: '黑底标志'),
         (value: 'fyLogo', asset: 'assets/icon/fy_logo.png', label: '白底标志'),
@@ -99,7 +99,7 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
       // null = 默认主图标（飞扬娘）。注意派生名需先于其前缀判断。
       setState(() {
         if (name == null) {
-          _currentIcon = 'red';
+          _currentIcon = 'character';
         } else if (name.contains('LogoLight') ||
             name.contains('foc_logo_light')) {
           _currentIcon = 'logoLight';
@@ -114,6 +114,7 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
             name.contains('foc_character')) {
           _currentIcon = 'character';
         } else {
+          // MainActivityRed / foc_red（飞扬娘头像）及未知值兜底
           _currentIcon = 'red';
         }
       });
@@ -152,7 +153,8 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
           'logoLight' => 'foc_logo_light',
           'logoArt' => 'foc_logoart',
           'fyLogo' => 'foc_fylogo',
-          'red' => null, // null = 恢复默认主图标（飞扬娘）
+          'character' => null, // null = 恢复默认主图标（飞扬娘）
+          'red' => 'foc_red',
           _ => 'foc_character',
         };
         await FlutterDynamicIconPlus.setAlternateIconName(iconName: iconName);

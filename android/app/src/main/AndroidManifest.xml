@@ -24,13 +24,15 @@
               />
         </activity>
         <!-- 双图标支持：LAUNCHER 入口放在 activity-alias 上（恰好一个 enabled），
-             切换 = disable 当前 alias + enable 目标 alias（软件设置 → 应用图标） -->
+             切换 = disable 当前 alias + enable 目标 alias（软件设置 → 应用图标）。
+             默认主图标为飞扬娘立绘（MainActivityCharacter） -->
         <activity-alias
             android:name=".MainActivityRed"
-            android:enabled="true"
+            android:enabled="false"
             android:exported="true"
-            android:icon="@mipmap/ic_launcher"
+            android:icon="@mipmap/ic_launcher_red"
             android:label="云上飞扬"
+            android:theme="@style/LaunchThemeRed"
             android:targetActivity=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -55,6 +57,7 @@
             android:exported="true"
             android:icon="@mipmap/ic_launcher_fylogo"
             android:label="云上飞扬"
+            android:theme="@style/LaunchThemeFyLogo"
             android:targetActivity=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -67,6 +70,7 @@
             android:exported="true"
             android:icon="@mipmap/ic_launcher_logo"
             android:label="云上飞扬"
+            android:theme="@style/LaunchThemeLogo"
             android:targetActivity=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -75,10 +79,11 @@
         </activity-alias>
         <activity-alias
             android:name=".MainActivityCharacter"
-            android:enabled="false"
+            android:enabled="true"
             android:exported="true"
-            android:icon="@mipmap/ic_launcher_character"
+            android:icon="@mipmap/ic_launcher"
             android:label="云上飞扬"
+            android:theme="@style/LaunchTheme"
             android:targetActivity=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

@@ -64,6 +64,15 @@
 					<key>UIPrerenderedIcon</key>
 					<true/>
 				</dict>
+				<key>foc_red</key>
+				<dict>
+					<key>CFBundleIconFiles</key>
+					<array>
+						<string>foc_red</string>
+					</array>
+					<key>UIPrerenderedIcon</key>
+					<true/>
+				</dict>
 			</dict>
 		</dict>
 		<key>LSRequiresIPhoneOS</key>

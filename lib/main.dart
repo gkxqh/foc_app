@@ -6,7 +6,7 @@ import 'providers/auth_provider.dart';
 import 'providers/config_provider.dart';
 import 'providers/ticket_provider.dart';
 import 'providers/theme_provider.dart';
-import 'views/main_scaffold.dart';
+import 'views/splash/launch_gate.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -56,7 +56,7 @@ class FeiyangApp extends StatelessWidget {
             home: child,
           );
         },
-        child: const MainScaffold(),
+        child: const LaunchGate(),
       ),
     );
   }

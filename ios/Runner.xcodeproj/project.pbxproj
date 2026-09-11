@@ -10,6 +10,7 @@
 		F0CA11F00000000000000010 /* foc_logoart.png in Resources */ = {isa = PBXBuildFile; fileRef = F0CA11F00000000000000009 /* foc_logoart.png */; };
 		F0CA11F00000000000000012 /* foc_fylogo.png in Resources */ = {isa = PBXBuildFile; fileRef = F0CA11F00000000000000011 /* foc_fylogo.png */; };
 		F0CA11F00000000000000014 /* foc_character.png in Resources */ = {isa = PBXBuildFile; fileRef = F0CA11F00000000000000013 /* foc_character.png */; };
+		F0CA11F00000000000000016 /* foc_red.png in Resources */ = {isa = PBXBuildFile; fileRef = F0CA11F00000000000000015 /* foc_red.png */; };
 		F0CA11F00000000000000002 /* foc_logo.png in Resources */ = {isa = PBXBuildFile; fileRef = F0CA11F00000000000000001 /* foc_logo.png */; };
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
 		331C808B294A63AB00263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C807B294A618700263BE5 /* RunnerTests.swift */; };
@@ -49,6 +50,7 @@
 		F0CA11F00000000000000009 /* foc_logoart.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = foc_logoart.png; path = foc_logoart.png; sourceTree = "<group>"; };
 		F0CA11F00000000000000011 /* foc_fylogo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = foc_fylogo.png; path = foc_fylogo.png; sourceTree = "<group>"; };
 		F0CA11F00000000000000013 /* foc_character.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = foc_character.png; path = foc_character.png; sourceTree = "<group>"; };
+		F0CA11F00000000000000015 /* foc_red.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = foc_red.png; path = foc_red.png; sourceTree = "<group>"; };
 		F0CA11F00000000000000001 /* foc_logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = foc_logo.png; path = foc_logo.png; sourceTree = "<group>"; };
 		1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeneratedPluginRegistrant.h; sourceTree = "<group>"; };
 		1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };
@@ -129,6 +131,7 @@
 				F0CA11F00000000000000009 /* foc_logoart.png */,
 				F0CA11F00000000000000011 /* foc_fylogo.png */,
 				F0CA11F00000000000000013 /* foc_character.png */,
+				F0CA11F00000000000000015 /* foc_red.png */,
 				97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */,
 				97C147021CF9000F007C117D /* Info.plist */,
 				1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */,
@@ -244,6 +247,7 @@
 				F0CA11F00000000000000010 /* foc_logoart.png in Resources */,
 				F0CA11F00000000000000012 /* foc_fylogo.png in Resources */,
 				F0CA11F00000000000000014 /* foc_character.png in Resources */,
+				F0CA11F00000000000000016 /* foc_red.png in Resources */,
 				97C146FC1CF9000F007C117D /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
