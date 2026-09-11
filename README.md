@@ -1,4 +1,4 @@
-<p align="center"><img width="120" src="https://www.fyscu.com/img/logo-blue.png" alt="Feiyang Club Logo"></p>
+<p align="center"><img width="140" src="assets/icon/icon.png" alt="云上飞扬 App 图标"></p>
 
 # 云上飞扬 (Feiyang on Cloud)
 
