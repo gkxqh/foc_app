@@ -180,22 +180,6 @@ class ProfilePage extends StatelessWidget {
                 const Divider(height: 1),
                 ListTile(
                   leading: const Icon(
-                    Icons.chat_bubble_outline_rounded,
-                    color: AppTheme.primaryBlue,
-                  ),
-                  title: const Text('问题反馈'),
-                  subtitle: const Text('意见与建议', style: AppText.captionSm),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const FeedbackPage()),
-                    );
-                  },
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(
                     Icons.tune_rounded,
                     color: AppTheme.primaryBlue,
                   ),
@@ -213,6 +197,22 @@ class ProfilePage extends StatelessWidget {
                       MaterialPageRoute(
                         builder: (_) => const AppSettingsPage(),
                       ),
+                    );
+                  },
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(
+                    Icons.chat_bubble_outline_rounded,
+                    color: AppTheme.primaryBlue,
+                  ),
+                  title: const Text('问题反馈'),
+                  subtitle: const Text('意见与建议', style: AppText.captionSm),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const FeedbackPage()),
                     );
                   },
                 ),
