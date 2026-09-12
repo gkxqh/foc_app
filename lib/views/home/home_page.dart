@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/theme/app_theme.dart';
@@ -17,6 +16,7 @@ import '../../providers/update_provider.dart';
 import '../auth/login_page.dart';
 import '../common/update_dialog.dart';
 import 'annual_summary_page.dart';
+import 'announcement_page.dart';
 import 'repair_terms_page.dart';
 import 'scan_give_page.dart';
 import 'ticket_detail_page.dart';
@@ -84,7 +84,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _showAnnouncementDialog() {
+  void _openAnnouncement() {
     final config = context.read<ConfigProvider>();
     final String body;
     if (config.submitTips.isNotEmpty &&
@@ -100,35 +100,9 @@ class _HomePageState extends State<HomePage> {
                 : ServiceTexts.fallbackRepairTerms);
     }
 
-    showDialog(
-      context: context,
-      // scrollable + noScroll：Markdown 渲染为 Column 以支持 AlertDialog 的
-      // 固有尺寸查询（视口类不支持会布局崩溃，真机表现只剩暗色屏障），
-      // 长公告由外层滚动区限高滚动，短公告收紧弹窗
-      builder: (ctx) => AlertDialog(
-        scrollable: true,
-        title: const Text('公告与服务须知'),
-        content: Markdown(
-          data: body,
-          selectable: true,
-          noScroll: true,
-          styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(ctx)).copyWith(
-            p: AppText.body.copyWith(
-              height: 1.6,
-              color: Theme.of(ctx).colorScheme.onSurface,
-            ),
-            listBullet: AppText.body.copyWith(
-              color: Theme.of(ctx).colorScheme.onSurface,
-            ),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('我知道了'),
-          ),
-        ],
-      ),
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => AnnouncementPage(body: body)),
     );
   }
 
@@ -146,7 +120,7 @@ class _HomePageState extends State<HomePage> {
         borderRadius: BorderRadius.circular(AppRadius.banner),
         child: InkWell(
           borderRadius: BorderRadius.circular(AppRadius.banner),
-          onTap: _showAnnouncementDialog,
+          onTap: _openAnnouncement,
           child: Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.md,
