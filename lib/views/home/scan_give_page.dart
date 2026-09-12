@@ -210,8 +210,11 @@ class _ScanGivePageState extends State<ScanGivePage> {
                   ),
                   if (_resultMessage == null) ...[
                     const SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    // 横屏/分屏宽度不足时换行，避免按钮行 RenderFlex 溢出
+                    Wrap(
+                      alignment: WrapAlignment.center,
+                      spacing: 14,
+                      runSpacing: 8,
                       children: [
                         OutlinedButton.icon(
                           onPressed: _pickImageFromGallery,
@@ -227,7 +230,6 @@ class _ScanGivePageState extends State<ScanGivePage> {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 14),
                         OutlinedButton.icon(
                           onPressed: _openManualInput,
                           icon: const Icon(
@@ -248,8 +250,10 @@ class _ScanGivePageState extends State<ScanGivePage> {
                   // 失败后相机已暂停，提供手动重扫、相册重试或手动输码入口
                   if (!_success && _resultMessage != null) ...[
                     const SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    Wrap(
+                      alignment: WrapAlignment.center,
+                      spacing: AppSpacing.sm,
+                      runSpacing: 8,
                       children: [
                         ElevatedButton.icon(
                           onPressed: _resumeScan,
@@ -262,7 +266,6 @@ class _ScanGivePageState extends State<ScanGivePage> {
                             ),
                           ),
                         ),
-                        const SizedBox(width: AppSpacing.sm),
                         OutlinedButton.icon(
                           onPressed: _pickImageFromGallery,
                           icon: const Icon(
@@ -277,7 +280,6 @@ class _ScanGivePageState extends State<ScanGivePage> {
                             ),
                           ),
                         ),
-                        const SizedBox(width: AppSpacing.sm),
                         OutlinedButton.icon(
                           onPressed: _openManualInput,
                           icon: const Icon(

@@ -96,12 +96,17 @@ class ProfilePage extends StatelessWidget {
                               ),
                               if (user?.campus.isNotEmpty == true) ...[
                                 const SizedBox(width: 6),
-                                Text(
-                                  user!.campus,
-                                  style: AppText.captionSm.copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurfaceVariant,
+                                // 长校区名折行省略而非内部溢出
+                                Flexible(
+                                  child: Text(
+                                    user!.campus,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: AppText.captionSm.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant,
+                                    ),
                                   ),
                                 ),
                               ],

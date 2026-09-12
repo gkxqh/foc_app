@@ -437,11 +437,16 @@ class _HomePageState extends State<HomePage> {
         ],
         // 技术员排行榜（受软件设置开关控制）
         if (config.showTechRank) ...[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          // 标题与榜单切换 chips 允许换行：窄宽度（横屏/分屏）下不溢出
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: AppSpacing.sm,
+            runSpacing: 8,
             children: [
               const Text('技术员英雄榜', style: AppText.title),
               Row(
+                mainAxisSize: MainAxisSize.min,
                 children: ['总榜', '江安', '望江'].map((tab) {
                   final isSelected = config.selectedCampusTab == tab;
                   return Padding(
@@ -502,9 +507,13 @@ class _HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            if (list.length > 1) _buildPodiumColumn(context, list[1], 2, 110),
-            if (list.isNotEmpty) _buildPodiumColumn(context, list[0], 1, 140),
-            if (list.length > 2) _buildPodiumColumn(context, list[2], 3, 90),
+            // Flexible 让长昵称的省略号真正生效，也避免 3 列在宽卡上互挤溢出
+            if (list.length > 1)
+              Flexible(child: _buildPodiumColumn(context, list[1], 2, 110)),
+            if (list.isNotEmpty)
+              Flexible(child: _buildPodiumColumn(context, list[0], 1, 140)),
+            if (list.length > 2)
+              Flexible(child: _buildPodiumColumn(context, list[2], 3, 90)),
           ],
         ),
       ),
@@ -642,14 +651,16 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                Row(
+                // 品牌名可能较长（如「机械革命/Thunderobot」），窄宽度换行防溢出
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 4,
                   children: [
                     Chip(
                       label: Text(ticket.campus, style: AppText.micro),
                       visualDensity: VisualDensity.compact,
                       padding: EdgeInsets.zero,
                     ),
-                    const SizedBox(width: 6),
                     Chip(
                       label: Text(ticket.computerBrand, style: AppText.micro),
                       visualDensity: VisualDensity.compact,

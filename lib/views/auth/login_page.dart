@@ -381,14 +381,19 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 const SizedBox(width: AppSpacing.md),
-                SizedBox(
-                  height: 56,
-                  child: OutlinedButton(
-                    onPressed: auth.isCountingDown ? null : _sendCode,
-                    child: Text(
-                      auth.isCountingDown ? '${auth.countdown}s' : '发送',
-                      style: AppText.captionSm,
+                // 不固定 56 高：验证码输入框随文字缩放变高时按钮同步对齐
+                OutlinedButton(
+                  onPressed: auth.isCountingDown ? null : _sendCode,
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(64, 56),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 16,
                     ),
+                  ),
+                  child: Text(
+                    auth.isCountingDown ? '${auth.countdown}s' : '发送',
+                    style: AppText.captionSm,
                   ),
                 ),
               ],

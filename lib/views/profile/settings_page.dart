@@ -558,30 +558,33 @@ class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text('确认注销账号？'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('注销后所有报修历史、技术员积分和个人数据将被永久删除且无法恢复！'),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            '请输入本机登录手机号 ${widget.phone} 以确认：',
-            style: AppText.captionSm.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+      // 横屏弹出键盘后可用高度骤减：内容允许滚动，按钮不再被顶出屏幕；
+      // 不设 autofocus，避免横屏下键盘一弹就把弹窗压爆
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('注销后所有报修历史、技术员积分和个人数据将被永久删除且无法恢复！'),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              '请输入本机登录手机号 ${widget.phone} 以确认：',
+              style: AppText.captionSm.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          TextField(
-            controller: _controller,
-            keyboardType: TextInputType.phone,
-            inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly,
-              LengthLimitingTextInputFormatter(11),
-            ],
-            autofocus: true,
-            onChanged: (_) => setState(() {}),
-          ),
-        ],
+            const SizedBox(height: AppSpacing.sm),
+            TextField(
+              controller: _controller,
+              keyboardType: TextInputType.phone,
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+                LengthLimitingTextInputFormatter(11),
+              ],
+              onChanged: (_) => setState(() {}),
+            ),
+          ],
+        ),
       ),
       actions: [
         TextButton(

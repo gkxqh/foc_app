@@ -59,72 +59,100 @@ class _AboutPageState extends State<AboutPage> {
       appBar: AppBar(title: const Text('关于云上飞扬')),
       body: SafeArea(
         top: false,
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.xxl),
-          child: Column(
-            children: [
-              const SizedBox(height: AppSpacing.xxxl),
-              Center(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(AppRadius.pill),
-                  child: Image.asset(
-                    'assets/icon/icon.png',
-                    width: 100,
-                    height: 100,
-                    fit: BoxFit.contain,
+        child: LayoutBuilder(
+          builder: (context, viewport) {
+            // 固定内容 Column 在横屏（视口 ~300dp）会溢出：包滚动并在
+            // 高度充裕时由 Spacer 继续把页脚压到底部
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: viewport.maxHeight),
+                child: IntrinsicHeight(
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppSpacing.xxl),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: AppSpacing.xxxl),
+                        Center(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(AppRadius.pill),
+                            child: Image.asset(
+                              'assets/icon/icon.png',
+                              width: 100,
+                              height: 100,
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.lg),
+                        const Text(
+                          '云上飞扬 (Feiyang on Cloud)',
+                          style: AppText.titleXl,
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          _version.isEmpty ? 'Flutter 跨平台版' : '版本 $_version ',
+                          style: AppText.caption.copyWith(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        // 应用仅经 GitHub Releases 侧载分发（Android），无商店更新通道，
+                        // 其他平台没有可安装的产物，不展示检查更新入口
+                        if (Platform.isAndroid) ...[
+                          const SizedBox(height: AppSpacing.lg),
+                          Consumer<UpdateProvider>(
+                            builder: (context, update, _) {
+                              final checking =
+                                  update.status == UpdateStatus.checking;
+                              return OutlinedButton.icon(
+                                onPressed: checking
+                                    ? null
+                                    : () => _checkUpdate(update),
+                                icon: checking
+                                    ? const SizedBox(
+                                        width: 16,
+                                        height: 16,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : const Icon(
+                                        Icons.system_update_alt,
+                                        size: 18,
+                                      ),
+                                label: Text(checking ? '正在检查…' : '检查更新'),
+                              );
+                            },
+                          ),
+                        ],
+                        const SizedBox(height: AppSpacing.xxl),
+                        Card(
+                          child: Padding(
+                            padding: const EdgeInsets.all(AppSpacing.lg),
+                            child: Text(
+                              '“云上飞扬”是四川大学飞扬俱乐部研发部打造的校园个人设备一体化服务平台。其前身为“小川电脑管家”。',
+                              style: AppText.body.copyWith(height: 1.6),
+                            ),
+                          ),
+                        ),
+                        const Spacer(),
+                        Text(
+                          'Powered By 四川大学飞扬俱乐部研发部 ｜ 刻御晴空',
+                          style: AppText.captionSm.copyWith(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.xl),
+                      ],
+                    ),
                   ),
                 ),
               ),
-              const SizedBox(height: AppSpacing.lg),
-              const Text('云上飞扬 (Feiyang on Cloud)', style: AppText.titleXl),
-              const SizedBox(height: 6),
-              Text(
-                _version.isEmpty ? 'Flutter 跨平台版' : '版本 $_version ',
-                style: AppText.caption.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-              // 应用仅经 GitHub Releases 侧载分发（Android），无商店更新通道，
-              // 其他平台没有可安装的产物，不展示检查更新入口
-              if (Platform.isAndroid) ...[
-                const SizedBox(height: AppSpacing.lg),
-                Consumer<UpdateProvider>(
-                  builder: (context, update, _) {
-                    final checking = update.status == UpdateStatus.checking;
-                    return OutlinedButton.icon(
-                      onPressed: checking ? null : () => _checkUpdate(update),
-                      icon: checking
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.system_update_alt, size: 18),
-                      label: Text(checking ? '正在检查…' : '检查更新'),
-                    );
-                  },
-                ),
-              ],
-              const SizedBox(height: AppSpacing.xxl),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  child: Text(
-                    '“云上飞扬”是四川大学飞扬俱乐部研发部打造的校园个人设备一体化服务平台。其前身为“小川电脑管家”。',
-                    style: AppText.body.copyWith(height: 1.6),
-                  ),
-                ),
-              ),
-              const Spacer(),
-              Text(
-                'Powered By 四川大学飞扬俱乐部研发部 ｜ 刻御晴空',
-                style: AppText.captionSm.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.xl),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );

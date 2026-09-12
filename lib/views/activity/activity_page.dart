@@ -235,35 +235,37 @@ class _ActivityPageState extends State<ActivityPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           if (event.poster != null && event.poster!.isNotEmpty)
-                            // 海报缓存到本地：回退重进不再重复下载
-                            CachedNetworkImage(
-                              imageUrl: event.poster!,
-                              height: 160,
-                              width: double.infinity,
-                              fit: BoxFit.cover,
-                              placeholder: (context, url) => Container(
-                                height: 160,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .surfaceContainerHighest,
-                                child: const Center(
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                ),
-                              ),
-                              // 海报加载失败用占位图填满原高度，避免残留 160px 空白
-                              errorWidget: (context, url, error) => Container(
-                                height: 160,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .surfaceContainerHighest,
-                                child: Icon(
-                                  Icons.image_not_supported_outlined,
-                                  size: 40,
+                            // 海报缓存到本地：回退重进不再重复下载。
+                            // 固定高在宽屏（折叠屏展开）会被 cover 裁成极端横条，
+                            // 改为 16:9 随卡片宽度伸缩
+                            AspectRatio(
+                              aspectRatio: 16 / 9,
+                              child: CachedNetworkImage(
+                                imageUrl: event.poster!,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) => Container(
                                   color: Theme.of(context)
                                       .colorScheme
-                                      .onSurfaceVariant,
+                                      .surfaceContainerHighest,
+                                  child: const Center(
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  ),
+                                ),
+                                // 海报加载失败用主题化占位填满，避免残留空白
+                                errorWidget: (context, url, error) => Container(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .surfaceContainerHighest,
+                                  child: Icon(
+                                    Icons.image_not_supported_outlined,
+                                    size: 40,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
                                 ),
                               ),
                             ),
@@ -470,10 +472,13 @@ class _SignUpDialogState extends State<_SignUpDialog> {
               ),
             ),
             const SizedBox(height: AppSpacing.md),
-            Row(
+            // SegmentedButton 有固有最小宽，文字放大档位下允许折行防溢出
+            Wrap(
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 8,
+              runSpacing: 8,
               children: [
                 const Text('性别：'),
-                const SizedBox(width: 8),
                 SegmentedButton<String>(
                   segments: const [
                     ButtonSegment(value: '男', label: Text('男')),

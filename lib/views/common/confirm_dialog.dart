@@ -20,6 +20,8 @@ Future<bool> showConfirmDialog(
     context: context,
     builder: (ctx) => AlertDialog(
       title: Text(title),
+      // 长文案在横屏（视口高度减半）下底部会被裁，交给弹窗自行滚动
+      scrollable: true,
       content: Text(content),
       actions: [
         TextButton(

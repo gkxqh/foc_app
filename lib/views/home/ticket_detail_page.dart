@@ -68,10 +68,14 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
-          const Spacer(),
-          Text(
-            hasValue ? value : '未预留',
-            style: AppText.caption.copyWith(fontWeight: FontWeight.w500),
+          const SizedBox(width: AppSpacing.lg),
+          // 长号码右对齐折行而非溢出
+          Expanded(
+            child: Text(
+              hasValue ? value : '未预留',
+              textAlign: TextAlign.right,
+              style: AppText.caption.copyWith(fontWeight: FontWeight.w500),
+            ),
           ),
           if (hasValue) ...[
             const SizedBox(width: AppSpacing.xs),
@@ -470,7 +474,12 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
+                  // 徽章与故障类型允许换行：长品牌名/长故障类型不再互相挤出溢出
+                  Wrap(
+                    alignment: WrapAlignment.spaceBetween,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: AppSpacing.sm,
+                    runSpacing: AppSpacing.xs,
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(
@@ -489,7 +498,6 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
                           ),
                         ),
                       ),
-                      const SizedBox(width: AppSpacing.sm),
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: AppSpacing.sm,
@@ -507,7 +515,6 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
                           ),
                         ),
                       ),
-                      const Spacer(),
                       Text(_ticket.faultType, style: AppText.title),
                     ],
                   ),
@@ -671,7 +678,7 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             label,
@@ -679,9 +686,14 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
-          Text(
-            value,
-            style: AppText.caption.copyWith(fontWeight: FontWeight.w500),
+          const SizedBox(width: AppSpacing.lg),
+          // 长值（长设备型号等）右对齐折行而非溢出
+          Expanded(
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: AppText.caption.copyWith(fontWeight: FontWeight.w500),
+            ),
           ),
         ],
       ),
@@ -697,23 +709,25 @@ class _CachedTicketImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CachedNetworkImage(
-      imageUrl: imageUrl,
-      height: 180,
-      width: double.infinity,
-      fit: BoxFit.cover,
-      placeholder: (_, _) => Container(
-        height: 180,
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
-      ),
-      errorWidget: (_, _, _) => Container(
-        height: 180,
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        child: Center(
-          child: Icon(
-            Icons.broken_image_outlined,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
+    // 固定 180 高在宽屏（折叠屏展开/横屏）会被 cover 裁成极端横条，
+    // 改为 16:9 随宽度伸缩，窄屏观感与原高度接近
+    return AspectRatio(
+      aspectRatio: 16 / 9,
+      child: CachedNetworkImage(
+        imageUrl: imageUrl,
+        width: double.infinity,
+        fit: BoxFit.cover,
+        placeholder: (_, _) => Container(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+        ),
+        errorWidget: (_, _, _) => Container(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          child: Center(
+            child: Icon(
+              Icons.broken_image_outlined,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
         ),
       ),
