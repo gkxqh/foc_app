@@ -51,7 +51,9 @@ class _StepProgressState extends State<StepProgress>
   void _updateBreathing() {
     final finished = widget.currentStep >= widget.labels.length - 1;
     final shouldRepeat =
-        !finished && !widget.abnormalLast && !MediaQuery.disableAnimationsOf(context);
+        !finished &&
+        !widget.abnormalLast &&
+        !MediaQuery.disableAnimationsOf(context);
     if (shouldRepeat && !_breath.isAnimating) {
       _breath.repeat(reverse: true);
     } else if (!shouldRepeat && _breath.isAnimating) {
@@ -69,9 +71,7 @@ class _StepProgressState extends State<StepProgress>
 
   @override
   Widget build(BuildContext context) {
-    final weakColor = Theme.of(context)
-        .colorScheme
-        .onSurfaceVariant
+    final weakColor = Theme.of(context).colorScheme.onSurfaceVariant
         .withValues(alpha: 0.55);
 
     final children = <Widget>[];
@@ -184,10 +184,8 @@ class _StepDot extends StatelessWidget {
       dot = AnimatedBuilder(
         animation: breath,
         child: dot,
-        builder: (context, child) => Transform.scale(
-          scale: 1 + 0.12 * breath.value,
-          child: child,
-        ),
+        builder: (context, child) =>
+            Transform.scale(scale: 1 + 0.12 * breath.value, child: child),
       );
     }
     return dot;
@@ -208,9 +206,8 @@ class _StepDivider extends StatelessWidget {
       child: Stack(
         children: [
           Container(
-            color: Theme.of(
-              context,
-            ).colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
+            color: Theme.of(context).colorScheme.onSurfaceVariant
+                .withValues(alpha: 0.3),
           ),
           AnimatedAlign(
             duration: const Duration(milliseconds: 400),

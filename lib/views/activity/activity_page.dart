@@ -1,5 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+
+import '../common/responsive_center.dart';
+
 import 'package:provider/provider.dart';
 
 import '../../core/theme/app_theme.dart';
@@ -178,236 +181,244 @@ class _ActivityPageState extends State<ActivityPage> {
           ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: _fetchEvents,
-        // 与首页/历史工单统一：加载占位用骨架屏而非全屏转圈
-        child: _isLoading
-            ? const SkeletonList(
-                variant: SkeletonVariant.activity,
-                itemCount: 3,
-              )
-            : _loadError != null
-            ? ListView(
-                children: [
-                  const SizedBox(height: 80),
-                  EmptyState(
-                    icon: Icons.cloud_off_rounded,
-                    title: _loadError!,
-                    minHeight: 240,
-                    action: OutlinedButton.icon(
-                      onPressed: _fetchEvents,
-                      icon: const Icon(Icons.refresh_rounded),
-                      label: const Text('重新加载'),
+      body: ResponsiveCenter(
+        child: RefreshIndicator(
+          onRefresh: _fetchEvents,
+          // 与首页/历史工单统一：加载占位用骨架屏而非全屏转圈
+          child: _isLoading
+              ? const SkeletonList(
+                  variant: SkeletonVariant.activity,
+                  itemCount: 3,
+                )
+              : _loadError != null
+              ? ListView(
+                  children: [
+                    const SizedBox(height: 80),
+                    EmptyState(
+                      icon: Icons.cloud_off_rounded,
+                      title: _loadError!,
+                      minHeight: 240,
+                      action: OutlinedButton.icon(
+                        onPressed: _fetchEvents,
+                        icon: const Icon(Icons.refresh_rounded),
+                        label: const Text('重新加载'),
+                      ),
                     ),
-                  ),
-                ],
-              )
-            : _events.isEmpty
-            ? ListView(
-                children: [
-                  const SizedBox(height: 80),
-                  EmptyState(
-                    icon: Icons.event_busy_outlined,
-                    image: 'assets/illustrations/fy_q.png',
-                    title: '近期暂无正在进行的招新或技术活动',
-                    minHeight: 240,
-                    action: OutlinedButton.icon(
-                      onPressed: _fetchEvents,
-                      icon: const Icon(Icons.refresh_rounded),
-                      label: const Text('重新加载'),
+                  ],
+                )
+              : _events.isEmpty
+              ? ListView(
+                  children: [
+                    const SizedBox(height: 80),
+                    EmptyState(
+                      icon: Icons.event_busy_outlined,
+                      image: 'assets/illustrations/fy_q.png',
+                      title: '近期暂无正在进行的招新或技术活动',
+                      minHeight: 240,
+                      action: OutlinedButton.icon(
+                        onPressed: _fetchEvents,
+                        icon: const Icon(Icons.refresh_rounded),
+                        label: const Text('重新加载'),
+                      ),
                     ),
-                  ),
-                ],
-              )
-            : ListView.builder(
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                itemCount: _events.length,
-                itemBuilder: (ctx, i) {
-                  final event = _events[i];
-                  final isSignUp = event.status == 1; // 报名进行中
+                  ],
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  itemCount: _events.length,
+                  itemBuilder: (ctx, i) {
+                    final event = _events[i];
+                    final isSignUp = event.status == 1; // 报名进行中
 
-                  return StaggeredIn(
-                    index: i,
-                    child: Card(
-                      clipBehavior: Clip.antiAlias,
-                      margin: const EdgeInsets.only(bottom: AppSpacing.lg),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (event.poster != null && event.poster!.isNotEmpty)
-                            // 海报缓存到本地：回退重进不再重复下载。
-                            // 固定高在宽屏（折叠屏展开）会被 cover 裁成极端横条，
-                            // 改为 16:9 随卡片宽度伸缩
-                            AspectRatio(
-                              aspectRatio: 16 / 9,
-                              child: CachedNetworkImage(
-                                imageUrl: event.poster!,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
-                                placeholder: (context, url) => Container(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .surfaceContainerHighest,
-                                  child: const Center(
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  ),
-                                ),
-                                // 海报加载失败用主题化占位填满，避免残留空白
-                                errorWidget: (context, url, error) => Container(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .surfaceContainerHighest,
-                                  child: Icon(
-                                    Icons.image_not_supported_outlined,
-                                    size: 40,
+                    return StaggeredIn(
+                      index: i,
+                      child: Card(
+                        clipBehavior: Clip.antiAlias,
+                        margin: const EdgeInsets.only(bottom: AppSpacing.lg),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (event.poster != null &&
+                                event.poster!.isNotEmpty)
+                              // 海报缓存到本地：回退重进不再重复下载。
+                              // 固定高在宽屏（折叠屏展开）会被 cover 裁成极端横条，
+                              // 改为 16:9 随卡片宽度伸缩
+                              AspectRatio(
+                                aspectRatio: 16 / 9,
+                                child: CachedNetworkImage(
+                                  imageUrl: event.poster!,
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                  placeholder: (context, url) => Container(
                                     color: Theme.of(context)
                                         .colorScheme
-                                        .onSurfaceVariant,
+                                        .surfaceContainerHighest,
+                                    child: const Center(
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    ),
                                   ),
+                                  // 海报加载失败用主题化占位填满，避免残留空白
+                                  errorWidget: (context, url, error) =>
+                                      Container(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .surfaceContainerHighest,
+                                        child: Icon(
+                                          Icons.image_not_supported_outlined,
+                                          size: 40,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurfaceVariant,
+                                        ),
+                                      ),
                                 ),
                               ),
-                            ),
-                          Padding(
-                            padding: const EdgeInsets.all(AppSpacing.lg),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    if (event.type != null &&
-                                        event.type!.isNotEmpty) ...[
+                            Padding(
+                              padding: const EdgeInsets.all(AppSpacing.lg),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      if (event.type != null &&
+                                          event.type!.isNotEmpty) ...[
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 6,
+                                            vertical: 2,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: AppTheme.primaryBlue
+                                                .withValues(alpha: 0.1),
+                                            borderRadius: BorderRadius.circular(
+                                              AppRadius.badge,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            event.type!,
+                                            style: AppText.micro.copyWith(
+                                              color: AppTheme.primaryBlue,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: AppSpacing.sm),
+                                      ],
+                                      Expanded(
+                                        child: Text(
+                                          event.title,
+                                          style: AppText.titleLg,
+                                        ),
+                                      ),
                                       Container(
                                         padding: const EdgeInsets.symmetric(
-                                          horizontal: 6,
-                                          vertical: 2,
+                                          horizontal: AppSpacing.sm,
+                                          vertical: AppSpacing.xs,
                                         ),
                                         decoration: BoxDecoration(
-                                          color: AppTheme.primaryBlue
-                                              .withValues(alpha: 0.1),
+                                          color: isSignUp
+                                              ? AppTheme.accentColor.withValues(
+                                                  alpha: 0.15,
+                                                )
+                                              : Theme.of(context)
+                                                    .colorScheme
+                                                    .onSurfaceVariant
+                                                    .withValues(alpha: 0.12),
                                           borderRadius: BorderRadius.circular(
-                                            AppRadius.badge,
+                                            6,
                                           ),
                                         ),
                                         child: Text(
-                                          event.type!,
-                                          style: AppText.micro.copyWith(
-                                            color: AppTheme.primaryBlue,
+                                          event.statusText,
+                                          style: AppText.captionSm.copyWith(
+                                            color: isSignUp
+                                                ? AppTheme.accentColor
+                                                : Theme.of(context)
+                                                      .colorScheme
+                                                      .onSurfaceVariant,
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
                                       ),
-                                      const SizedBox(width: AppSpacing.sm),
                                     ],
-                                    Expanded(
-                                      child: Text(
-                                        event.title,
-                                        style: AppText.titleLg,
-                                      ),
-                                    ),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: AppSpacing.sm,
-                                        vertical: AppSpacing.xs,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: isSignUp
-                                            ? AppTheme.accentColor.withValues(
-                                                alpha: 0.15,
-                                              )
-                                            : Theme.of(context)
-                                                  .colorScheme
-                                                  .onSurfaceVariant
-                                                  .withValues(alpha: 0.12),
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      child: Text(
-                                        event.statusText,
-                                        style: AppText.captionSm.copyWith(
-                                          color: isSignUp
-                                              ? AppTheme.accentColor
-                                              : Theme.of(context)
-                                                    .colorScheme
-                                                    .onSurfaceVariant,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: AppSpacing.sm),
-                                Text(
-                                  event.description,
-                                  style: AppText.caption.copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurfaceVariant,
-                                    height: 1.4,
                                   ),
-                                ),
-                                const SizedBox(height: AppSpacing.md),
-                                if (event.signupStartTime.isNotEmpty)
+                                  const SizedBox(height: AppSpacing.sm),
                                   Text(
-                                    '报名时间：${event.signupStartTime} ~ ${event.signupEndTime}',
-                                    style: AppText.micro.copyWith(
+                                    event.description,
+                                    style: AppText.caption.copyWith(
                                       color: Theme.of(context)
                                           .colorScheme
                                           .onSurfaceVariant,
+                                      height: 1.4,
                                     ),
                                   ),
-                                const SizedBox(height: AppSpacing.lg),
-                                Align(
-                                  alignment: Alignment.centerRight,
-                                  child: Wrap(
-                                    alignment: WrapAlignment.end,
-                                    spacing: 8,
-                                    runSpacing: 8,
-                                    children: [
-                                      if (event.isLucky)
-                                        OutlinedButton.icon(
-                                          onPressed: () =>
-                                              _checkLuckyNumber(event),
-                                          icon: const Icon(
-                                            Icons.confirmation_number_outlined,
-                                            size: 16,
-                                          ),
-                                          label: const Text('我的抽奖号'),
-                                        ),
-                                      ElevatedButton(
-                                        onPressed:
-                                            (isSignUp &&
-                                                !event.registered &&
-                                                _registeringEventId != event.id)
-                                            ? () => _showSignUpDialog(event)
-                                            : null,
-                                        child: _registeringEventId == event.id
-                                            ? const SizedBox(
-                                                width: 16,
-                                                height: 16,
-                                                child:
-                                                    CircularProgressIndicator(
-                                                      strokeWidth: 2,
-                                                    ),
-                                              )
-                                            : Text(
-                                                event.registered
-                                                    ? '已报名'
-                                                    : '立即报名',
-                                              ),
+                                  const SizedBox(height: AppSpacing.md),
+                                  if (event.signupStartTime.isNotEmpty)
+                                    Text(
+                                      '报名时间：${event.signupStartTime} ~ ${event.signupEndTime}',
+                                      style: AppText.micro.copyWith(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurfaceVariant,
                                       ),
-                                    ],
+                                    ),
+                                  const SizedBox(height: AppSpacing.lg),
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: Wrap(
+                                      alignment: WrapAlignment.end,
+                                      spacing: 8,
+                                      runSpacing: 8,
+                                      children: [
+                                        if (event.isLucky)
+                                          OutlinedButton.icon(
+                                            onPressed: () =>
+                                                _checkLuckyNumber(event),
+                                            icon: const Icon(
+                                              Icons
+                                                  .confirmation_number_outlined,
+                                              size: 16,
+                                            ),
+                                            label: const Text('我的抽奖号'),
+                                          ),
+                                        ElevatedButton(
+                                          onPressed:
+                                              (isSignUp &&
+                                                  !event.registered &&
+                                                  _registeringEventId !=
+                                                      event.id)
+                                              ? () => _showSignUpDialog(event)
+                                              : null,
+                                          child: _registeringEventId == event.id
+                                              ? const SizedBox(
+                                                  width: 16,
+                                                  height: 16,
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                        strokeWidth: 2,
+                                                      ),
+                                                )
+                                              : Text(
+                                                  event.registered
+                                                      ? '已报名'
+                                                      : '立即报名',
+                                                ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  );
-                },
-              ),
+                    );
+                  },
+                ),
+        ),
       ),
     );
   }

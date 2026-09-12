@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../common/responsive_center.dart';
+
 import '../../core/theme/app_theme.dart';
 import '../../models/tech_stats_model.dart';
 import '../../services/config_service.dart';
@@ -76,88 +78,92 @@ class _AnnualSummaryPageState extends State<AnnualSummaryPage> {
                 ),
               ),
             )
-          : SingleChildScrollView(
-              padding: pageListPadding(context, horizontal: 20, top: 20),
-              child: Column(
-                children: [
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                      vertical: AppSpacing.xxxl,
-                      horizontal: AppSpacing.xl,
-                    ),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+          : ResponsiveCenter(
+              child: SingleChildScrollView(
+                padding: pageListPadding(context, horizontal: 20, top: 20),
+                child: Column(
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: AppSpacing.xxxl,
+                        horizontal: AppSpacing.xl,
                       ),
-                      borderRadius: BorderRadius.circular(AppRadius.modal),
-                      boxShadow: AppShadow.glow(AppTheme.primaryBlue),
-                    ),
-                    child: Column(
-                      children: [
-                        Text(
-                          '年度维修总台数',
-                          style: AppText.body.copyWith(color: Colors.white70),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
-                        const SizedBox(height: AppSpacing.sm),
-                        CountUpText(
-                          _summary?.totalOrders ?? '0',
-                          style: AppText.displayNumber.copyWith(
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.sm),
-                        Text(
-                          '感谢你为川大师生排忧解难！',
-                          style: AppText.caption.copyWith(color: Colors.white),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.xl),
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(AppSpacing.lg),
+                        borderRadius: BorderRadius.circular(AppRadius.modal),
+                        boxShadow: AppShadow.glow(AppTheme.primaryBlue),
+                      ),
                       child: Column(
                         children: [
-                          _buildStatTile(
-                            icon: Icons.access_time_rounded,
-                            title: '初次接单时间',
-                            value: _summary?.firstTime.isEmpty ?? true
-                                ? '暂无记录'
-                                : _summary!.firstTime,
+                          Text(
+                            '年度维修总台数',
+                            style: AppText.body.copyWith(color: Colors.white70),
                           ),
-                          const Divider(),
-                          _buildStatTile(
-                            icon: Icons.history_toggle_off_rounded,
-                            title: '最近接单时间',
-                            value: _summary?.lastTime.isEmpty ?? true
-                                ? '暂无记录'
-                                : _summary!.lastTime,
+                          const SizedBox(height: AppSpacing.sm),
+                          CountUpText(
+                            _summary?.totalOrders ?? '0',
+                            style: AppText.displayNumber.copyWith(
+                              color: Colors.white,
+                            ),
                           ),
-                          const Divider(),
-                          _buildStatTile(
-                            icon: Icons.timer_outlined,
-                            title: '累计维修总时长',
-                            value: _summary?.totalTime.isEmpty ?? true
-                                ? '暂无记录'
-                                : _summary!.totalTime,
-                          ),
-                          const Divider(),
-                          _buildStatTile(
-                            icon: Icons.bolt_rounded,
-                            title: '最短单台耗时',
-                            value: _summary?.shortestTime.isEmpty ?? true
-                                ? '暂无记录'
-                                : _summary!.shortestTime,
+                          const SizedBox(height: AppSpacing.sm),
+                          Text(
+                            '感谢你为川大师生排忧解难！',
+                            style: AppText.caption.copyWith(
+                              color: Colors.white,
+                            ),
                           ),
                         ],
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: AppSpacing.xl),
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(AppSpacing.lg),
+                        child: Column(
+                          children: [
+                            _buildStatTile(
+                              icon: Icons.access_time_rounded,
+                              title: '初次接单时间',
+                              value: _summary?.firstTime.isEmpty ?? true
+                                  ? '暂无记录'
+                                  : _summary!.firstTime,
+                            ),
+                            const Divider(),
+                            _buildStatTile(
+                              icon: Icons.history_toggle_off_rounded,
+                              title: '最近接单时间',
+                              value: _summary?.lastTime.isEmpty ?? true
+                                  ? '暂无记录'
+                                  : _summary!.lastTime,
+                            ),
+                            const Divider(),
+                            _buildStatTile(
+                              icon: Icons.timer_outlined,
+                              title: '累计维修总时长',
+                              value: _summary?.totalTime.isEmpty ?? true
+                                  ? '暂无记录'
+                                  : _summary!.totalTime,
+                            ),
+                            const Divider(),
+                            _buildStatTile(
+                              icon: Icons.bolt_rounded,
+                              title: '最短单台耗时',
+                              value: _summary?.shortestTime.isEmpty ?? true
+                                  ? '暂无记录'
+                                  : _summary!.shortestTime,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
     );

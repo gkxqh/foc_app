@@ -1,5 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+
+import '../common/responsive_center.dart';
+
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -229,255 +232,261 @@ class _SettingsPageState extends State<SettingsPage> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('个人设置')),
-      body: ListView(
-        padding: pageListPadding(context),
-        children: [
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Column(
-                children: [
-                  GestureDetector(
-                    onTap: _isUploadingAvatar ? null : _pickAvatar,
-                    child: Stack(
-                      children: [
-                        CircleAvatar(
-                          radius: 40,
-                          // 底色随主题翻转，深色模式下不再是刺眼亮灰圆盘
-                          backgroundColor: Theme.of(context)
-                              .colorScheme
-                              .surfaceContainerHighest,
-                          // 无头像时显示本地图标兜底，不向第三方图床发起请求
-                          backgroundImage: _avatarUrl.isNotEmpty
-                              ? CachedNetworkImageProvider(_avatarUrl)
-                              : null,
-                          child: _avatarUrl.isNotEmpty
-                              ? null
-                              : Icon(
-                                  Icons.person_rounded,
-                                  size: 44,
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSurfaceVariant,
-                                ),
-                        ),
-                        Positioned(
-                          bottom: 0,
-                          right: 0,
-                          child: CircleAvatar(
-                            radius: 12,
-                            backgroundColor: AppTheme.primaryBlue,
-                            child: _isUploadingAvatar
-                                ? const SizedBox(
-                                    width: 12,
-                                    height: 12,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                : const Icon(
-                                    Icons.camera_alt,
-                                    size: 14,
-                                    color: Colors.white,
-                                  ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    '点击更换头像',
-                    style: AppText.captionSm.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  TextField(
-                    controller: _nicknameController,
-                    decoration: const InputDecoration(labelText: '用户昵称'),
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  DropdownButtonFormField<String>(
-                    initialValue: _campus,
-                    decoration: const InputDecoration(labelText: '所在校区'),
-                    items: ApiConstants.campuses
-                        .map((c) => DropdownMenuItem(value: c, child: Text(c)))
-                        .toList(),
-                    onChanged: (v) => setState(() => _campus = v!),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          if (isTech) ...[
-            const SizedBox(height: AppSpacing.lg),
+      body: ResponsiveCenter(
+        child: ListView(
+          padding: pageListPadding(context),
+          children: [
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(AppSpacing.lg),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('技术员接单意愿与设置', style: AppText.title),
-                    const SizedBox(height: AppSpacing.lg),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text('接单意向：'),
-                        Text(
-                          _wantsLabels[_wantsLetters[_wantsSliderValue
-                                  .round()]] ??
-                              '',
-                          style: AppText.titleSm.copyWith(
-                            color: AppTheme.primaryBlue,
+                    GestureDetector(
+                      onTap: _isUploadingAvatar ? null : _pickAvatar,
+                      child: Stack(
+                        children: [
+                          CircleAvatar(
+                            radius: 40,
+                            // 底色随主题翻转，深色模式下不再是刺眼亮灰圆盘
+                            backgroundColor: Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerHighest,
+                            // 无头像时显示本地图标兜底，不向第三方图床发起请求
+                            backgroundImage: _avatarUrl.isNotEmpty
+                                ? CachedNetworkImageProvider(_avatarUrl)
+                                : null,
+                            child: _avatarUrl.isNotEmpty
+                                ? null
+                                : Icon(
+                                    Icons.person_rounded,
+                                    size: 44,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
                           ),
-                        ),
-                      ],
-                    ),
-                    Slider(
-                      value: _wantsSliderValue,
-                      min: 0,
-                      max: 4,
-                      divisions: 4,
-                      onChanged: (v) => setState(() => _wantsSliderValue = v),
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text('同时接单上限：'),
-                        Text(
-                          '$_maxConcurrent 单',
-                          style: AppText.titleSm.copyWith(
-                            color: AppTheme.primaryBlue,
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: CircleAvatar(
+                              radius: 12,
+                              backgroundColor: AppTheme.primaryBlue,
+                              child: _isUploadingAvatar
+                                  ? const SizedBox(
+                                      width: 12,
+                                      height: 12,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : const Icon(
+                                      Icons.camera_alt,
+                                      size: 14,
+                                      color: Colors.white,
+                                    ),
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                    Slider(
-                      value: _maxConcurrent.toDouble(),
-                      min: 1,
-                      max: 10,
-                      divisions: 9,
-                      label: '$_maxConcurrent',
-                      onChanged: (v) =>
-                          setState(() => _maxConcurrent = v.round()),
-                    ),
+                    const SizedBox(height: AppSpacing.sm),
                     Text(
-                      '同时维修中的工单达到上限后，系统将暂停自动派新单给您',
+                      '点击更换头像',
                       style: AppText.captionSm.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
-                    SwitchListTile(
-                      title: const Text('多校区接单意愿'),
-                      subtitle: const Text('开启后将支持接收来自其他校区同学的设备报修工单'),
-                      value: _canDuo,
-                      onChanged: (v) => setState(() => _canDuo = v),
-                      contentPadding: EdgeInsets.zero,
+                    const SizedBox(height: AppSpacing.lg),
+                    TextField(
+                      controller: _nicknameController,
+                      decoration: const InputDecoration(labelText: '用户昵称'),
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    DropdownButtonFormField<String>(
+                      initialValue: _campus,
+                      decoration: const InputDecoration(labelText: '所在校区'),
+                      items: ApiConstants.campuses
+                          .map(
+                            (c) => DropdownMenuItem(value: c, child: Text(c)),
+                          )
+                          .toList(),
+                      onChanged: (v) => setState(() => _campus = v!),
                     ),
                   ],
                 ),
               ),
             ),
+            if (isTech) ...[
+              const SizedBox(height: AppSpacing.lg),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('技术员接单意愿与设置', style: AppText.title),
+                      const SizedBox(height: AppSpacing.lg),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('接单意向：'),
+                          Text(
+                            _wantsLabels[_wantsLetters[_wantsSliderValue
+                                    .round()]] ??
+                                '',
+                            style: AppText.titleSm.copyWith(
+                              color: AppTheme.primaryBlue,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Slider(
+                        value: _wantsSliderValue,
+                        min: 0,
+                        max: 4,
+                        divisions: 4,
+                        onChanged: (v) => setState(() => _wantsSliderValue = v),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('同时接单上限：'),
+                          Text(
+                            '$_maxConcurrent 单',
+                            style: AppText.titleSm.copyWith(
+                              color: AppTheme.primaryBlue,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Slider(
+                        value: _maxConcurrent.toDouble(),
+                        min: 1,
+                        max: 10,
+                        divisions: 9,
+                        label: '$_maxConcurrent',
+                        onChanged: (v) =>
+                            setState(() => _maxConcurrent = v.round()),
+                      ),
+                      Text(
+                        '同时维修中的工单达到上限后，系统将暂停自动派新单给您',
+                        style: AppText.captionSm.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      SwitchListTile(
+                        title: const Text('多校区接单意愿'),
+                        subtitle: const Text('开启后将支持接收来自其他校区同学的设备报修工单'),
+                        value: _canDuo,
+                        onChanged: (v) => setState(() => _canDuo = v),
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+            const SizedBox(height: AppSpacing.lg),
+            Card(
+              child: Column(
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.email_outlined),
+                    title: const Text('接收进度通知邮箱'),
+                    subtitle: Text(
+                      auth.user?.email.isNotEmpty == true
+                          ? auth.user!.email
+                          : '未绑定',
+                    ),
+                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                    onTap: _changeEmail,
+                  ),
+                  const Divider(height: 1),
+                  ListTile(
+                    leading: const Icon(Icons.phone_android_outlined),
+                    title: const Text('更换手机号'),
+                    subtitle: Text(
+                      auth.user?.phone.isNotEmpty == true
+                          ? auth.user!.phone
+                          : '未绑定',
+                    ),
+                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                    onTap: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const NewPhonePage()),
+                      );
+                      if (mounted) _syncFromRemote();
+                    },
+                  ),
+                  const Divider(height: 1),
+                  ListTile(
+                    leading: const Icon(Icons.support_agent_outlined),
+                    title: const Text('联系客服'),
+                    subtitle: Text(
+                      isTech ? '请在技术员群中联系群主或管理员' : '请在会员群中联系群主或管理员',
+                    ),
+                    onTap: () {
+                      Clipboard.setData(
+                        const ClipboardData(text: ApiConstants.supportPhone),
+                      );
+                      HapticFeedback.selectionClick();
+                      showAppSnackBar(
+                        context,
+                        '客服电话 ${ApiConstants.supportPhone} 已复制',
+                        type: SnackBarType.error,
+                      );
+                    },
+                  ),
+                  const Divider(height: 1),
+                  ListTile(
+                    leading: const Icon(
+                      Icons.delete_forever_outlined,
+                      color: AppTheme.errorRed,
+                    ),
+                    title: const Text(
+                      '注销云上飞扬账号',
+                      style: TextStyle(color: AppTheme.errorRed),
+                    ),
+                    onTap: _deleteAccount,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xxl),
+            ElevatedButton(
+              onPressed: _isSaving ? null : _saveSettings,
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+              ),
+              child: _isSaving
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text('保存修改'),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            OutlinedButton(
+              onPressed: () async {
+                await auth.logout();
+                if (context.mounted) {
+                  Navigator.pop(context);
+                  showAppSnackBar(context, '已退出登录', type: SnackBarType.error);
+                }
+              },
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppTheme.errorRed,
+                side: const BorderSide(color: AppTheme.errorRed),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+              ),
+              child: const Text('退出当前账号'),
+            ),
+            const SizedBox(height: 32),
           ],
-          const SizedBox(height: AppSpacing.lg),
-          Card(
-            child: Column(
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.email_outlined),
-                  title: const Text('接收进度通知邮箱'),
-                  subtitle: Text(
-                    auth.user?.email.isNotEmpty == true
-                        ? auth.user!.email
-                        : '未绑定',
-                  ),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: _changeEmail,
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.phone_android_outlined),
-                  title: const Text('更换手机号'),
-                  subtitle: Text(
-                    auth.user?.phone.isNotEmpty == true
-                        ? auth.user!.phone
-                        : '未绑定',
-                  ),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: () async {
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const NewPhonePage()),
-                    );
-                    if (mounted) _syncFromRemote();
-                  },
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.support_agent_outlined),
-                  title: const Text('联系客服'),
-                  subtitle: Text(isTech ? '请在技术员群中联系群主或管理员' : '请在会员群中联系群主或管理员'),
-                  onTap: () {
-                    Clipboard.setData(
-                      const ClipboardData(text: ApiConstants.supportPhone),
-                    );
-                    HapticFeedback.selectionClick();
-                    showAppSnackBar(
-                      context,
-                      '客服电话 ${ApiConstants.supportPhone} 已复制',
-                      type: SnackBarType.error,
-                    );
-                  },
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(
-                    Icons.delete_forever_outlined,
-                    color: AppTheme.errorRed,
-                  ),
-                  title: const Text(
-                    '注销云上飞扬账号',
-                    style: TextStyle(color: AppTheme.errorRed),
-                  ),
-                  onTap: _deleteAccount,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xxl),
-          ElevatedButton(
-            onPressed: _isSaving ? null : _saveSettings,
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 14),
-            ),
-            child: _isSaving
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Text('保存修改'),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          OutlinedButton(
-            onPressed: () async {
-              await auth.logout();
-              if (context.mounted) {
-                Navigator.pop(context);
-                showAppSnackBar(context, '已退出登录', type: SnackBarType.error);
-              }
-            },
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppTheme.errorRed,
-              side: const BorderSide(color: AppTheme.errorRed),
-              padding: const EdgeInsets.symmetric(vertical: 14),
-            ),
-            child: const Text('退出当前账号'),
-          ),
-          const SizedBox(height: 32),
-        ],
+        ),
       ),
     );
   }

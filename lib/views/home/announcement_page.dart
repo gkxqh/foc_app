@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../common/responsive_center.dart';
+
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 
 import '../../core/theme/app_theme.dart';
@@ -15,27 +18,30 @@ class AnnouncementPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('公告与服务须知')),
-      body: SingleChildScrollView(
-        padding: pageListPadding(context),
-        child: Markdown(
-          data: body,
-          selectable: true,
-          // 外层 SingleChildScrollView 提供滚动；Markdown 若再渲染为视口，
-          // 会因无限高度约束直接布局崩溃（页面空白），必须渲染为 Column
-          noScroll: true,
-          // 横向留白交给页面级 pageListPadding，Markdown 自身归零避免叠加
-          padding: EdgeInsets.zero,
-          styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
-            p: AppText.body.copyWith(
-              height: 1.6,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-            listBullet: AppText.body.copyWith(
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-            h1: AppText.title,
-            h2: AppText.title,
-            h3: AppText.titleSm,
+      body: ResponsiveCenter(
+        child: SingleChildScrollView(
+          padding: pageListPadding(context),
+          child: Markdown(
+            data: body,
+            selectable: true,
+            // 外层 SingleChildScrollView 提供滚动；Markdown 若再渲染为视口，
+            // 会因无限高度约束直接布局崩溃（页面空白），必须渲染为 Column
+            noScroll: true,
+            // 横向留白交给页面级 pageListPadding，Markdown 自身归零避免叠加
+            padding: EdgeInsets.zero,
+            styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context))
+                .copyWith(
+                  p: AppText.body.copyWith(
+                    height: 1.6,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                  listBullet: AppText.body.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                  h1: AppText.title,
+                  h2: AppText.title,
+                  h3: AppText.titleSm,
+                ),
           ),
         ),
       ),

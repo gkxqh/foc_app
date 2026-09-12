@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../common/responsive_center.dart';
+
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -78,100 +81,104 @@ class _GiveOrderPageState extends State<GiveOrderPage> {
 
     return Scaffold(
       appBar: AppBar(title: Text(isShowingShare ? '转单凭证' : '手动接单')),
-      body: SingleChildScrollView(
-        padding: pageListPadding(context, horizontal: 24, top: 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (isShowingShare) ...[
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.xxl),
-                  child: Column(
-                    children: [
-                      Text(
-                        '请其他技术员扫码或输入转单码接单',
-                        style: AppText.body.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+      body: ResponsiveCenter(
+        child: SingleChildScrollView(
+          padding: pageListPadding(context, horizontal: 24, top: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (isShowingShare) ...[
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppSpacing.xxl),
+                    child: Column(
+                      children: [
+                        Text(
+                          '请其他技术员扫码或输入转单码接单',
+                          style: AppText.body.copyWith(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurfaceVariant,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: AppSpacing.xl),
-                      QrImageView(
-                        data: widget.transcodeToShare!,
-                        version: QrVersions.auto,
-                        size: 200.0,
-                        eyeStyle: QrEyeStyle(
-                          eyeShape: QrEyeShape.square,
-                          color: qrEyeColor,
+                        const SizedBox(height: AppSpacing.xl),
+                        QrImageView(
+                          data: widget.transcodeToShare!,
+                          version: QrVersions.auto,
+                          size: 200.0,
+                          eyeStyle: QrEyeStyle(
+                            eyeShape: QrEyeShape.square,
+                            color: qrEyeColor,
+                          ),
+                          dataModuleStyle: QrDataModuleStyle(
+                            dataModuleShape: QrDataModuleShape.square,
+                            color: qrColor,
+                          ),
                         ),
-                        dataModuleStyle: QrDataModuleStyle(
-                          dataModuleShape: QrDataModuleShape.square,
-                          color: qrColor,
+                        const SizedBox(height: AppSpacing.xl),
+                        SelectableText(
+                          '转单码：${widget.transcodeToShare}',
+                          style: AppText.bodyLg.copyWith(
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.2,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: AppSpacing.xl),
-                      SelectableText(
-                        '转单码：${widget.transcodeToShare}',
-                        style: AppText.bodyLg.copyWith(
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.2,
+                        const SizedBox(height: AppSpacing.xl),
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            Clipboard.setData(
+                              ClipboardData(text: widget.transcodeToShare!),
+                            );
+                            HapticFeedback.selectionClick();
+                            showAppSnackBar(
+                              context,
+                              '转单码已复制到剪贴板',
+                              type: SnackBarType.error,
+                            );
+                          },
+                          icon: const Icon(Icons.copy_rounded, size: 18),
+                          label: const Text('复制转单码'),
                         ),
-                      ),
-                      const SizedBox(height: AppSpacing.xl),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          Clipboard.setData(
-                            ClipboardData(text: widget.transcodeToShare!),
-                          );
-                          HapticFeedback.selectionClick();
-                          showAppSnackBar(
-                            context,
-                            '转单码已复制到剪贴板',
-                            type: SnackBarType.error,
-                          );
-                        },
-                        icon: const Icon(Icons.copy_rounded, size: 18),
-                        label: const Text('复制转单码'),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ] else ...[
-              Text('技术员接单', style: AppText.title),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                '如需接收其他技术员转让的工单，请在下方粘贴或输入转单码：',
-                style: AppText.caption.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ] else ...[
+                Text('技术员接单', style: AppText.title),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  '如需接收其他技术员转让的工单，请在下方粘贴或输入转单码：',
+                  style: AppText.caption.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              TextField(
-                controller: _codeController,
-                decoration: const InputDecoration(
-                  labelText: '转单码',
-                  hintText: '单号',
-                  prefixIcon: Icon(Icons.qr_code_2_rounded),
+                const SizedBox(height: AppSpacing.lg),
+                TextField(
+                  controller: _codeController,
+                  decoration: const InputDecoration(
+                    labelText: '转单码',
+                    hintText: '单号',
+                    prefixIcon: Icon(Icons.qr_code_2_rounded),
+                  ),
                 ),
-              ),
-              const SizedBox(height: AppSpacing.xxl),
-              ElevatedButton.icon(
-                onPressed: _isSubmitting ? null : _submitTransfer,
-                icon: _isSubmitting
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.handyman_rounded),
-                label: const Text('确认接单'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
+                const SizedBox(height: AppSpacing.xxl),
+                ElevatedButton.icon(
+                  onPressed: _isSubmitting ? null : _submitTransfer,
+                  icon: _isSubmitting
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.handyman_rounded),
+                  label: const Text('确认接单'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
                 ),
-              ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

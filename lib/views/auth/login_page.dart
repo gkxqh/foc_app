@@ -1,5 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+
+import '../common/responsive_center.dart';
+
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -190,259 +193,266 @@ class _LoginPageState extends State<LoginPage> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('手机验证码登录')),
-      body: SingleChildScrollView(
-        padding: pageListPadding(context, horizontal: 24, top: 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const SizedBox(height: 10),
-            Center(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(AppRadius.pill),
-                child: Image.asset(
-                  'assets/icon/icon.png',
-                  width: 88,
-                  height: 88,
-                  fit: BoxFit.contain,
+      body: ResponsiveCenter(
+        child: SingleChildScrollView(
+          padding: pageListPadding(context, horizontal: 24, top: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SizedBox(height: 10),
+              Center(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(AppRadius.pill),
+                  child: Image.asset(
+                    'assets/icon/icon.png',
+                    width: 88,
+                    height: 88,
+                    fit: BoxFit.contain,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Center(
-              child: Text(
-                '云上飞扬',
-                style: AppText.titleApp.copyWith(color: AppTheme.primaryBlue),
-              ),
-            ),
-            Center(
-              child: Text(
-                '四川大学飞扬俱乐部设备报修一体化平台',
-                style: AppText.caption.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+              const SizedBox(height: AppSpacing.md),
+              Center(
+                child: Text(
+                  '云上飞扬',
+                  style: AppText.titleApp.copyWith(color: AppTheme.primaryBlue),
                 ),
               ),
-            ),
-            const SizedBox(height: 28),
-            // 已保存账号（QQ 式快速切换）：点击直接进入，可单独删除
-            if (_savedAccounts.isNotEmpty) ...[
-              ..._savedAccounts.map((account) {
-                final isSwitching = _switchingPhone == account.phone;
-                return Card(
-                  margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-                  child: ListTile(
-                    onTap: isSwitching ? null : () => _switchToAccount(account),
-                    leading: CircleAvatar(
-                      backgroundColor: AppTheme.primaryBlue.withValues(
-                        alpha: 0.12,
-                      ),
-                      backgroundImage: account.avatarUrl.isNotEmpty
-                          ? CachedNetworkImageProvider(account.avatarUrl)
-                          : null,
-                      child: account.avatarUrl.isNotEmpty
+              Center(
+                child: Text(
+                  '四川大学飞扬俱乐部设备报修一体化平台',
+                  style: AppText.caption.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 28),
+              // 已保存账号（QQ 式快速切换）：点击直接进入，可单独删除
+              if (_savedAccounts.isNotEmpty) ...[
+                ..._savedAccounts.map((account) {
+                  final isSwitching = _switchingPhone == account.phone;
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+                    child: ListTile(
+                      onTap: isSwitching
                           ? null
-                          : Text(
-                              account.nickname.isNotEmpty
-                                  ? account.nickname.characters.first
-                                  : account.maskedPhone.substring(0, 1),
-                              style: const TextStyle(
-                                color: AppTheme.primaryBlue,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                    ),
-                    title: Text(
-                      account.nickname.isNotEmpty
-                          ? account.nickname
-                          : account.maskedPhone,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppText.titleSm.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    subtitle: Row(
-                      children: [
-                        Text(
-                          account.maskedPhone,
-                          style: AppText.captionSm.copyWith(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurfaceVariant,
-                          ),
+                          : () => _switchToAccount(account),
+                      leading: CircleAvatar(
+                        backgroundColor: AppTheme.primaryBlue.withValues(
+                          alpha: 0.12,
                         ),
-                        if (account.role == 'technician') ...[
-                          const SizedBox(width: 6),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 5,
-                              vertical: 1,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppTheme.accentColor.withValues(
-                                alpha: 0.15,
+                        backgroundImage: account.avatarUrl.isNotEmpty
+                            ? CachedNetworkImageProvider(account.avatarUrl)
+                            : null,
+                        child: account.avatarUrl.isNotEmpty
+                            ? null
+                            : Text(
+                                account.nickname.isNotEmpty
+                                    ? account.nickname.characters.first
+                                    : account.maskedPhone.substring(0, 1),
+                                style: const TextStyle(
+                                  color: AppTheme.primaryBlue,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                              borderRadius: BorderRadius.circular(
-                                AppRadius.badge,
-                              ),
-                            ),
-                            child: Text(
-                              '技术员',
-                              style: AppText.tag.copyWith(
-                                color: AppTheme.accentColor,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                    trailing: _switchingPhone != null
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : IconButton(
-                            icon: Icon(
-                              Icons.delete_outline_rounded,
-                              size: 20,
+                      ),
+                      title: Text(
+                        account.nickname.isNotEmpty
+                            ? account.nickname
+                            : account.maskedPhone,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppText.titleSm.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      subtitle: Row(
+                        children: [
+                          Text(
+                            account.maskedPhone,
+                            style: AppText.captionSm.copyWith(
                               color: Theme.of(context)
                                   .colorScheme
                                   .onSurfaceVariant,
                             ),
-                            tooltip: '删除此账号',
-                            onPressed: () => _removeAccount(account),
                           ),
-                  ),
-                );
-              }),
+                          if (account.role == 'technician') ...[
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 5,
+                                vertical: 1,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppTheme.accentColor.withValues(
+                                  alpha: 0.15,
+                                ),
+                                borderRadius: BorderRadius.circular(
+                                  AppRadius.badge,
+                                ),
+                              ),
+                              child: Text(
+                                '技术员',
+                                style: AppText.tag.copyWith(
+                                  color: AppTheme.accentColor,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      trailing: _switchingPhone != null
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : IconButton(
+                              icon: Icon(
+                                Icons.delete_outline_rounded,
+                                size: 20,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
+                              ),
+                              tooltip: '删除此账号',
+                              onPressed: () => _removeAccount(account),
+                            ),
+                    ),
+                  );
+                }),
+                Row(
+                  children: [
+                    const Expanded(child: Divider()),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                      ),
+                      child: Text(
+                        '或使用其他手机号登录',
+                        style: AppText.captionSm.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                    const Expanded(child: Divider()),
+                  ],
+                ),
+                const SizedBox(height: 16),
+              ],
+              TextField(
+                controller: _phoneController,
+                keyboardType: TextInputType.phone,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(11),
+                ],
+                decoration: InputDecoration(
+                  labelText: '手机号码',
+                  hintText: '请输入手机号',
+                  prefixIcon: const Icon(Icons.phone_android_rounded),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.lg),
               Row(
                 children: [
-                  const Expanded(child: Divider()),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.md,
+                  Expanded(
+                    child: TextField(
+                      controller: _codeController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: '短信验证码',
+                        hintText: '',
+                        prefixIcon: const Icon(Icons.lock_clock_outlined),
+                        // 短信验证码常需跨应用取：一键粘贴并校验 4-6 位数字
+                        suffixIcon: IconButton(
+                          icon: const Icon(
+                            Icons.content_paste_rounded,
+                            size: 18,
+                          ),
+                          tooltip: '粘贴验证码',
+                          onPressed: () async {
+                            final messenger = ScaffoldMessenger.of(context);
+                            final data = await Clipboard.getData('text/plain');
+                            final code = data?.text?.trim() ?? '';
+                            if (RegExp(r'^\d{4,6}$').hasMatch(code)) {
+                              _codeController.text = code;
+                            } else {
+                              showAppSnackBarOn(
+                                messenger,
+                                '剪贴板中没有可用的验证码',
+                                type: SnackBarType.warning,
+                              );
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  // 不固定 56 高：验证码输入框随文字缩放变高时按钮同步对齐
+                  OutlinedButton(
+                    onPressed: auth.isCountingDown ? null : _sendCode,
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(64, 56),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 16,
+                      ),
                     ),
                     child: Text(
-                      '或使用其他手机号登录',
-                      style: AppText.captionSm.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                      auth.isCountingDown ? '${auth.countdown}s' : '发送',
+                      style: AppText.captionSm,
                     ),
                   ),
-                  const Expanded(child: Divider()),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.xxl),
+              ElevatedButton(
+                onPressed: auth.isLoading ? null : _login,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                child: auth.isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Text('验证码登录', style: AppText.bodyLg),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              // 「记住登录」：开启时备份 30 天 token，退出登录后重开 App 免验证码
+              CheckboxListTile(
+                value: _rememberLogin,
+                onChanged: (v) async {
+                  setState(() => _rememberLogin = v ?? true);
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setBool('remember_enabled', _rememberLogin);
+                },
+                title: const Text('记住此设备', style: AppText.body),
+                subtitle: const Text(
+                  '30 天内在本机重新打开无需验证码',
+                  style: AppText.captionSm,
+                ),
+                contentPadding: EdgeInsets.zero,
+                dense: true,
+                controlAffinity: ListTileControlAffinity.leading,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Text(
+                '未注册用户请先前往微信小程序「云上飞扬」完成注册',
+                textAlign: TextAlign.center,
+                style: AppText.captionSm.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  height: 1.5,
+                ),
+              ),
             ],
-            TextField(
-              controller: _phoneController,
-              keyboardType: TextInputType.phone,
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-                LengthLimitingTextInputFormatter(11),
-              ],
-              decoration: InputDecoration(
-                labelText: '手机号码',
-                hintText: '请输入手机号',
-                prefixIcon: const Icon(Icons.phone_android_rounded),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _codeController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: '短信验证码',
-                      hintText: '',
-                      prefixIcon: const Icon(Icons.lock_clock_outlined),
-                      // 短信验证码常需跨应用取：一键粘贴并校验 4-6 位数字
-                      suffixIcon: IconButton(
-                        icon: const Icon(Icons.content_paste_rounded, size: 18),
-                        tooltip: '粘贴验证码',
-                        onPressed: () async {
-                          final messenger = ScaffoldMessenger.of(context);
-                          final data = await Clipboard.getData('text/plain');
-                          final code = data?.text?.trim() ?? '';
-                          if (RegExp(r'^\d{4,6}$').hasMatch(code)) {
-                            _codeController.text = code;
-                          } else {
-                            showAppSnackBarOn(
-                              messenger,
-                              '剪贴板中没有可用的验证码',
-                              type: SnackBarType.warning,
-                            );
-                          }
-                        },
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                // 不固定 56 高：验证码输入框随文字缩放变高时按钮同步对齐
-                OutlinedButton(
-                  onPressed: auth.isCountingDown ? null : _sendCode,
-                  style: OutlinedButton.styleFrom(
-                    minimumSize: const Size(64, 56),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 16,
-                    ),
-                  ),
-                  child: Text(
-                    auth.isCountingDown ? '${auth.countdown}s' : '发送',
-                    style: AppText.captionSm,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.xxl),
-            ElevatedButton(
-              onPressed: auth.isLoading ? null : _login,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-              ),
-              child: auth.isLoading
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2,
-                      ),
-                    )
-                  : const Text('验证码登录', style: AppText.bodyLg),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            // 「记住登录」：开启时备份 30 天 token，退出登录后重开 App 免验证码
-            CheckboxListTile(
-              value: _rememberLogin,
-              onChanged: (v) async {
-                setState(() => _rememberLogin = v ?? true);
-                final prefs = await SharedPreferences.getInstance();
-                await prefs.setBool('remember_enabled', _rememberLogin);
-              },
-              title: const Text('记住此设备', style: AppText.body),
-              subtitle: const Text(
-                '30 天内在本机重新打开无需验证码',
-                style: AppText.captionSm,
-              ),
-              contentPadding: EdgeInsets.zero,
-              dense: true,
-              controlAffinity: ListTileControlAffinity.leading,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              '未注册用户请先前往微信小程序「云上飞扬」完成注册',
-              textAlign: TextAlign.center,
-              style: AppText.captionSm.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                height: 1.5,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

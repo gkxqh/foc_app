@@ -108,9 +108,10 @@ class _FloatingMascotState extends State<_FloatingMascot>
     duration: const Duration(milliseconds: 2600),
   );
 
-  late final Animation<double> _float = Tween(begin: -4.0, end: 4.0).animate(
-    CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-  );
+  late final Animation<double> _float = Tween(
+    begin: -4.0,
+    end: 4.0,
+  ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
 
   bool _checkedReduceMotion = false;
 
@@ -142,9 +143,8 @@ class _FloatingMascotState extends State<_FloatingMascot>
       errorBuilder: (_, _, _) => Icon(
         widget.fallbackIcon,
         size: 64,
-        color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(
-          alpha: 0.5,
-        ),
+        color: Theme.of(context).colorScheme.onSurfaceVariant
+            .withValues(alpha: 0.5),
       ),
     );
     // 减弱动态：跳过入场与浮动，直接静态展示

@@ -1,5 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+
+import '../common/responsive_center.dart';
+
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -173,332 +176,338 @@ class _SubmitTicketPageState extends State<SubmitTicketPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('提交设备报修')),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: pageListPadding(context),
-          children: [
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('基本设备信息', style: AppText.title),
-                    const SizedBox(height: AppSpacing.lg),
-                    DropdownButtonFormField<String>(
-                      initialValue: _deviceType,
-                      decoration: const InputDecoration(labelText: '设备类型'),
-                      items: ApiConstants.deviceTypes
-                          .map(
-                            (t) => DropdownMenuItem(value: t, child: Text(t)),
-                          )
-                          .toList(),
-                      onChanged: (v) => setState(() => _deviceType = v!),
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    DropdownButtonFormField<String>(
-                      initialValue: _brand,
-                      decoration: const InputDecoration(labelText: '设备品牌'),
-                      items: ApiConstants.brands
-                          .map(
-                            (b) => DropdownMenuItem(value: b, child: Text(b)),
-                          )
-                          .toList(),
-                      onChanged: (v) => setState(() => _brand = v!),
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    TextFormField(
-                      initialValue: _model,
-                      decoration: const InputDecoration(
-                        labelText: '具体型号 (选填)',
-                        hintText: '如联想小新Pro 16 / 华硕天选7 Pro Max',
-                      ),
-                      onSaved: (v) => _model = v?.trim() ?? '',
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    DropdownButtonFormField<String>(
-                      initialValue: _warrantyStatus,
-                      decoration: const InputDecoration(labelText: '在保状态'),
-                      items: const [
-                        DropdownMenuItem(value: 'expired', child: Text('过保')),
-                        DropdownMenuItem(value: 'under', child: Text('在保')),
-                        DropdownMenuItem(value: 'unknown', child: Text('未知')),
-                      ],
-                      onChanged: (v) => setState(() => _warrantyStatus = v!),
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    InkWell(
-                      onTap: _pickPurchaseDate,
-                      borderRadius: BorderRadius.circular(4),
-                      child: InputDecorator(
-                        decoration: const InputDecoration(
-                          labelText: '购买时间',
-                          helperText: '用于判断保修状态，点击选择日期',
-                          suffixIcon: Icon(Icons.calendar_today_outlined),
-                        ),
-                        child: Text(_purchaseDate),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('故障与送修信息', style: AppText.title),
-                    const SizedBox(height: AppSpacing.lg),
-                    DropdownButtonFormField<String>(
-                      initialValue: _faultType,
-                      decoration: const InputDecoration(labelText: '问题类型'),
-                      items: ApiConstants.problemTypes
-                          .map(
-                            (p) => DropdownMenuItem(value: p, child: Text(p)),
-                          )
-                          .toList(),
-                      onChanged: (v) => setState(() => _faultType = v!),
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    SwitchListTile(
-                      title: const Text('是否线下接单'),
-                      subtitle: const Text('参加社团大型线下集中维修时勾选'),
-                      value: _isOffline,
-                      onChanged: (v) => setState(() => _isOffline = v),
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                    SwitchListTile(
-                      title: const Text('接受跨校区维修'),
-                      subtitle: const Text('开启后其他校区的技术员也可处理您的工单，通常维修更快'),
-                      value: _duoCampus == 1,
-                      onChanged: (v) => setState(() => _duoCampus = v ? 1 : 0),
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                    if (!_isOffline) ...[
+      body: ResponsiveCenter(
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            padding: pageListPadding(context),
+            children: [
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('基本设备信息', style: AppText.title),
+                      const SizedBox(height: AppSpacing.lg),
                       DropdownButtonFormField<String>(
-                        initialValue: _campus,
-                        decoration: const InputDecoration(labelText: '所在校区'),
-                        items: ApiConstants.campuses
+                        initialValue: _deviceType,
+                        decoration: const InputDecoration(labelText: '设备类型'),
+                        items: ApiConstants.deviceTypes
                             .map(
-                              (c) => DropdownMenuItem(value: c, child: Text(c)),
+                              (t) => DropdownMenuItem(value: t, child: Text(t)),
                             )
                             .toList(),
-                        onChanged: (v) => setState(() => _campus = v!),
+                        onChanged: (v) => setState(() => _deviceType = v!),
                       ),
                       const SizedBox(height: AppSpacing.md),
+                      DropdownButtonFormField<String>(
+                        initialValue: _brand,
+                        decoration: const InputDecoration(labelText: '设备品牌'),
+                        items: ApiConstants.brands
+                            .map(
+                              (b) => DropdownMenuItem(value: b, child: Text(b)),
+                            )
+                            .toList(),
+                        onChanged: (v) => setState(() => _brand = v!),
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      TextFormField(
+                        initialValue: _model,
+                        decoration: const InputDecoration(
+                          labelText: '具体型号 (选填)',
+                          hintText: '如联想小新Pro 16 / 华硕天选7 Pro Max',
+                        ),
+                        onSaved: (v) => _model = v?.trim() ?? '',
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      DropdownButtonFormField<String>(
+                        initialValue: _warrantyStatus,
+                        decoration: const InputDecoration(labelText: '在保状态'),
+                        items: const [
+                          DropdownMenuItem(value: 'expired', child: Text('过保')),
+                          DropdownMenuItem(value: 'under', child: Text('在保')),
+                          DropdownMenuItem(value: 'unknown', child: Text('未知')),
+                        ],
+                        onChanged: (v) => setState(() => _warrantyStatus = v!),
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      InkWell(
+                        onTap: _pickPurchaseDate,
+                        borderRadius: BorderRadius.circular(4),
+                        child: InputDecorator(
+                          decoration: const InputDecoration(
+                            labelText: '购买时间',
+                            helperText: '用于判断保修状态，点击选择日期',
+                            suffixIcon: Icon(Icons.calendar_today_outlined),
+                          ),
+                          child: Text(_purchaseDate),
+                        ),
+                      ),
                     ],
-                    TextFormField(
-                      maxLines: 4,
-                      decoration: const InputDecoration(
-                        labelText: '问题详细描述',
-                        hintText: '请详述设备故障表现（如开机黑屏、风扇狂转、无法进入系统等）',
-                      ),
-                      validator: (v) =>
-                          (v == null || v.trim().isEmpty) ? '请填写问题描述' : null,
-                      onSaved: (v) => _description = v?.trim() ?? '',
-                    ),
-                  ],
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('联系方式', style: AppText.title),
-                    const SizedBox(height: AppSpacing.lg),
-                    TextFormField(
-                      initialValue: _phone,
-                      keyboardType: TextInputType.phone,
-                      decoration: const InputDecoration(labelText: '联系电话'),
-                      validator: (v) =>
-                          (v == null || !RegExp(r'^\d{11}$').hasMatch(v.trim()))
-                          ? '请输入11位手机号'
-                          : null,
-                      onSaved: (v) => _phone = v?.trim() ?? '',
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    Row(
-                      children: [
-                        SizedBox(
-                          width: 120,
-                          child: DropdownButtonFormField<String>(
-                            initialValue: _contactType,
-                            decoration: const InputDecoration(),
-                            items: ApiConstants.contactTypes
-                                .map(
-                                  (c) => DropdownMenuItem(
-                                    value: c,
-                                    child: Text(c),
-                                  ),
-                                )
-                                .toList(),
-                            onChanged: (v) => setState(() => _contactType = v!),
-                          ),
+              const SizedBox(height: AppSpacing.md),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('故障与送修信息', style: AppText.title),
+                      const SizedBox(height: AppSpacing.lg),
+                      DropdownButtonFormField<String>(
+                        initialValue: _faultType,
+                        decoration: const InputDecoration(labelText: '问题类型'),
+                        items: ApiConstants.problemTypes
+                            .map(
+                              (p) => DropdownMenuItem(value: p, child: Text(p)),
+                            )
+                            .toList(),
+                        onChanged: (v) => setState(() => _faultType = v!),
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      SwitchListTile(
+                        title: const Text('是否线下接单'),
+                        subtitle: const Text('参加社团大型线下集中维修时勾选'),
+                        value: _isOffline,
+                        onChanged: (v) => setState(() => _isOffline = v),
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                      SwitchListTile(
+                        title: const Text('接受跨校区维修'),
+                        subtitle: const Text('开启后其他校区的技术员也可处理您的工单，通常维修更快'),
+                        value: _duoCampus == 1,
+                        onChanged: (v) =>
+                            setState(() => _duoCampus = v ? 1 : 0),
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                      if (!_isOffline) ...[
+                        DropdownButtonFormField<String>(
+                          initialValue: _campus,
+                          decoration: const InputDecoration(labelText: '所在校区'),
+                          items: ApiConstants.campuses
+                              .map(
+                                (c) =>
+                                    DropdownMenuItem(value: c, child: Text(c)),
+                              )
+                              .toList(),
+                          onChanged: (v) => setState(() => _campus = v!),
                         ),
-                        const SizedBox(width: AppSpacing.sm),
-                        Expanded(
-                          child: TextFormField(
-                            initialValue: _contactNumber,
-                            decoration: InputDecoration(
-                              labelText: '联系账号',
-                              hintText: '输入$_contactType',
-                            ),
-                            validator: (v) => (v == null || v.trim().isEmpty)
-                                ? '请输入联系账号'
-                                : null,
-                            onSaved: (v) => _contactNumber = v?.trim() ?? '',
-                          ),
-                        ),
+                        const SizedBox(height: AppSpacing.md),
                       ],
-                    ),
-                  ],
+                      TextFormField(
+                        maxLines: 4,
+                        decoration: const InputDecoration(
+                          labelText: '问题详细描述',
+                          hintText: '请详述设备故障表现（如开机黑屏、风扇狂转、无法进入系统等）',
+                        ),
+                        validator: (v) =>
+                            (v == null || v.trim().isEmpty) ? '请填写问题描述' : null,
+                        onSaved: (v) => _description = v?.trim() ?? '',
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('故障图片', style: AppText.title),
-                    const SizedBox(height: AppSpacing.sm),
-                    Text(
-                      '上传故障画面、外观损坏等照片有助于技术员提前准备工具（目前支持 1 张，工单将使用第一张）。',
-                      style: AppText.captionSm.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+              const SizedBox(height: AppSpacing.md),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('联系方式', style: AppText.title),
+                      const SizedBox(height: AppSpacing.lg),
+                      TextFormField(
+                        initialValue: _phone,
+                        keyboardType: TextInputType.phone,
+                        decoration: const InputDecoration(labelText: '联系电话'),
+                        validator: (v) =>
+                            (v == null ||
+                                !RegExp(r'^\d{11}$').hasMatch(v.trim()))
+                            ? '请输入11位手机号'
+                            : null,
+                        onSaved: (v) => _phone = v?.trim() ?? '',
                       ),
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    Wrap(
-                      spacing: AppSpacing.md,
-                      runSpacing: AppSpacing.md,
-                      children: [
-                        ..._uploadedImageUrls.map(
-                          (url) => Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              GestureDetector(
-                                onTap: () => showImagePreview(context, url),
-                                child: ClipRRect(
+                      const SizedBox(height: AppSpacing.md),
+                      Row(
+                        children: [
+                          SizedBox(
+                            width: 120,
+                            child: DropdownButtonFormField<String>(
+                              initialValue: _contactType,
+                              decoration: const InputDecoration(),
+                              items: ApiConstants.contactTypes
+                                  .map(
+                                    (c) => DropdownMenuItem(
+                                      value: c,
+                                      child: Text(c),
+                                    ),
+                                  )
+                                  .toList(),
+                              onChanged: (v) =>
+                                  setState(() => _contactType = v!),
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.sm),
+                          Expanded(
+                            child: TextFormField(
+                              initialValue: _contactNumber,
+                              decoration: InputDecoration(
+                                labelText: '联系账号',
+                                hintText: '输入$_contactType',
+                              ),
+                              validator: (v) => (v == null || v.trim().isEmpty)
+                                  ? '请输入联系账号'
+                                  : null,
+                              onSaved: (v) => _contactNumber = v?.trim() ?? '',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('故障图片', style: AppText.title),
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
+                        '上传故障画面、外观损坏等照片有助于技术员提前准备工具（目前支持 1 张，工单将使用第一张）。',
+                        style: AppText.captionSm.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      Wrap(
+                        spacing: AppSpacing.md,
+                        runSpacing: AppSpacing.md,
+                        children: [
+                          ..._uploadedImageUrls.map(
+                            (url) => Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                GestureDetector(
+                                  onTap: () => showImagePreview(context, url),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(
+                                      AppRadius.thumb,
+                                    ),
+                                    child: CachedNetworkImage(
+                                      imageUrl: url,
+                                      width: 80,
+                                      height: 80,
+                                      fit: BoxFit.cover,
+                                      errorWidget: (_, _, _) => Container(
+                                        width: 80,
+                                        height: 80,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .surfaceContainerHighest,
+                                        child: Icon(
+                                          Icons.broken_image_outlined,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurfaceVariant,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  top: -6,
+                                  right: -6,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        _uploadedImageUrls.remove(url);
+                                      });
+                                    },
+                                    child: Container(
+                                      decoration: const BoxDecoration(
+                                        color: AppTheme.errorRed,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      padding: const EdgeInsets.all(2),
+                                      child: const Icon(
+                                        Icons.close,
+                                        size: 14,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (_uploadedImageUrls.isEmpty)
+                            GestureDetector(
+                              onTap: _isUploadingImage
+                                  ? null
+                                  : _pickAndUploadImage,
+                              child: Container(
+                                width: 80,
+                                height: 80,
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .surfaceContainerHighest
+                                      .withValues(alpha: 0.4),
                                   borderRadius: BorderRadius.circular(
                                     AppRadius.thumb,
                                   ),
-                                  child: CachedNetworkImage(
-                                    imageUrl: url,
-                                    width: 80,
-                                    height: 80,
-                                    fit: BoxFit.cover,
-                                    errorWidget: (_, _, _) => Container(
-                                      width: 80,
-                                      height: 80,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .surfaceContainerHighest,
-                                      child: Icon(
-                                        Icons.broken_image_outlined,
+                                  border: Border.all(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant
+                                        .withValues(alpha: 0.3),
+                                  ),
+                                ),
+                                child: _isUploadingImage
+                                    ? const Center(
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : Icon(
+                                        Icons.add_a_photo_outlined,
                                         color: Theme.of(context)
                                             .colorScheme
                                             .onSurfaceVariant,
                                       ),
-                                    ),
-                                  ),
-                                ),
                               ),
-                              Positioned(
-                                top: -6,
-                                right: -6,
-                                child: GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      _uploadedImageUrls.remove(url);
-                                    });
-                                  },
-                                  child: Container(
-                                    decoration: const BoxDecoration(
-                                      color: AppTheme.errorRed,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    padding: const EdgeInsets.all(2),
-                                    child: const Icon(
-                                      Icons.close,
-                                      size: 14,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        if (_uploadedImageUrls.isEmpty)
-                          GestureDetector(
-                            onTap: _isUploadingImage
-                                ? null
-                                : _pickAndUploadImage,
-                            child: Container(
-                              width: 80,
-                              height: 80,
-                              decoration: BoxDecoration(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .surfaceContainerHighest
-                                    .withValues(alpha: 0.4),
-                                borderRadius: BorderRadius.circular(
-                                  AppRadius.thumb,
-                                ),
-                                border: Border.all(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSurfaceVariant
-                                      .withValues(alpha: 0.3),
-                                ),
-                              ),
-                              child: _isUploadingImage
-                                  ? const Center(
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                  : Icon(
-                                      Icons.add_a_photo_outlined,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurfaceVariant,
-                                    ),
                             ),
-                          ),
-                      ],
-                    ),
-                  ],
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: AppSpacing.xxl),
-            ElevatedButton(
-              onPressed: _isSubmitting ? null : _submit,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
+              const SizedBox(height: AppSpacing.xxl),
+              ElevatedButton(
+                onPressed: _isSubmitting ? null : _submit,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                child: _isSubmitting
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('确认提交工单', style: AppText.bodyLg),
               ),
-              child: _isSubmitting
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Text('确认提交工单', style: AppText.bodyLg),
-            ),
-            const SizedBox(height: AppSpacing.xxl),
-          ],
+              const SizedBox(height: AppSpacing.xxl),
+            ],
+          ),
         ),
       ),
     );

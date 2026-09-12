@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../common/responsive_center.dart';
+
 import 'package:provider/provider.dart';
 
 import '../../core/theme/app_theme.dart';
@@ -218,53 +221,55 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildNotLoggedInView() {
-    return ListView(
-      padding: const EdgeInsets.all(AppSpacing.xxl),
-      children: [
-        const SizedBox(height: AppSpacing.xxxl),
-        // 吉祥物迎宾：首次打开的第一眼即建立"社团服务"的亲近感
-        Center(
-          child: Image.asset(
-            'assets/illustrations/fy_q.png',
-            height: 150,
-            fit: BoxFit.contain,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.xl),
-        const Center(child: Text('欢迎使用云上飞扬', style: AppText.titleXl)),
-        const SizedBox(height: AppSpacing.sm),
-        Center(
-          child: Text(
-            '四川大学飞扬俱乐部设备报修及维护服务',
-            style: AppText.caption.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+    return ResponsiveCenter(
+      child: ListView(
+        padding: const EdgeInsets.all(AppSpacing.xxl),
+        children: [
+          const SizedBox(height: AppSpacing.xxxl),
+          // 吉祥物迎宾：首次打开的第一眼即建立"社团服务"的亲近感
+          Center(
+            child: Image.asset(
+              'assets/illustrations/fy_q.png',
+              height: 150,
+              fit: BoxFit.contain,
             ),
           ),
-        ),
-        const SizedBox(height: AppSpacing.xxxl),
-        ElevatedButton.icon(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const LoginPage()),
-            );
-          },
-          icon: const Icon(Icons.login_rounded),
-          label: const Text('登录'),
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 14),
-          ),
-        ),
-        const SizedBox(height: AppSpacing.md),
-        Center(
-          child: Text(
-            '未注册用户请先前往微信小程序「云上飞扬」完成注册',
-            style: AppText.captionSm.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+          const SizedBox(height: AppSpacing.xl),
+          const Center(child: Text('欢迎使用云上飞扬', style: AppText.titleXl)),
+          const SizedBox(height: AppSpacing.sm),
+          Center(
+            child: Text(
+              '四川大学飞扬俱乐部设备报修及维护服务',
+              style: AppText.caption.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
           ),
-        ),
-      ],
+          const SizedBox(height: AppSpacing.xxxl),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const LoginPage()),
+              );
+            },
+            icon: const Icon(Icons.login_rounded),
+            label: const Text('登录'),
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Center(
+            child: Text(
+              '未注册用户请先前往微信小程序「云上飞扬」完成注册',
+              style: AppText.captionSm.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -333,73 +338,79 @@ class _HomePageState extends State<HomePage> {
       return const SkeletonList();
     }
 
-    return ListView(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      children: [
-        if (config.showAnnouncement) _buildAnnouncementBanner(config),
-        _buildTicketErrorBanner(ticketProvider),
-        if (!config.repairFlag) ...[
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.xl),
-            decoration: BoxDecoration(
-              color: AppTheme.warningOrange.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(AppRadius.card),
-              border: Border.all(
-                color: AppTheme.warningOrange.withValues(alpha: 0.3),
+    return ResponsiveCenter(
+      child: ListView(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        children: [
+          if (config.showAnnouncement) _buildAnnouncementBanner(config),
+          _buildTicketErrorBanner(ticketProvider),
+          if (!config.repairFlag) ...[
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.xl),
+              decoration: BoxDecoration(
+                color: AppTheme.warningOrange.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(AppRadius.card),
+                border: Border.all(
+                  color: AppTheme.warningOrange.withValues(alpha: 0.3),
+                ),
+              ),
+              child: Column(
+                children: [
+                  Icon(
+                    Icons.bedtime_outlined,
+                    size: 48,
+                    color: AppTheme.warningOrange,
+                  ),
+                  SizedBox(height: AppSpacing.md),
+                  Text(
+                    '报修通道暂未开启',
+                    style: AppText.title.copyWith(
+                      color: AppTheme.warningOrange,
+                    ),
+                  ),
+                  SizedBox(height: AppSpacing.sm),
+                  Text(
+                    '当前为假期或技术员休整时间，系统已暂停接收新工单。感谢您的理解！',
+                    textAlign: TextAlign.center,
+                    style: AppText.caption.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
               ),
             ),
-            child: Column(
+            const SizedBox(height: AppSpacing.lg),
+          ],
+          if (activeList.isNotEmpty) ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Icon(
-                  Icons.bedtime_outlined,
-                  size: 48,
-                  color: AppTheme.warningOrange,
-                ),
-                SizedBox(height: AppSpacing.md),
+                const Text('我的进行中工单', style: AppText.title),
                 Text(
-                  '报修通道暂未开启',
-                  style: AppText.title.copyWith(color: AppTheme.warningOrange),
-                ),
-                SizedBox(height: AppSpacing.sm),
-                Text(
-                  '当前为假期或技术员休整时间，系统已暂停接收新工单。感谢您的理解！',
-                  textAlign: TextAlign.center,
-                  style: AppText.caption.copyWith(
+                  '共 ${activeList.length} 单',
+                  style: AppText.captionSm.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
             ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: AppSpacing.md),
+            ...activeList.indexed.map(
+              (e) => _buildTicketCard(e.$2, index: e.$1),
+            ),
+            const SizedBox(height: AppSpacing.xl),
+          ] else if (config.repairFlag) ...[
+            const EmptyState(
+              icon: Icons.assignment_turned_in_outlined,
+              image: 'assets/illustrations/fy_q.png',
+              title: '您当前没有进行中的报修工单',
+              subtitle: '如遇电脑软硬件故障，请点击右下方按钮发起报修',
+              minHeight: 220,
+            ),
+            const SizedBox(height: AppSpacing.xl),
+          ],
         ],
-        if (activeList.isNotEmpty) ...[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text('我的进行中工单', style: AppText.title),
-              Text(
-                '共 ${activeList.length} 单',
-                style: AppText.captionSm.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.md),
-          ...activeList.indexed.map((e) => _buildTicketCard(e.$2, index: e.$1)),
-          const SizedBox(height: AppSpacing.xl),
-        ] else if (config.repairFlag) ...[
-          const EmptyState(
-            icon: Icons.assignment_turned_in_outlined,
-            image: 'assets/illustrations/fy_q.png',
-            title: '您当前没有进行中的报修工单',
-            subtitle: '如遇电脑软硬件故障，请点击右下方按钮发起报修',
-            minHeight: 220,
-          ),
-          const SizedBox(height: AppSpacing.xl),
-        ],
-      ],
+      ),
     );
   }
 
@@ -413,66 +424,70 @@ class _HomePageState extends State<HomePage> {
       return const SkeletonList();
     }
 
-    return ListView(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      children: [
-        if (config.showAnnouncement) _buildAnnouncementBanner(config),
-        _buildTicketErrorBanner(ticketProvider),
-        if (activeList.isNotEmpty) ...[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text('我的进行中工单', style: AppText.title),
-              Text(
-                '共 ${activeList.length} 单',
-                style: AppText.captionSm.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+    return ResponsiveCenter(
+      child: ListView(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        children: [
+          if (config.showAnnouncement) _buildAnnouncementBanner(config),
+          _buildTicketErrorBanner(ticketProvider),
+          if (activeList.isNotEmpty) ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('我的进行中工单', style: AppText.title),
+                Text(
+                  '共 ${activeList.length} 单',
+                  style: AppText.captionSm.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.md),
-          ...activeList.indexed.map((e) => _buildTicketCard(e.$2, index: e.$1)),
-          const SizedBox(height: AppSpacing.xl),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.md),
+            ...activeList.indexed.map(
+              (e) => _buildTicketCard(e.$2, index: e.$1),
+            ),
+            const SizedBox(height: AppSpacing.xl),
+          ],
+          // 技术员排行榜（受软件设置开关控制）
+          if (config.showTechRank) ...[
+            // 标题与榜单切换 chips 允许换行：窄宽度（横屏/分屏）下不溢出
+            Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: AppSpacing.sm,
+              runSpacing: 8,
+              children: [
+                const Text('技术员英雄榜', style: AppText.title),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: ['总榜', '江安', '望江'].map((tab) {
+                    final isSelected = config.selectedCampusTab == tab;
+                    return Padding(
+                      padding: const EdgeInsets.only(left: 6.0),
+                      child: ChoiceChip(
+                        label: Text(tab),
+                        selected: isSelected,
+                        onSelected: (_) => config.setCampusTab(tab),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            _buildPodiumView(config),
+          ] else if (activeList.isEmpty) ...[
+            const EmptyState(
+              icon: Icons.done_all_rounded,
+              image: 'assets/illustrations/fy_q.png',
+              title: '当前没有进行中的工单',
+              subtitle: '如需接单，请点击右上角扫码接单',
+              minHeight: 220,
+            ),
+          ],
         ],
-        // 技术员排行榜（受软件设置开关控制）
-        if (config.showTechRank) ...[
-          // 标题与榜单切换 chips 允许换行：窄宽度（横屏/分屏）下不溢出
-          Wrap(
-            alignment: WrapAlignment.spaceBetween,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: AppSpacing.sm,
-            runSpacing: 8,
-            children: [
-              const Text('技术员英雄榜', style: AppText.title),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: ['总榜', '江安', '望江'].map((tab) {
-                  final isSelected = config.selectedCampusTab == tab;
-                  return Padding(
-                    padding: const EdgeInsets.only(left: 6.0),
-                    child: ChoiceChip(
-                      label: Text(tab),
-                      selected: isSelected,
-                      onSelected: (_) => config.setCampusTab(tab),
-                    ),
-                  );
-                }).toList(),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          _buildPodiumView(config),
-        ] else if (activeList.isEmpty) ...[
-          const EmptyState(
-            icon: Icons.done_all_rounded,
-            image: 'assets/illustrations/fy_q.png',
-            title: '当前没有进行中的工单',
-            subtitle: '如需接单，请点击右上角扫码接单',
-            minHeight: 220,
-          ),
-        ],
-      ],
+      ),
     );
   }
 

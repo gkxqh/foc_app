@@ -9,7 +9,10 @@ import '../../providers/update_provider.dart';
 /// 更新弹窗：随 UpdateProvider 状态切换 新版本信息 / 下载进度 / 失败重试。
 /// [fromAutoCheck] 为 true（启动静默检查）时提供「忽略此版本」免打扰出口；
 /// 手动检查场景用户意图明确，不展示忽略项。
-Future<void> showUpdateDialog(BuildContext context, {required bool fromAutoCheck}) {
+Future<void> showUpdateDialog(
+  BuildContext context, {
+  required bool fromAutoCheck,
+}) {
   final update = context.read<UpdateProvider>();
   update.setDialogVisible(true);
   return showDialog(
@@ -103,10 +106,7 @@ class _UpdateDialogBody extends StatelessWidget {
         ];
       case UpdateStatus.error:
         return [
-          Text(
-            update.errorMessage ?? '出了点问题，请稍后重试',
-            style: AppText.body,
-          ),
+          Text(update.errorMessage ?? '出了点问题，请稍后重试', style: AppText.body),
         ];
       default:
         final changelog = info.changelog.trim();
@@ -118,19 +118,19 @@ class _UpdateDialogBody extends StatelessWidget {
             data: changelog,
             selectable: false,
             noScroll: true,
-            styleSheet:
-                MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
-              p: AppText.body.copyWith(
-                height: 1.6,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-              listBullet: AppText.body.copyWith(
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-              h1: AppText.titleSm,
-              h2: AppText.titleSm,
-              h3: AppText.title,
-            ),
+            styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context))
+                .copyWith(
+                  p: AppText.body.copyWith(
+                    height: 1.6,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                  listBullet: AppText.body.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                  h1: AppText.titleSm,
+                  h2: AppText.titleSm,
+                  h3: AppText.title,
+                ),
           ),
         ];
     }
@@ -158,10 +158,7 @@ class _UpdateDialogBody extends StatelessWidget {
             onPressed: () => Navigator.of(context).pop(),
             child: const Text('关闭'),
           ),
-          ElevatedButton(
-            onPressed: update.updateNow,
-            child: const Text('重试'),
-          ),
+          ElevatedButton(onPressed: update.updateNow, child: const Text('重试')),
         ];
       default:
         return [

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../common/responsive_center.dart';
+
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:provider/provider.dart';
 
@@ -123,19 +126,21 @@ class _RepairTermsPageState extends State<RepairTermsPage> {
               child: Scrollbar(
                 controller: _scrollController,
                 thumbVisibility: true,
-                child: SingleChildScrollView(
-                  controller: _scrollController,
-                  padding: const EdgeInsets.all(AppSpacing.xl),
-                  child: MarkdownBody(
-                    data: tips,
-                    selectable: true,
-                    styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
-                      p: AppText.body.copyWith(
-                        height: 1.6,
-                        color: colorScheme.onSurface,
-                      ),
-                      listBullet: AppText.body.copyWith(
-                        color: colorScheme.onSurface,
+                child: ResponsiveCenter(
+                  child: SingleChildScrollView(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.all(AppSpacing.xl),
+                    child: MarkdownBody(
+                      data: tips,
+                      selectable: true,
+                      styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
+                        p: AppText.body.copyWith(
+                          height: 1.6,
+                          color: colorScheme.onSurface,
+                        ),
+                        listBullet: AppText.body.copyWith(
+                          color: colorScheme.onSurface,
+                        ),
                       ),
                     ),
                   ),
