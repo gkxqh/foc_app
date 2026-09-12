@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-
-import '../common/responsive_center.dart';
-
 import 'package:provider/provider.dart';
 
+import '../../core/layout/window_class.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/constants/service_texts.dart';
 import '../common/empty_state.dart';
+import '../common/responsive_center.dart';
 import '../common/skeleton_list.dart';
 import '../common/rank_badge.dart';
 import '../common/staggered_in.dart';
@@ -23,6 +22,7 @@ import 'announcement_page.dart';
 import 'repair_terms_page.dart';
 import 'scan_give_page.dart';
 import 'ticket_detail_page.dart';
+import 'ticket_detail_view.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -34,6 +34,9 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   bool _wasLoggedIn = false;
   bool _didInitialRefresh = false;
+  // 宽屏双栏右栏当前展示的工单（存 id，展示时从最新列表解析，
+  // 刷新后自动跟随新数据，工单消失则回落到占位态）
+  String? _selectedTicketId;
 
   @override
   void didChangeDependencies() {
@@ -203,6 +206,8 @@ class _HomePageState extends State<HomePage> {
         onRefresh: _refreshData,
         child: !auth.isLoggedIn
             ? _buildNotLoggedInView()
+            : useTwoPane(context)
+            ? _buildTwoPane(config, ticketProvider, isTech: auth.isTechnician)
             : auth.isTechnician
             ? _buildTechnicianView(config, ticketProvider)
             : _buildUserView(config, ticketProvider),
@@ -331,7 +336,86 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildUserView(ConfigProvider config, TicketProvider ticketProvider) {
+  /// 宽屏（≥720dp）列表-详情双栏：左栏仍是原列表流（点卡就地选中而非
+  /// 整页 push），右栏展示选中工单详情；未选中时显示占位引导
+  Widget _buildTwoPane(
+    ConfigProvider config,
+    TicketProvider ticketProvider, {
+    required bool isTech,
+  }) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    // 展开态越宽左栏略放宽，给右栏详情留出可读宽度
+    final leftWidth = screenWidth >= 840 ? 360.0 : 300.0;
+    final selected = _selectedTicketOf(ticketProvider);
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SizedBox(
+          width: leftWidth,
+          child: isTech
+              ? _buildTechnicianView(
+                  config,
+                  ticketProvider,
+                  selectOnly: true,
+                  selectedId: _selectedTicketId,
+                )
+              : _buildUserView(
+                  config,
+                  ticketProvider,
+                  selectOnly: true,
+                  selectedId: _selectedTicketId,
+                ),
+        ),
+        const VerticalDivider(width: 1, thickness: 1),
+        Expanded(
+          child: selected == null
+              ? const Center(
+                  child: EmptyState(
+                    icon: Icons.assignment_outlined,
+                    title: '选择工单查看详情',
+                    subtitle: '在左侧选择一个进行中的工单',
+                    minHeight: 200,
+                  ),
+                )
+              : ResponsiveCenter(
+                  child: TicketDetailView(
+                    // 状态/凭证变化时重建内容体，保证与最新数据一致
+                    key: ValueKey(
+                      Object.hash(
+                        selected.id,
+                        selected.repairStatus,
+                        selected.completeImageUrl,
+                      ),
+                    ),
+                    ticket: selected,
+                    onFinished: () {
+                      // 直接结束/取消后工单已离开进行中列表：刷新并取消选中
+                      _refreshData();
+                      setState(() => _selectedTicketId = null);
+                    },
+                  ),
+                ),
+        ),
+      ],
+    );
+  }
+
+  TicketModel? _selectedTicketOf(TicketProvider tp) {
+    final id = _selectedTicketId;
+    if (id == null) return null;
+    for (final t in tp.activeTickets) {
+      if (t.id == id) return t;
+    }
+    return null;
+  }
+
+  Widget _buildUserView(
+    ConfigProvider config,
+    TicketProvider ticketProvider, {
+    bool selectOnly = false,
+    String? selectedId,
+  }) {
     final activeList = ticketProvider.activeTickets;
 
     if (ticketProvider.isLoading && activeList.isEmpty) {
@@ -396,7 +480,12 @@ class _HomePageState extends State<HomePage> {
             ),
             const SizedBox(height: AppSpacing.md),
             ...activeList.indexed.map(
-              (e) => _buildTicketCard(e.$2, index: e.$1),
+              (e) => _buildTicketCard(
+                e.$2,
+                index: e.$1,
+                selectOnly: selectOnly,
+                selected: e.$2.id == selectedId,
+              ),
             ),
             const SizedBox(height: AppSpacing.xl),
           ] else if (config.repairFlag) ...[
@@ -416,8 +505,10 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildTechnicianView(
     ConfigProvider config,
-    TicketProvider ticketProvider,
-  ) {
+    TicketProvider ticketProvider, {
+    bool selectOnly = false,
+    String? selectedId,
+  }) {
     final activeList = ticketProvider.activeTickets;
 
     if (ticketProvider.isLoading && activeList.isEmpty) {
@@ -445,7 +536,12 @@ class _HomePageState extends State<HomePage> {
             ),
             const SizedBox(height: AppSpacing.md),
             ...activeList.indexed.map(
-              (e) => _buildTicketCard(e.$2, index: e.$1),
+              (e) => _buildTicketCard(
+                e.$2,
+                index: e.$1,
+                selectOnly: selectOnly,
+                selected: e.$2.id == selectedId,
+              ),
             ),
             const SizedBox(height: AppSpacing.xl),
           ],
@@ -588,14 +684,34 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildTicketCard(TicketModel ticket, {required int index}) {
+  Widget _buildTicketCard(
+    TicketModel ticket, {
+    required int index,
+    bool selectOnly = false,
+    bool selected = false,
+  }) {
     return StaggeredIn(
       index: index,
       child: Card(
         margin: const EdgeInsets.only(bottom: AppSpacing.md),
+        // 双栏模式下选中卡高亮描边，标示右栏当前内容
+        color: selected ? AppTheme.primaryBlue.withValues(alpha: 0.06) : null,
+        shape: selected
+            ? RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppRadius.card),
+                side: BorderSide(
+                  color: AppTheme.primaryBlue.withValues(alpha: 0.5),
+                ),
+              )
+            : null,
         child: InkWell(
           borderRadius: BorderRadius.circular(AppRadius.card),
           onTap: () async {
+            // 宽屏双栏：点卡就地选中，不再整页 push
+            if (selectOnly) {
+              setState(() => _selectedTicketId = ticket.id);
+              return;
+            }
             await Navigator.push(
               context,
               MaterialPageRoute(
