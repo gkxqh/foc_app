@@ -13,7 +13,9 @@ import '../../models/tech_stats_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/config_provider.dart';
 import '../../providers/ticket_provider.dart';
+import '../../providers/update_provider.dart';
 import '../auth/login_page.dart';
+import '../common/update_dialog.dart';
 import 'annual_summary_page.dart';
 import 'repair_terms_page.dart';
 import 'scan_give_page.dart';
@@ -38,8 +40,10 @@ class _HomePageState extends State<HomePage> {
     final loggedIn = context.watch<AuthProvider>().isLoggedIn;
     if (!_didInitialRefresh) {
       _didInitialRefresh = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _refreshData();
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (!mounted) return;
+        await _refreshData();
+        _autoCheckUpdate();
       });
     } else if (loggedIn && !_wasLoggedIn) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -61,6 +65,16 @@ class _HomePageState extends State<HomePage> {
     if (auth.isLoggedIn && auth.user != null) {
       await ticket.fetchTickets(role: auth.user!.role, uid: auth.user!.uid);
     }
+  }
+
+  // 启动静默检查更新：只有发现「未被忽略」的新版本才弹窗，
+  // 无更新/检查失败一律静默，不打扰用户；每次启动仅此一处触发
+  Future<void> _autoCheckUpdate() async {
+    final update = context.read<UpdateProvider>();
+    final result = await update.checkForUpdate(auto: true);
+    if (!mounted || result != UpdateCheckResult.newVersion) return;
+    if (update.dialogVisible) return;
+    showUpdateDialog(context, fromAutoCheck: true);
   }
 
   void _openRepairTerms() {

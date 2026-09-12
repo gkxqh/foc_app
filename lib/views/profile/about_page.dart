@@ -1,7 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:provider/provider.dart';
 
 import '../../core/theme/app_theme.dart';
+import '../../providers/update_provider.dart';
+import '../common/app_snackbar.dart';
+import '../common/update_dialog.dart';
 
 class AboutPage extends StatefulWidget {
   const AboutPage({super.key});
@@ -29,6 +35,21 @@ class _AboutPageState extends State<AboutPage> {
       }
     } catch (_) {
       // 读取失败保持空串，界面展示兜底文案
+    }
+  }
+
+  Future<void> _checkUpdate(UpdateProvider update) async {
+    // await 后仍要弹 SnackBar，提前取好 messenger（见 showAppSnackBarOn 注释）
+    final messenger = ScaffoldMessenger.of(context);
+    final result = await update.checkForUpdate();
+    switch (result) {
+      case UpdateCheckResult.newVersion:
+        if (!mounted) return;
+        showUpdateDialog(context, fromAutoCheck: false);
+      case UpdateCheckResult.upToDate:
+        showAppSnackBarOn(messenger, '已是最新版本', type: SnackBarType.success);
+      case UpdateCheckResult.failed:
+        showAppSnackBarOn(messenger, '检查更新失败，请稍后重试', type: SnackBarType.error);
     }
   }
 
@@ -63,6 +84,27 @@ class _AboutPageState extends State<AboutPage> {
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
+              // 应用仅经 GitHub Releases 侧载分发（Android），无商店更新通道，
+              // 其他平台没有可安装的产物，不展示检查更新入口
+              if (Platform.isAndroid) ...[
+                const SizedBox(height: AppSpacing.lg),
+                Consumer<UpdateProvider>(
+                  builder: (context, update, _) {
+                    final checking = update.status == UpdateStatus.checking;
+                    return OutlinedButton.icon(
+                      onPressed: checking ? null : () => _checkUpdate(update),
+                      icon: checking
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.system_update_alt, size: 18),
+                      label: Text(checking ? '正在检查…' : '检查更新'),
+                    );
+                  },
+                ),
+              ],
               const SizedBox(height: AppSpacing.xxl),
               Card(
                 child: Padding(

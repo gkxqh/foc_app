@@ -1,6 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- INTERNET 权限必须声明在主清单中，否则 release 包无法联网（debug/profile 清单的声明不生效） -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- 应用内更新：调起系统安装器安装下载的 APK（设置页/关于页的「检查更新」） -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>
     <application
         android:label="云上飞扬"
         android:name="${applicationName}"

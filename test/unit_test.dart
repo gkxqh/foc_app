@@ -1,8 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:foc_app/core/theme/app_theme.dart';
+import 'package:foc_app/models/app_update_model.dart';
 import 'package:foc_app/models/event_model.dart';
 import 'package:foc_app/models/ticket_model.dart';
 import 'package:foc_app/models/user_model.dart';
+import 'package:foc_app/services/update_service.dart';
 
 void main() {
   group('UserModel tests', () {
@@ -231,6 +233,177 @@ void main() {
       });
       expect(event3.isLucky, false);
       expect(event3.registered, false);
+    });
+  });
+
+  group('UpdateService 版本比较', () {
+    test('v 前缀与常规新版本', () {
+      expect(UpdateService.isNewerVersion('v1.0.2', '1.0.1'), true);
+      expect(UpdateService.isNewerVersion('v1.1.0', '1.0.9'), true);
+      expect(UpdateService.isNewerVersion('2.0', '1.9.9'), true);
+    });
+
+    test('分段数值比较而非字典序（1.10 > 1.9）', () {
+      expect(UpdateService.isNewerVersion('1.10.0', '1.9.9'), true);
+      expect(UpdateService.isNewerVersion('v1.10', '1.9'), true);
+      expect(UpdateService.isNewerVersion('1.2', '1.10'), false);
+    });
+
+    test('相同或更旧的版本不提示更新', () {
+      expect(UpdateService.isNewerVersion('v1.0.1', '1.0.1'), false);
+      expect(UpdateService.isNewerVersion('1.0.0', '1.0.1'), false);
+      expect(UpdateService.isNewerVersion('0.9.9', '1.0.1'), false);
+    });
+
+    test('位数不齐时缺省段按 0 补齐', () {
+      expect(UpdateService.isNewerVersion('v1.1', '1.0.5'), true);
+      expect(UpdateService.isNewerVersion('v1.0', '1.0.1'), false);
+    });
+
+    test('无法解析的版本一律视为无更新，避免异常 tag 骚扰', () {
+      expect(UpdateService.isNewerVersion('latest', '1.0.1'), false);
+      expect(UpdateService.isNewerVersion('', '1.0.1'), false);
+      expect(UpdateService.isNewerVersion('v1.0.2', 'dev'), false);
+      expect(UpdateService.isNewerVersion('v1.0.2-beta.1', '1.0.1'), false);
+    });
+  });
+
+  group('UpdateService.pickApkAsset 按 ABI 选择 APK', () {
+    final assets = [
+      {
+        'name': 'app-armeabi-v7a-release.apk',
+        'size': 18000000,
+        'browser_download_url': 'https://example.com/app-armeabi-v7a-release.apk',
+      },
+      {
+        'name': 'app-arm64-v8a-release.apk',
+        'size': 20000000,
+        'browser_download_url': 'https://example.com/app-arm64-v8a-release.apk',
+      },
+      {
+        'name': 'app-x86_64-release.apk',
+        'size': 21000000,
+        'browser_download_url': 'https://example.com/app-x86_64-release.apk',
+      },
+      {
+        'name': 'app-release.apk',
+        'size': 55000000,
+        'browser_download_url': 'https://example.com/app-release.apk',
+      },
+    ];
+
+    test('优先精确匹配设备 ABI', () {
+      expect(
+        UpdateService.pickApkAsset(assets, 'arm64-v8a')?['name'],
+        'app-arm64-v8a-release.apk',
+      );
+      expect(
+        UpdateService.pickApkAsset(assets, 'armeabi-v7a')?['name'],
+        'app-armeabi-v7a-release.apk',
+      );
+      expect(
+        UpdateService.pickApkAsset(assets, 'x86_64')?['name'],
+        'app-x86_64-release.apk',
+      );
+    });
+
+    test('ABI 未知时退回任一分 ABI 包而非体积大的通用整包', () {
+      expect(
+        UpdateService.pickApkAsset(assets, '')?['name'],
+        'app-armeabi-v7a-release.apk',
+      );
+    });
+
+    test('仅通用整包时可用，且解析出下载直链', () {
+      final universal = [
+        {
+          'name': 'app-release.apk',
+          'size': 55000000,
+          'browser_download_url': 'https://example.com/app-release.apk',
+        },
+      ];
+      final picked = UpdateService.pickApkAsset(universal, 'arm64-v8a');
+      expect(picked?['name'], 'app-release.apk');
+    });
+
+    test('兼容仓库实际发布产物命名（foc_app_v1.0.x_arm64.apk 简写）', () {
+      final realAssets = [
+        {
+          'name': 'foc_app_v1.0.1_arm32.apk',
+          'size': 32905976,
+          'browser_download_url': 'https://example.com/foc_app_v1.0.1_arm32.apk',
+        },
+        {
+          'name': 'foc_app_v1.0.1_arm64.apk',
+          'size': 36763462,
+          'browser_download_url': 'https://example.com/foc_app_v1.0.1_arm64.apk',
+        },
+        {
+          'name': 'foc_app_v1.0.1_x86_64.apk',
+          'size': 39484063,
+          'browser_download_url': 'https://example.com/foc_app_v1.0.1_x86_64.apk',
+        },
+      ];
+      expect(
+        UpdateService.pickApkAsset(realAssets, 'arm64-v8a')?['name'],
+        'foc_app_v1.0.1_arm64.apk',
+      );
+      expect(
+        UpdateService.pickApkAsset(realAssets, 'armeabi-v7a')?['name'],
+        'foc_app_v1.0.1_arm32.apk',
+      );
+      expect(
+        UpdateService.pickApkAsset(realAssets, 'x86_64')?['name'],
+        'foc_app_v1.0.1_x86_64.apk',
+      );
+      // 无 ABI 精确匹配时（如发布产物缺 x86_64 包）不误选通用整包
+      expect(
+        UpdateService.pickApkAsset(realAssets, '')?['name'],
+        'foc_app_v1.0.1_arm32.apk',
+      );
+    });
+
+    test('无任何 APK 资产时返回 null', () {
+      expect(UpdateService.pickApkAsset([], 'arm64-v8a'), isNull);
+      expect(
+        UpdateService.pickApkAsset([
+          {'name': 'source.zip', 'size': 1, 'browser_download_url': 'x'},
+        ], 'arm64-v8a'),
+        isNull,
+      );
+    });
+  });
+
+  group('AppUpdateInfo 解析', () {
+    test('剥离 tag 的 v 前缀，按所选资产填充下载信息', () {
+      final info = AppUpdateInfo.fromGitHubJson({
+        'tag_name': 'v1.0.2',
+        'name': '云上飞扬 v1.0.2',
+        'body': '## 更新内容\n- 修复若干问题',
+        'html_url': 'https://github.com/gkxqh/foc_app/releases/tag/v1.0.2',
+      }, {
+        'name': 'app-arm64-v8a-release.apk',
+        'size': 20000000,
+        'browser_download_url': 'https://example.com/app-arm64-v8a-release.apk',
+      });
+
+      expect(info.version, '1.0.2');
+      expect(info.hasApk, true);
+      expect(info.downloadUrl, 'https://example.com/app-arm64-v8a-release.apk');
+      expect(info.downloadSize, 20000000);
+      expect(info.changelog, contains('更新内容'));
+    });
+
+    test('无可用 APK 资产时 hasApk 为 false，更新检查会跳过', () {
+      final info = AppUpdateInfo.fromGitHubJson({
+        'tag_name': 'v1.0.2',
+        'name': '云上飞扬 v1.0.2',
+        'body': '',
+        'html_url': '',
+      }, null);
+
+      expect(info.hasApk, false);
+      expect(info.downloadUrl, isEmpty);
     });
   });
 }

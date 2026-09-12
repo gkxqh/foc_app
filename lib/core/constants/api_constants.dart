@@ -47,6 +47,10 @@ class ApiConstants {
   // 服务端真实路由为 /v1/status/getLuckynum（getLuckynum.php），参数 activity_id + user_id
   static const String getLuckyNum = '/v1/status/getLuckynum';
 
+  // 应用更新检测（GitHub Releases 侧载分发，匿名调用限额 60 次/时/IP，检查频率足够）
+  static const String githubApiBase = 'https://api.github.com';
+  static const String githubRepo = 'gkxqh/foc_app';
+
   // Options
   static const List<String> campuses = ['江安', '望江', '华西'];
   static const List<String> deviceTypes = [
