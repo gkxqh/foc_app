@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -32,18 +33,15 @@ class _ImagePreviewPage extends StatelessWidget {
             Center(
               child: InteractiveViewer(
                 maxScale: 5,
-                child: Image.network(
-                  imageUrl,
+                child: CachedNetworkImage(
+                  imageUrl: imageUrl,
                   fit: BoxFit.contain,
                   // 加载期间给出转圈反馈，避免全黑无响应感
-                  loadingBuilder: (context, child, progress) {
-                    if (progress == null) return child;
-                    return const Padding(
-                      padding: EdgeInsets.all(48.0),
-                      child: CircularProgressIndicator(color: Colors.white70),
-                    );
-                  },
-                  errorBuilder: (_, _, _) => const Column(
+                  placeholder: (_, _) => const Padding(
+                    padding: EdgeInsets.all(48.0),
+                    child: CircularProgressIndicator(color: Colors.white70),
+                  ),
+                  errorWidget: (_, _, _) => const Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(

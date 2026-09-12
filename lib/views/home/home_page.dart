@@ -7,6 +7,7 @@ import '../../core/constants/service_texts.dart';
 import '../common/empty_state.dart';
 import '../common/skeleton_list.dart';
 import '../common/rank_badge.dart';
+import '../common/staggered_in.dart';
 import '../../models/ticket_model.dart';
 import '../../models/tech_stats_model.dart';
 import '../../providers/auth_provider.dart';
@@ -239,19 +240,12 @@ class _HomePageState extends State<HomePage> {
       padding: const EdgeInsets.all(AppSpacing.xxl),
       children: [
         const SizedBox(height: AppSpacing.xxxl),
+        // 吉祥物迎宾：首次打开的第一眼即建立"社团服务"的亲近感
         Center(
-          child: Container(
-            width: 90,
-            height: 90,
-            decoration: BoxDecoration(
-              color: AppTheme.primaryBlue.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.cloud_outlined,
-              size: 50,
-              color: AppTheme.primaryBlue,
-            ),
+          child: Image.asset(
+            'assets/illustrations/fy_q.png',
+            height: 150,
+            fit: BoxFit.contain,
           ),
         ),
         const SizedBox(height: AppSpacing.xl),
@@ -411,11 +405,12 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-          ...activeList.map((t) => _buildTicketCard(t)),
+          ...activeList.indexed.map((e) => _buildTicketCard(e.$2, index: e.$1)),
           const SizedBox(height: AppSpacing.xl),
         ] else if (config.repairFlag) ...[
           const EmptyState(
             icon: Icons.assignment_turned_in_outlined,
+            image: 'assets/illustrations/fy_q.png',
             title: '您当前没有进行中的报修工单',
             subtitle: '如遇电脑软硬件故障，请点击右下方按钮发起报修',
             minHeight: 220,
@@ -455,7 +450,7 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-          ...activeList.map((t) => _buildTicketCard(t)),
+          ...activeList.indexed.map((e) => _buildTicketCard(e.$2, index: e.$1)),
           const SizedBox(height: AppSpacing.xl),
         ],
         // 技术员排行榜（受软件设置开关控制）
@@ -484,6 +479,7 @@ class _HomePageState extends State<HomePage> {
         ] else if (activeList.isEmpty) ...[
           const EmptyState(
             icon: Icons.done_all_rounded,
+            image: 'assets/illustrations/fy_q.png',
             title: '当前没有进行中的工单',
             subtitle: '如需接单，请点击右上角扫码接单',
             minHeight: 220,
@@ -586,92 +582,101 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildTicketCard(TicketModel ticket) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: AppSpacing.md),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(AppRadius.card),
-        onTap: () async {
-          await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => TicketDetailPage(ticket: ticket)),
-          );
-          if (mounted) {
-            _refreshData();
-          }
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Hero(
-                    tag: 'ticket-status-${ticket.id}',
-                    child: Material(
-                      type: MaterialType.transparency,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.sm,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppTheme.getStatusColor(ticket.repairStatus)
-                              .withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(AppRadius.badge),
-                        ),
-                        child: Text(
-                          AppTheme.getStatusText(ticket.repairStatus),
-                          style: AppText.captionSm.copyWith(
-                            color: AppTheme.getStatusColor(ticket.repairStatus),
-                            fontWeight: FontWeight.bold,
-                            decoration: TextDecoration.none,
+  Widget _buildTicketCard(TicketModel ticket, {required int index}) {
+    return StaggeredIn(
+      index: index,
+      child: Card(
+        margin: const EdgeInsets.only(bottom: AppSpacing.md),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(AppRadius.card),
+          onTap: () async {
+            await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => TicketDetailPage(ticket: ticket),
+              ),
+            );
+            if (mounted) {
+              _refreshData();
+            }
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Hero(
+                      tag: 'ticket-status-${ticket.id}',
+                      child: Material(
+                        type: MaterialType.transparency,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.sm,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppTheme.getStatusColor(ticket.repairStatus)
+                                .withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(
+                              AppRadius.badge,
+                            ),
+                          ),
+                          child: Text(
+                            AppTheme.getStatusText(ticket.repairStatus),
+                            style: AppText.captionSm.copyWith(
+                              color: AppTheme.getStatusColor(
+                                ticket.repairStatus,
+                              ),
+                              fontWeight: FontWeight.bold,
+                              decoration: TextDecoration.none,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  const Spacer(),
-                  Text(
-                    ticket.createTime,
-                    style: AppText.captionSm.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    const Spacer(),
+                    Text(
+                      ticket.createTime,
+                      style: AppText.captionSm.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Text(
-                '${ticket.deviceType} • ${ticket.faultType}',
-                style: AppText.title,
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                ticket.repairDescription,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: AppText.caption.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ],
                 ),
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Chip(
-                    label: Text(ticket.campus, style: AppText.micro),
-                    visualDensity: VisualDensity.compact,
-                    padding: EdgeInsets.zero,
+                const SizedBox(height: 10),
+                Text(
+                  '${ticket.deviceType} • ${ticket.faultType}',
+                  style: AppText.title,
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  ticket.repairDescription,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppText.caption.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
-                  const SizedBox(width: 6),
-                  Chip(
-                    label: Text(ticket.computerBrand, style: AppText.micro),
-                    visualDensity: VisualDensity.compact,
-                    padding: EdgeInsets.zero,
-                  ),
-                ],
-              ),
-            ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Chip(
+                      label: Text(ticket.campus, style: AppText.micro),
+                      visualDensity: VisualDensity.compact,
+                      padding: EdgeInsets.zero,
+                    ),
+                    const SizedBox(width: 6),
+                    Chip(
+                      label: Text(ticket.computerBrand, style: AppText.micro),
+                      visualDensity: VisualDensity.compact,
+                      padding: EdgeInsets.zero,
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

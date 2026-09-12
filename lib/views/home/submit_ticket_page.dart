@@ -1,4 +1,6 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -8,6 +10,7 @@ import '../../core/network/api_client.dart';
 import '../../core/theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/ticket_provider.dart';
+import '../common/app_snackbar.dart';
 import '../common/confirm_dialog.dart';
 import '../common/image_preview.dart';
 import '../common/page_insets.dart';
@@ -79,8 +82,7 @@ class _SubmitTicketPageState extends State<SubmitTicketPage> {
     } catch (_) {
       // 相册权限被拒等场景：image_picker 会抛出异常而非返回 null
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('无法打开相册，请检查相册权限设置')));
+      showAppSnackBar(context, '无法打开相册，请检查相册权限设置', type: SnackBarType.error);
       return;
     }
 
@@ -102,8 +104,7 @@ class _SubmitTicketPageState extends State<SubmitTicketPage> {
       setState(() {
         _uploadedImageUrls.add(res.data!);
       });
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('图片上传成功')));
+      showAppSnackBar(context, '图片上传成功', type: SnackBarType.success);
     } else {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(res.message ?? '图片上传失败')));
@@ -155,8 +156,8 @@ class _SubmitTicketPageState extends State<SubmitTicketPage> {
     setState(() => _isSubmitting = false);
 
     if (success) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('报修工单提交成功！')));
+      HapticFeedback.mediumImpact();
+      showAppSnackBar(context, '报修工单提交成功！', type: SnackBarType.success);
       if (auth.user != null) {
         ticketProvider.fetchTickets(role: auth.user!.role, uid: auth.user!.uid);
       }
@@ -389,13 +390,15 @@ class _SubmitTicketPageState extends State<SubmitTicketPage> {
                               GestureDetector(
                                 onTap: () => showImagePreview(context, url),
                                 child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: Image.network(
-                                    url,
+                                  borderRadius: BorderRadius.circular(
+                                    AppRadius.thumb,
+                                  ),
+                                  child: CachedNetworkImage(
+                                    imageUrl: url,
                                     width: 80,
                                     height: 80,
                                     fit: BoxFit.cover,
-                                    errorBuilder: (_, _, _) => Container(
+                                    errorWidget: (_, _, _) => Container(
                                       width: 80,
                                       height: 80,
                                       color: Theme.of(context)

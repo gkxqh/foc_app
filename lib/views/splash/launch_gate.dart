@@ -27,15 +27,15 @@ class LaunchGate extends StatelessWidget {
 class IconSplashPage extends StatefulWidget {
   const IconSplashPage({super.key});
 
-  // 与软件设置页 _iconOptions 的预览资源一致；判定顺序需先于前缀派生名
-  // （foc_logo 是 foc_logo_light / foc_logoart 的前缀）。
+  // 与软件设置页 _iconOptions 的预览资源一致（缩略版，控制包体）；
+  // 判定顺序需先于前缀派生名（foc_logo 是 foc_logo_light / foc_logoart 的前缀）。
   static String _assetForIcon(String? name) {
-    if (name == null) return 'assets/icon/character_icon.png';
-    if (name.contains('foc_logo_light')) return 'assets/icon/logo_alt.png';
-    if (name.contains('foc_logoart')) return 'assets/icon/logo_art.png';
-    if (name.contains('foc_logo')) return 'assets/icon/logo_alt.png';
-    if (name.contains('foc_fylogo')) return 'assets/icon/fy_logo.png';
-    return 'assets/icon/red_avatar.png'; // foc_red 及未知值兜底
+    if (name == null) return 'assets/preview/character_icon.png';
+    if (name.contains('foc_logo_light')) return 'assets/preview/logo_alt.png';
+    if (name.contains('foc_logoart')) return 'assets/preview/logo_art.png';
+    if (name.contains('foc_logo')) return 'assets/preview/logo_alt.png';
+    if (name.contains('foc_fylogo')) return 'assets/preview/fy_logo.png';
+    return 'assets/preview/red_avatar.png'; // foc_red 及未知值兜底
   }
 
   @override

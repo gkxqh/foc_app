@@ -6,6 +6,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../../core/theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/ticket_provider.dart';
+import '../common/app_snackbar.dart';
 import '../common/page_insets.dart';
 
 class GiveOrderPage extends StatefulWidget {
@@ -39,8 +40,7 @@ class _GiveOrderPageState extends State<GiveOrderPage> {
     if (_isSubmitting) return;
     final code = _codeController.text.trim();
     if (code.isEmpty) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('请填写完整的转单码')));
+      showAppSnackBar(context, '请填写完整的转单码', type: SnackBarType.error);
       return;
     }
 
@@ -54,8 +54,8 @@ class _GiveOrderPageState extends State<GiveOrderPage> {
     setState(() => _isSubmitting = false);
 
     if (err == null) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('接单成功！')));
+      HapticFeedback.mediumImpact();
+      showAppSnackBar(context, '接单成功！', type: SnackBarType.success);
       if (authProvider.user != null) {
         ticketProvider.fetchTickets(
           role: authProvider.user!.role,
@@ -64,8 +64,7 @@ class _GiveOrderPageState extends State<GiveOrderPage> {
       }
       Navigator.pop(context, true);
     } else {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('接单失败: $err')));
+      showAppSnackBar(context, '接单失败: $err', type: SnackBarType.error);
     }
   }
 
@@ -124,8 +123,11 @@ class _GiveOrderPageState extends State<GiveOrderPage> {
                           Clipboard.setData(
                             ClipboardData(text: widget.transcodeToShare!),
                           );
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('转单码已复制到剪贴板')),
+                          HapticFeedback.selectionClick();
+                          showAppSnackBar(
+                            context,
+                            '转单码已复制到剪贴板',
+                            type: SnackBarType.error,
                           );
                         },
                         icon: const Icon(Icons.copy_rounded, size: 18),

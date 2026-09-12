@@ -2,13 +2,17 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/app_theme.dart';
 
-/// 统一空态组件：图标 + 标题 + 可选说明 + 可选操作按钮。
+/// 统一空态组件：吉祥物插画或图标 + 标题 + 可选说明 + 可选操作按钮。
 /// 替代各页面手写的"图标+文案"竖排组合，保证全 App 空态观感一致。
+///
+/// [image] 传入吉祥物插画路径（如飞扬娘 Q 版），此时 [icon] 不展示；
+/// 错误类空态建议保留语义图标（cloud_off 等），插画留给"确实没有内容"的场景。
 ///
 /// [minHeight] 用于列表页场景：直接作为 ListView 子项时给定最小高度并垂直居中，
 /// 页面不再需要外包 SizedBox 手动撑高。
 class EmptyState extends StatelessWidget {
   final IconData icon;
+  final String? image;
   final String title;
   final String? subtitle;
   final Widget? action;
@@ -17,6 +21,7 @@ class EmptyState extends StatelessWidget {
   const EmptyState({
     super.key,
     required this.icon,
+    this.image,
     required this.title,
     this.subtitle,
     this.action,
@@ -35,11 +40,26 @@ class EmptyState extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            icon,
-            size: 64,
-            color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-          ),
+          if (image != null)
+            Image.asset(
+              image!,
+              height: 110,
+              fit: BoxFit.contain,
+              // 插画加载失败兜底回语义图标
+              errorBuilder: (_, _, _) => Icon(
+                icon,
+                size: 64,
+                color: theme.colorScheme.onSurfaceVariant.withValues(
+                  alpha: 0.5,
+                ),
+              ),
+            )
+          else
+            Icon(
+              icon,
+              size: 64,
+              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+            ),
           const SizedBox(height: AppSpacing.lg),
           Text(
             title,

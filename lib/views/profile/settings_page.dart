@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -9,7 +10,7 @@ import '../../core/theme/app_theme.dart';
 import '../../models/user_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/auth_service.dart';
-import '../common/confirm_dialog.dart';
+import '../common/app_snackbar.dart';
 import '../common/page_insets.dart';
 import 'new_phone_page.dart';
 
@@ -39,7 +40,7 @@ class _SettingsPageState extends State<SettingsPage> {
     'b': '减少接单',
     'c': '正常接单',
     'd': '增加接单',
-    'e': '疯狂接单！🔥',
+    'e': '全力接单',
   };
 
   @override
@@ -113,8 +114,7 @@ class _SettingsPageState extends State<SettingsPage> {
     } catch (_) {
       // 相册权限被拒等场景：image_picker 会抛出异常而非返回 null
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('无法打开相册，请检查相册权限设置')));
+      showAppSnackBar(context, '无法打开相册，请检查相册权限设置', type: SnackBarType.error);
       return;
     }
     if (picked == null) return;
@@ -127,8 +127,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
     if (res.success && res.data != null) {
       setState(() => _avatarUrl = res.data!);
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('头像上传成功，请保存设置')));
+      showAppSnackBar(context, '头像上传成功，请保存设置', type: SnackBarType.success);
     } else {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(res.message ?? '头像上传失败')));
@@ -164,16 +163,14 @@ class _SettingsPageState extends State<SettingsPage> {
     setState(() => _isSaving = false);
 
     if (okProfile && okTech) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('个人资料更新成功！')));
+      showAppSnackBar(context, '个人资料更新成功！', type: SnackBarType.success);
       Navigator.pop(context);
     } else if (okProfile && !okTech) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('个人资料已保存，但技术员设置保存失败，请重试')));
     } else {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('保存失败，请稍后重试')));
+      showAppSnackBar(context, '保存失败，请稍后重试', type: SnackBarType.error);
     }
   }
 
@@ -187,8 +184,7 @@ class _SettingsPageState extends State<SettingsPage> {
     final ok = await _authService.newEmail(email);
     if (!mounted) return;
     if (!ok) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('变更失败，请稍后重试')));
+      showAppSnackBar(context, '变更失败，请稍后重试', type: SnackBarType.error);
       return;
     }
     // 服务端 newemail 只把新邮箱存为待验证状态并发验证邮件，验证完成后才真正生效
@@ -199,18 +195,17 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Future<void> _deleteAccount() async {
-    final ok = await showConfirmDialog(
-      context,
-      title: '注销账号？',
-      content: '注销后所有报修历史、技术员积分和个人数据将被永久删除且无法恢复！',
-      confirmText: '确认注销',
-      danger: true,
+    // 注销不可逆：除红色确认按钮外，还要求手动输入本机手机号才能执行，
+    // 防止误触一次性永久删除全部数据
+    final auth = context.read<AuthProvider>();
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (_) => _DeleteAccountDialog(phone: auth.user?.phone ?? ''),
     );
 
-    if (!ok) return;
+    if (ok != true) return;
     if (!mounted) return;
 
-    final auth = context.read<AuthProvider>();
     final deleted = await _authService.deleteAccount();
     if (!mounted) return;
 
@@ -219,13 +214,11 @@ class _SettingsPageState extends State<SettingsPage> {
       await auth.removeSavedAccount(auth.user?.phone ?? '');
       await auth.logout();
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('账号已成功注销')));
+      showAppSnackBar(context, '账号已成功注销', type: SnackBarType.success);
       Navigator.pop(context);
     } else {
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('注销失败，请稍后重试或联系管理员')));
+      showAppSnackBar(context, '注销失败，请稍后重试或联系管理员', type: SnackBarType.error);
     }
   }
 
@@ -256,7 +249,7 @@ class _SettingsPageState extends State<SettingsPage> {
                               .surfaceContainerHighest,
                           // 无头像时显示本地图标兜底，不向第三方图床发起请求
                           backgroundImage: _avatarUrl.isNotEmpty
-                              ? NetworkImage(_avatarUrl)
+                              ? CachedNetworkImageProvider(_avatarUrl)
                               : null,
                           child: _avatarUrl.isNotEmpty
                               ? null
@@ -430,10 +423,11 @@ class _SettingsPageState extends State<SettingsPage> {
                     Clipboard.setData(
                       const ClipboardData(text: ApiConstants.supportPhone),
                     );
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('客服电话 ${ApiConstants.supportPhone} 已复制'),
-                      ),
+                    HapticFeedback.selectionClick();
+                    showAppSnackBar(
+                      context,
+                      '客服电话 ${ApiConstants.supportPhone} 已复制',
+                      type: SnackBarType.error,
                     );
                   },
                 ),
@@ -472,8 +466,7 @@ class _SettingsPageState extends State<SettingsPage> {
               await auth.logout();
               if (context.mounted) {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context)
-                    .showSnackBar(const SnackBar(content: Text('已退出登录')));
+                showAppSnackBar(context, '已退出登录', type: SnackBarType.error);
               }
             },
             style: OutlinedButton.styleFrom(
@@ -528,13 +521,81 @@ class _EmailDialogState extends State<_EmailDialog> {
           onPressed: () {
             final email = _emailController.text.trim();
             if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email)) {
-              ScaffoldMessenger.of(context)
-                  .showSnackBar(const SnackBar(content: Text('请输入有效的邮箱地址')));
+              showAppSnackBar(context, '请输入有效的邮箱地址', type: SnackBarType.error);
               return;
             }
             Navigator.pop(context, email);
           },
           child: const Text('确认'),
+        ),
+      ],
+    );
+  }
+}
+
+/// 注销账号二次确认：仅当输入内容与本机登录手机号完全一致时才允许确认。
+class _DeleteAccountDialog extends StatefulWidget {
+  final String phone;
+
+  const _DeleteAccountDialog({required this.phone});
+
+  @override
+  State<_DeleteAccountDialog> createState() => _DeleteAccountDialogState();
+}
+
+class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
+  final _controller = TextEditingController();
+
+  bool get _matched => _controller.text.trim() == widget.phone;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('确认注销账号？'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('注销后所有报修历史、技术员积分和个人数据将被永久删除且无法恢复！'),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            '请输入本机登录手机号 ${widget.phone} 以确认：',
+            style: AppText.captionSm.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          TextField(
+            controller: _controller,
+            keyboardType: TextInputType.phone,
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(11),
+            ],
+            autofocus: true,
+            onChanged: (_) => setState(() {}),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: const Text('取消'),
+        ),
+        ElevatedButton(
+          onPressed: _matched ? () => Navigator.pop(context, true) : null,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppTheme.errorRed,
+            disabledBackgroundColor: Theme.of(context).colorScheme.onSurface
+                .withValues(alpha: 0.12),
+          ),
+          child: const Text('确认注销'),
         ),
       ],
     );

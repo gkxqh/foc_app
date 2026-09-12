@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -6,8 +7,10 @@ import '../../models/event_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/event_service.dart';
 import '../auth/login_page.dart';
+import '../common/app_snackbar.dart';
 import '../common/empty_state.dart';
 import '../common/skeleton_list.dart';
+import '../common/staggered_in.dart';
 import 'number_page.dart';
 
 class ActivityPage extends StatefulWidget {
@@ -141,8 +144,7 @@ class _ActivityPageState extends State<ActivityPage> {
     }
     final uid = auth.user?.uid ?? '';
     if (uid.isEmpty) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('用户信息未加载完成，请稍后重试')));
+      showAppSnackBar(context, '用户信息未加载完成，请稍后重试', type: SnackBarType.error);
       return;
     }
 
@@ -159,8 +161,7 @@ class _ActivityPageState extends State<ActivityPage> {
         ),
       );
     } else {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('暂无您的抽奖号码或活动尚未开奖')));
+      showAppSnackBar(context, '暂无您的抽奖号码或活动尚未开奖', type: SnackBarType.error);
     }
   }
 
@@ -207,6 +208,7 @@ class _ActivityPageState extends State<ActivityPage> {
                   const SizedBox(height: 80),
                   EmptyState(
                     icon: Icons.event_busy_outlined,
+                    image: 'assets/illustrations/fy_q.png',
                     title: '近期暂无正在进行的招新或技术活动',
                     minHeight: 240,
                     action: OutlinedButton.icon(
@@ -224,21 +226,22 @@ class _ActivityPageState extends State<ActivityPage> {
                   final event = _events[i];
                   final isSignUp = event.status == 1; // 报名进行中
 
-                  return Card(
-                    clipBehavior: Clip.antiAlias,
-                    margin: const EdgeInsets.only(bottom: AppSpacing.lg),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (event.poster != null && event.poster!.isNotEmpty)
-                          Image.network(
-                            event.poster!,
-                            height: 160,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                            loadingBuilder: (context, child, progress) {
-                              if (progress == null) return child;
-                              return Container(
+                  return StaggeredIn(
+                    index: i,
+                    child: Card(
+                      clipBehavior: Clip.antiAlias,
+                      margin: const EdgeInsets.only(bottom: AppSpacing.lg),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (event.poster != null && event.poster!.isNotEmpty)
+                            // 海报缓存到本地：回退重进不再重复下载
+                            CachedNetworkImage(
+                              imageUrl: event.poster!,
+                              height: 160,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) => Container(
                                 height: 160,
                                 color: Theme.of(context)
                                     .colorScheme
@@ -248,156 +251,157 @@ class _ActivityPageState extends State<ActivityPage> {
                                     strokeWidth: 2,
                                   ),
                                 ),
-                              );
-                            },
-                            // 海报加载失败用占位图填满原高度，避免残留 160px 空白
-                            errorBuilder: (context, error, stackTrace) =>
-                                Container(
-                                  height: 160,
+                              ),
+                              // 海报加载失败用占位图填满原高度，避免残留 160px 空白
+                              errorWidget: (context, url, error) => Container(
+                                height: 160,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .surfaceContainerHighest,
+                                child: Icon(
+                                  Icons.image_not_supported_outlined,
+                                  size: 40,
                                   color: Theme.of(context)
                                       .colorScheme
-                                      .surfaceContainerHighest,
-                                  child: Icon(
-                                    Icons.image_not_supported_outlined,
-                                    size: 40,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurfaceVariant,
-                                  ),
+                                      .onSurfaceVariant,
                                 ),
-                          ),
-                        Padding(
-                          padding: const EdgeInsets.all(AppSpacing.lg),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  if (event.type != null &&
-                                      event.type!.isNotEmpty) ...[
+                              ),
+                            ),
+                          Padding(
+                            padding: const EdgeInsets.all(AppSpacing.lg),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    if (event.type != null &&
+                                        event.type!.isNotEmpty) ...[
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 6,
+                                          vertical: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: AppTheme.primaryBlue
+                                              .withValues(alpha: 0.1),
+                                          borderRadius: BorderRadius.circular(
+                                            AppRadius.badge,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          event.type!,
+                                          style: AppText.micro.copyWith(
+                                            color: AppTheme.primaryBlue,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: AppSpacing.sm),
+                                    ],
+                                    Expanded(
+                                      child: Text(
+                                        event.title,
+                                        style: AppText.titleLg,
+                                      ),
+                                    ),
                                     Container(
                                       padding: const EdgeInsets.symmetric(
-                                        horizontal: 6,
-                                        vertical: 2,
+                                        horizontal: AppSpacing.sm,
+                                        vertical: AppSpacing.xs,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: AppTheme.primaryBlue.withValues(
-                                          alpha: 0.1,
-                                        ),
-                                        borderRadius: BorderRadius.circular(
-                                          AppRadius.badge,
-                                        ),
+                                        color: isSignUp
+                                            ? AppTheme.accentColor.withValues(
+                                                alpha: 0.15,
+                                              )
+                                            : Theme.of(context)
+                                                  .colorScheme
+                                                  .onSurfaceVariant
+                                                  .withValues(alpha: 0.12),
+                                        borderRadius: BorderRadius.circular(6),
                                       ),
                                       child: Text(
-                                        event.type!,
-                                        style: AppText.micro.copyWith(
-                                          color: AppTheme.primaryBlue,
+                                        event.statusText,
+                                        style: AppText.captionSm.copyWith(
+                                          color: isSignUp
+                                              ? AppTheme.accentColor
+                                              : Theme.of(context)
+                                                    .colorScheme
+                                                    .onSurfaceVariant,
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
                                     ),
-                                    const SizedBox(width: AppSpacing.sm),
                                   ],
-                                  Expanded(
-                                    child: Text(
-                                      event.title,
-                                      style: AppText.titleLg,
-                                    ),
-                                  ),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: AppSpacing.sm,
-                                      vertical: AppSpacing.xs,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: isSignUp
-                                          ? AppTheme.accentColor.withValues(
-                                              alpha: 0.15,
-                                            )
-                                          : Theme.of(context)
-                                                .colorScheme
-                                                .onSurfaceVariant
-                                                .withValues(alpha: 0.12),
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: Text(
-                                      event.statusText,
-                                      style: AppText.captionSm.copyWith(
-                                        color: isSignUp
-                                            ? AppTheme.accentColor
-                                            : Theme.of(context)
-                                                  .colorScheme
-                                                  .onSurfaceVariant,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: AppSpacing.sm),
-                              Text(
-                                event.description,
-                                style: AppText.caption.copyWith(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSurfaceVariant,
-                                  height: 1.4,
                                 ),
-                              ),
-                              const SizedBox(height: AppSpacing.md),
-                              if (event.signupStartTime.isNotEmpty)
+                                const SizedBox(height: AppSpacing.sm),
                                 Text(
-                                  '报名时间：${event.signupStartTime} ~ ${event.signupEndTime}',
-                                  style: AppText.micro.copyWith(
+                                  event.description,
+                                  style: AppText.caption.copyWith(
                                     color: Theme.of(context)
                                         .colorScheme
                                         .onSurfaceVariant,
+                                    height: 1.4,
                                   ),
                                 ),
-                              const SizedBox(height: AppSpacing.lg),
-                              Align(
-                                alignment: Alignment.centerRight,
-                                child: Wrap(
-                                  alignment: WrapAlignment.end,
-                                  spacing: 8,
-                                  runSpacing: 8,
-                                  children: [
-                                    if (event.isLucky)
-                                      OutlinedButton.icon(
-                                        onPressed: () =>
-                                            _checkLuckyNumber(event),
-                                        icon: const Icon(
-                                          Icons.confirmation_number_outlined,
-                                          size: 16,
-                                        ),
-                                        label: const Text('我的抽奖号'),
-                                      ),
-                                    ElevatedButton(
-                                      onPressed:
-                                          (isSignUp &&
-                                              !event.registered &&
-                                              _registeringEventId != event.id)
-                                          ? () => _showSignUpDialog(event)
-                                          : null,
-                                      child: _registeringEventId == event.id
-                                          ? const SizedBox(
-                                              width: 16,
-                                              height: 16,
-                                              child: CircularProgressIndicator(
-                                                strokeWidth: 2,
-                                              ),
-                                            )
-                                          : Text(
-                                              event.registered ? '已报名' : '立即报名',
-                                            ),
+                                const SizedBox(height: AppSpacing.md),
+                                if (event.signupStartTime.isNotEmpty)
+                                  Text(
+                                    '报名时间：${event.signupStartTime} ~ ${event.signupEndTime}',
+                                    style: AppText.micro.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant,
                                     ),
-                                  ],
+                                  ),
+                                const SizedBox(height: AppSpacing.lg),
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: Wrap(
+                                    alignment: WrapAlignment.end,
+                                    spacing: 8,
+                                    runSpacing: 8,
+                                    children: [
+                                      if (event.isLucky)
+                                        OutlinedButton.icon(
+                                          onPressed: () =>
+                                              _checkLuckyNumber(event),
+                                          icon: const Icon(
+                                            Icons.confirmation_number_outlined,
+                                            size: 16,
+                                          ),
+                                          label: const Text('我的抽奖号'),
+                                        ),
+                                      ElevatedButton(
+                                        onPressed:
+                                            (isSignUp &&
+                                                !event.registered &&
+                                                _registeringEventId != event.id)
+                                            ? () => _showSignUpDialog(event)
+                                            : null,
+                                        child: _registeringEventId == event.id
+                                            ? const SizedBox(
+                                                width: 16,
+                                                height: 16,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                      strokeWidth: 2,
+                                                    ),
+                                              )
+                                            : Text(
+                                                event.registered
+                                                    ? '已报名'
+                                                    : '立即报名',
+                                              ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   );
                 },
@@ -541,13 +545,11 @@ class _SignUpDialogState extends State<_SignUpDialog> {
           onPressed: () {
             final name = _nameController.text.trim();
             if (name.isEmpty) {
-              ScaffoldMessenger.of(context)
-                  .showSnackBar(const SnackBar(content: Text('请填写姓名')));
+              showAppSnackBar(context, '请填写姓名', type: SnackBarType.error);
               return;
             }
             if (_selectedDepts.isEmpty) {
-              ScaffoldMessenger.of(context)
-                  .showSnackBar(const SnackBar(content: Text('请至少选择一个意向部门')));
+              showAppSnackBar(context, '请至少选择一个意向部门', type: SnackBarType.error);
               return;
             }
             Navigator.pop(

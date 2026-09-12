@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -6,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/theme/app_theme.dart';
 import '../../models/saved_account.dart';
 import '../../providers/auth_provider.dart';
+import '../common/app_snackbar.dart';
 import '../common/confirm_dialog.dart';
 import '../common/page_insets.dart';
 
@@ -97,8 +99,7 @@ class _LoginPageState extends State<LoginPage> {
     final phone = _phoneController.text.trim();
     // 长度 + 纯数字双重校验，防止含非数字字符的输入透传到服务端
     if (!RegExp(r'^\d{11}$').hasMatch(phone)) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('请输入正确的11位手机号码')));
+      showAppSnackBar(context, '请输入正确的11位手机号码', type: SnackBarType.error);
       return;
     }
 
@@ -110,8 +111,7 @@ class _LoginPageState extends State<LoginPage> {
     if (res.success) {
       // phonesend 对未注册/待迁移用户直接返回 success:false 与中文提示，
       // 这里只处理发码成功；失败分支统一展示服务端 message
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('验证码已发送，请注意查收')));
+      showAppSnackBar(context, '验证码已发送，请注意查收', type: SnackBarType.success);
     } else {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(res.message ?? '验证码发送失败')));
@@ -152,8 +152,7 @@ class _LoginPageState extends State<LoginPage> {
       return true;
     }
     if (!mounted) return false;
-    ScaffoldMessenger.of(context)
-        .showSnackBar(const SnackBar(content: Text('需同意隐私声明后才能登录使用报修功能')));
+    showAppSnackBar(context, '需同意隐私声明后才能登录使用报修功能', type: SnackBarType.error);
     return false;
   }
 
@@ -162,13 +161,11 @@ class _LoginPageState extends State<LoginPage> {
     final code = _codeController.text.trim();
 
     if (phone.isEmpty) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('请填写手机号码')));
+      showAppSnackBar(context, '请填写手机号码', type: SnackBarType.error);
       return;
     }
     if (code.isEmpty) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('请输入短信验证码')));
+      showAppSnackBar(context, '请输入短信验证码', type: SnackBarType.error);
       return;
     }
 
@@ -180,12 +177,10 @@ class _LoginPageState extends State<LoginPage> {
     if (!mounted) return;
 
     if (ok) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('登录成功！')));
+      showAppSnackBar(context, '登录成功！', type: SnackBarType.success);
       Navigator.pop(context);
     } else {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('验证码错误或登录失败')));
+      showAppSnackBar(context, '验证码错误或登录失败', type: SnackBarType.error);
     }
   }
 
@@ -241,7 +236,7 @@ class _LoginPageState extends State<LoginPage> {
                         alpha: 0.12,
                       ),
                       backgroundImage: account.avatarUrl.isNotEmpty
-                          ? NetworkImage(account.avatarUrl)
+                          ? CachedNetworkImageProvider(account.avatarUrl)
                           : null,
                       child: account.avatarUrl.isNotEmpty
                           ? null
@@ -363,6 +358,25 @@ class _LoginPageState extends State<LoginPage> {
                       labelText: '短信验证码',
                       hintText: '',
                       prefixIcon: const Icon(Icons.lock_clock_outlined),
+                      // 短信验证码常需跨应用取：一键粘贴并校验 4-6 位数字
+                      suffixIcon: IconButton(
+                        icon: const Icon(Icons.content_paste_rounded, size: 18),
+                        tooltip: '粘贴验证码',
+                        onPressed: () async {
+                          final messenger = ScaffoldMessenger.of(context);
+                          final data = await Clipboard.getData('text/plain');
+                          final code = data?.text?.trim() ?? '';
+                          if (RegExp(r'^\d{4,6}$').hasMatch(code)) {
+                            _codeController.text = code;
+                          } else {
+                            showAppSnackBarOn(
+                              messenger,
+                              '剪贴板中没有可用的验证码',
+                              type: SnackBarType.warning,
+                            );
+                          }
+                        },
+                      ),
                     ),
                   ),
                 ),

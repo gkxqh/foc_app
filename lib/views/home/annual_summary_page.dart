@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
 import '../../models/tech_stats_model.dart';
 import '../../services/config_service.dart';
+import '../common/count_up_text.dart';
 import '../common/empty_state.dart';
 import '../common/page_insets.dart';
 import '../common/skeleton_list.dart';
@@ -107,7 +108,7 @@ class _AnnualSummaryPageState extends State<AnnualSummaryPage> {
                           style: AppText.body.copyWith(color: Colors.white70),
                         ),
                         const SizedBox(height: AppSpacing.sm),
-                        Text(
+                        CountUpText(
                           _summary?.totalOrders ?? '0',
                           style: AppText.displayNumber.copyWith(
                             color: Colors.white,

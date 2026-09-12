@@ -7,6 +7,7 @@ import '../../providers/ticket_provider.dart';
 import '../common/empty_state.dart';
 import '../common/page_insets.dart';
 import '../common/skeleton_list.dart';
+import '../common/staggered_in.dart';
 import '../home/ticket_detail_page.dart';
 
 class HistoryPage extends StatefulWidget {
@@ -81,6 +82,7 @@ class _HistoryPageState extends State<HistoryPage> {
                   SizedBox(height: 80),
                   EmptyState(
                     icon: Icons.history_toggle_off_rounded,
+                    image: 'assets/illustrations/fy_q.png',
                     title: '暂无历史已结束工单',
                     minHeight: 220,
                   ),
@@ -91,38 +93,45 @@ class _HistoryPageState extends State<HistoryPage> {
                 itemCount: historyList.length,
                 itemBuilder: (ctx, i) {
                   final ticket = historyList[i];
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: AppSpacing.md),
-                    child: ListTile(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => TicketDetailPage(ticket: ticket),
+                  return StaggeredIn(
+                    index: i,
+                    child: Card(
+                      margin: const EdgeInsets.only(bottom: AppSpacing.md),
+                      child: ListTile(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => TicketDetailPage(ticket: ticket),
+                            ),
+                          );
+                        },
+                        leading: CircleAvatar(
+                          backgroundColor: AppTheme.getStatusColor(
+                            ticket.repairStatus,
+                          ).withValues(alpha: 0.15),
+                          child: Icon(
+                            ticket.repairStatus == 'Done'
+                                ? Icons.check
+                                : ticket.repairStatus == 'Canceled'
+                                ? Icons.cancel_outlined
+                                : Icons.close,
+                            color: AppTheme.getStatusColor(ticket.repairStatus),
+                            size: 20,
                           ),
-                        );
-                      },
-                      leading: CircleAvatar(
-                        backgroundColor: AppTheme.getStatusColor(
-                          ticket.repairStatus,
-                        ).withValues(alpha: 0.15),
-                        child: Icon(
-                          ticket.repairStatus == 'Done'
-                              ? Icons.check
-                              : ticket.repairStatus == 'Canceled'
-                              ? Icons.cancel_outlined
-                              : Icons.close,
-                          color: AppTheme.getStatusColor(ticket.repairStatus),
-                          size: 20,
                         ),
-                      ),
-                      title: Text('${ticket.deviceType} • ${ticket.faultType}'),
-                      subtitle: Text('${ticket.campus} | ${ticket.createTime}'),
-                      trailing: Text(
-                        AppTheme.getStatusText(ticket.repairStatus),
-                        style: AppText.captionSm.copyWith(
-                          color: AppTheme.getStatusColor(ticket.repairStatus),
-                          fontWeight: FontWeight.bold,
+                        title: Text(
+                          '${ticket.deviceType} • ${ticket.faultType}',
+                        ),
+                        subtitle: Text(
+                          '${ticket.campus} | ${ticket.createTime}',
+                        ),
+                        trailing: Text(
+                          AppTheme.getStatusText(ticket.repairStatus),
+                          style: AppText.captionSm.copyWith(
+                            color: AppTheme.getStatusColor(ticket.repairStatus),
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),

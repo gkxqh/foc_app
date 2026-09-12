@@ -46,6 +46,7 @@ dependencies:
   flutter_dynamic_icon_plus: ^1.4.1
   flutter_markdown_plus: ^1.0.12
   home_widget: ^0.9.4
+  cached_network_image: ^4.0.0
 
 dev_dependencies:
   flutter_test:
@@ -74,12 +75,17 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/icon/character_icon.png
+    # 原生开屏（flutter_native_splash）与登录页/关于页使用的主图标
     - assets/icon/icon.png
-    - assets/icon/red_avatar.png
-    - assets/icon/logo_alt.png
-    - assets/icon/logo_art.png
-    - assets/icon/fy_logo.png
+    # 设置页预览与 iOS 开屏用的缩略版（tool/gen_preview_icons.dart 生成）
+    - assets/preview/character_icon.png
+    - assets/preview/red_avatar.png
+    - assets/preview/logo_alt.png
+    - assets/preview/logo_art.png
+    - assets/preview/fy_logo.png
+    # 吉祥物插画（tool/gen_illustrations.dart 生成）
+    - assets/illustrations/fy_q.png
+    - assets/illustrations/fy_face.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:

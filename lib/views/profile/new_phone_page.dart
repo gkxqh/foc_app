@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/auth_service.dart';
+import '../common/app_snackbar.dart';
 import '../common/page_insets.dart';
 
 /// 换绑手机号：向新手机号发送验证码（newphone），回填验证码完成换绑
@@ -51,9 +52,9 @@ class _NewPhonePageState extends State<NewPhonePage> {
         _countdown = 60;
       });
       _tick();
-      _toast('验证码已发送至新手机号');
+      _toast('验证码已发送至新手机号', type: SnackBarType.success);
     } else {
-      _toast(res.message ?? '发送失败，请稍后重试');
+      _toast(res.message ?? '发送失败，请稍后重试', type: SnackBarType.error);
     }
   }
 
@@ -81,15 +82,15 @@ class _NewPhonePageState extends State<NewPhonePage> {
     if (ok) {
       await context.read<AuthProvider>().refreshUserInfo();
       if (!mounted) return;
-      _toast('手机号换绑成功');
+      _toast('手机号换绑成功', type: SnackBarType.success);
       Navigator.pop(context);
     } else {
-      _toast('验证码错误或已过期');
+      _toast('验证码错误或已过期', type: SnackBarType.error);
     }
   }
 
-  void _toast(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+  void _toast(String msg, {SnackBarType type = SnackBarType.warning}) {
+    showAppSnackBar(context, msg, type: type);
   }
 
   @override

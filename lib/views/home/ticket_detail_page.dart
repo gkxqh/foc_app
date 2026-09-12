@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -8,6 +9,7 @@ import '../../core/theme/app_theme.dart';
 import '../../models/ticket_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/ticket_provider.dart';
+import '../common/app_snackbar.dart';
 import '../common/confirm_dialog.dart';
 import '../common/image_preview.dart';
 import '../common/page_insets.dart';
@@ -48,8 +50,8 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
 
   void _copyToClipboard(String label, String value) {
     Clipboard.setData(ClipboardData(text: value));
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text('$label已复制：$value')));
+    HapticFeedback.selectionClick();
+    showAppSnackBar(context, '$label已复制：$value', type: SnackBarType.error);
   }
 
   // 联系方式行：有值时附复制按钮
@@ -172,12 +174,14 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
           _ticket = _ticket.copyWith(completeImageUrl: res.data);
         });
         if (!mounted) return;
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('维修凭证上传成功')));
+        showAppSnackBar(context, '维修凭证上传成功', type: SnackBarType.success);
       } else {
         // 图片已上传但未关联到工单，必须明确告知，否则技术员以为凭证已生效
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('凭证上传成功但关联工单失败，请重新上传')));
+        showAppSnackBar(
+          context,
+          '凭证上传成功但关联工单失败，请重新上传',
+          type: SnackBarType.warning,
+        );
       }
     } else {
       if (!mounted) return;
@@ -240,11 +244,9 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
       setState(() {
         _ticket = _ticket.copyWith(repairStatus: newStatus);
       });
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('已提交完成确认')));
+      showAppSnackBar(context, '已提交完成确认', type: SnackBarType.success);
     } else {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('操作失败')));
+      showAppSnackBar(context, '操作失败', type: SnackBarType.error);
     }
   }
 
@@ -264,12 +266,10 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
     if (!mounted) return;
     setState(() => _isActionBusy = false);
     if (okDone) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('工单已结束')));
+      showAppSnackBar(context, '工单已结束', type: SnackBarType.success);
       Navigator.pop(context);
     } else {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('操作失败，请稍后重试')));
+      showAppSnackBar(context, '操作失败，请稍后重试', type: SnackBarType.error);
     }
   }
 
@@ -298,11 +298,9 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
       setState(() {
         _ticket = _ticket.copyWith(repairStatus: 'Closed');
       });
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('工单已强制关闭')));
+      showAppSnackBar(context, '工单已强制关闭', type: SnackBarType.success);
     } else {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('操作失败，请稍后重试')));
+      showAppSnackBar(context, '操作失败，请稍后重试', type: SnackBarType.error);
     }
   }
 
@@ -326,12 +324,10 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
     if (!mounted) return;
     setState(() => _isActionBusy = false);
     if (success) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('工单已取消')));
+      showAppSnackBar(context, '工单已取消', type: SnackBarType.success);
       Navigator.pop(context, true);
     } else {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('取消失败，请稍后重试')));
+      showAppSnackBar(context, '取消失败，请稍后重试', type: SnackBarType.error);
     }
   }
 
@@ -558,25 +554,8 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
                           showImagePreview(context, _ticket.repairImageUrl),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(AppRadius.thumb),
-                        child: Image.network(
-                          _ticket.repairImageUrl,
-                          height: 180,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, _, _) => Container(
-                            height: 180,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .surfaceContainerHighest,
-                            child: Center(
-                              child: Icon(
-                                Icons.broken_image_outlined,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant,
-                              ),
-                            ),
-                          ),
+                        child: _CachedTicketImage(
+                          imageUrl: _ticket.repairImageUrl,
                         ),
                       ),
                     ),
@@ -618,25 +597,8 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
                           showImagePreview(context, _ticket.completeImageUrl!),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(AppRadius.thumb),
-                        child: Image.network(
-                          _ticket.completeImageUrl!,
-                          height: 180,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, _, _) => Container(
-                            height: 180,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .surfaceContainerHighest,
-                            child: Center(
-                              child: Icon(
-                                Icons.broken_image_outlined,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant,
-                              ),
-                            ),
-                          ),
+                        child: _CachedTicketImage(
+                          imageUrl: _ticket.completeImageUrl!,
                         ),
                       ),
                     ),
@@ -782,6 +744,38 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
             style: AppText.caption.copyWith(fontWeight: FontWeight.w500),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// 工单图片缓存加载占位：本地缓存命中秒开，失败时用主题化占位填满原高度
+class _CachedTicketImage extends StatelessWidget {
+  final String imageUrl;
+
+  const _CachedTicketImage({required this.imageUrl});
+
+  @override
+  Widget build(BuildContext context) {
+    return CachedNetworkImage(
+      imageUrl: imageUrl,
+      height: 180,
+      width: double.infinity,
+      fit: BoxFit.cover,
+      placeholder: (_, _) => Container(
+        height: 180,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+      ),
+      errorWidget: (_, _, _) => Container(
+        height: 180,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        child: Center(
+          child: Icon(
+            Icons.broken_image_outlined,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
       ),
     );
   }

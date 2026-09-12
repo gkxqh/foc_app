@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../core/theme/app_theme.dart';
 
 /// 统一的确认弹窗：返回 true 表示用户确认。
-/// danger 为 true 时确认按钮呈错误红色（取语义 token，随品牌色板统一）。
+/// danger 为 true 时确认按钮呈错误红色，并在弹出时强振动提示破坏性操作。
 Future<bool> showConfirmDialog(
   BuildContext context, {
   required String title,
@@ -12,6 +13,9 @@ Future<bool> showConfirmDialog(
   String cancelText = '取消',
   bool danger = false,
 }) async {
+  if (danger) {
+    HapticFeedback.heavyImpact();
+  }
   final ok = await showDialog<bool>(
     context: context,
     builder: (ctx) => AlertDialog(

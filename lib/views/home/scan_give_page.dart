@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:provider/provider.dart';
@@ -44,6 +45,13 @@ class _ScanGivePageState extends State<ScanGivePage> {
       _success = err == null;
       _resultMessage = err ?? '接单成功！';
     });
+
+    // 接单结果用振动强化反馈：成功中振、失败强振（视线可能还停在取景框上）
+    if (err == null) {
+      HapticFeedback.mediumImpact();
+    } else {
+      HapticFeedback.heavyImpact();
+    }
 
     if (err == null) {
       final auth = context.read<AuthProvider>();

@@ -21,12 +21,26 @@ void main() async {
 
   final authProvider = AuthProvider();
   await authProvider.initialize();
+  // 使用中 token 失效被登出时给出可见反馈，避免"突然回到未登录态"无解释
+  authProvider.onSessionExpiredHint = () {
+    rootScaffoldMessengerKey.currentState?.showSnackBar(
+      const SnackBar(
+        content: Text('登录已过期，请重新登录'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  };
 
   final themeProvider = ThemeProvider();
   await themeProvider.load();
 
   runApp(FeiyangApp(authProvider: authProvider, themeProvider: themeProvider));
 }
+
+/// 全局 SnackBar 入口：与页面级 ScaffoldMessenger 解耦，
+/// 供 401 登出等无页面上下文的场景使用。
+final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey =
+    GlobalKey<ScaffoldMessengerState>();
 
 class FeiyangApp extends StatefulWidget {
   final AuthProvider? authProvider;
@@ -68,6 +82,8 @@ class _FeiyangAppState extends State<FeiyangApp> {
             debugShowCheckedModeBanner: false,
             // 小组件深链统一经此 key 跳转（WidgetLinkService）
             navigatorKey: WidgetLinkService.navigatorKey,
+            // 全局 SnackBar：401 登出提示在无页面上下文时也能弹出
+            scaffoldMessengerKey: rootScaffoldMessengerKey,
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
             themeMode: theme.themeMode,

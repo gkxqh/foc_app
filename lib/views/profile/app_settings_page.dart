@@ -10,6 +10,7 @@ import '../../core/theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/config_provider.dart';
 import '../../providers/theme_provider.dart';
+import '../common/app_snackbar.dart';
 import '../common/page_insets.dart';
 import 'about_page.dart';
 
@@ -67,14 +68,14 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
   // （兼容曾切换到这两个图标的设备），此处不再提供入口。
   static const List<({String value, String asset, String label})> _iconOptions =
       [
-        (value: 'red', asset: 'assets/icon/red_avatar.png', label: '飞扬娘头像'),
+        (value: 'red', asset: 'assets/preview/red_avatar.png', label: '飞扬娘头像'),
         (
           value: 'character',
-          asset: 'assets/icon/character_icon.png',
+          asset: 'assets/preview/character_icon.png',
           label: '飞扬娘',
         ),
-        (value: 'logo', asset: 'assets/icon/logo_alt.png', label: '黑底标志'),
-        (value: 'fyLogo', asset: 'assets/icon/fy_logo.png', label: '白底标志'),
+        (value: 'logo', asset: 'assets/preview/logo_alt.png', label: '黑底标志'),
+        (value: 'fyLogo', asset: 'assets/preview/fy_logo.png', label: '白底标志'),
       ];
 
   @override
@@ -143,8 +144,11 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
   Future<void> _switchIcon(String target) async {
     if (_iconSwitching || target == _currentIcon) return;
     if (!_canSwitchIcon) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('当前平台（桌面端）暂不支持应用内切换图标')));
+      showAppSnackBar(
+        context,
+        '当前平台（桌面端）暂不支持应用内切换图标',
+        type: SnackBarType.error,
+      );
       return;
     }
     setState(() => _iconSwitching = true);
@@ -176,13 +180,15 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
       }
       if (mounted) {
         setState(() => _currentIcon = target);
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('图标已更换，桌面可能需要几秒刷新')));
+        showAppSnackBar(
+          context,
+          '图标已更换，桌面可能需要几秒刷新',
+          type: SnackBarType.success,
+        );
       }
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('图标更换失败，请重试')));
+        showAppSnackBar(context, '图标更换失败，请重试', type: SnackBarType.error);
       }
     } finally {
       if (mounted) setState(() => _iconSwitching = false);

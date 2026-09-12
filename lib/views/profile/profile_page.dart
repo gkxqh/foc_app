@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -35,7 +36,7 @@ class ProfilePage extends StatelessWidget {
                         .surfaceContainerHighest,
                     // 无头像时显示本地图标兜底，不向第三方图床发起请求
                     backgroundImage: (user?.avatarUrl.isNotEmpty ?? false)
-                        ? NetworkImage(user!.avatarUrl)
+                        ? CachedNetworkImageProvider(user!.avatarUrl)
                         : null,
                     child: (user?.avatarUrl.isNotEmpty ?? false)
                         ? null

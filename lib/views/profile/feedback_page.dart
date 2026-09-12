@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../services/config_service.dart';
+import '../common/app_snackbar.dart';
 
 class FeedbackPage extends StatefulWidget {
   const FeedbackPage({super.key});
@@ -27,8 +28,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
     final content = _contentController.text.trim();
 
     if (content.isEmpty) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('请填写您的宝贵意见')));
+      showAppSnackBar(context, '请填写您的宝贵意见', type: SnackBarType.error);
       return;
     }
 
@@ -38,12 +38,10 @@ class _FeedbackPageState extends State<FeedbackPage> {
     setState(() => _isSubmitting = false);
 
     if (ok) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('感谢您的反馈，研发部将尽快优化！')));
+      showAppSnackBar(context, '感谢您的反馈，研发部将尽快优化！', type: SnackBarType.success);
       Navigator.pop(context);
     } else {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('提交失败，请稍后重试')));
+      showAppSnackBar(context, '提交失败，请稍后重试', type: SnackBarType.error);
     }
   }
 

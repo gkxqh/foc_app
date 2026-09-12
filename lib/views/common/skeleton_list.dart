@@ -18,7 +18,8 @@ enum SkeletonVariant {
 }
 
 /// 列表骨架屏：模拟对应页面卡片的结构占位，替代全屏转圈。
-/// 呼吸动画由整体透明度驱动；底色取主题 surfaceContainerHighest，深浅色自适应。
+/// 高光随 shimmer 扫光从左到右循环滑过（不依赖第三方包）；
+/// 底色取主题 surfaceContainerHighest，深浅色自适应。
 ///
 /// 单卡占位（领奖台/统计页加载）时传 `shrinkWrap: true` 并配合外部 padding。
 class SkeletonList extends StatefulWidget {
@@ -45,7 +46,7 @@ class _SkeletonListState extends State<SkeletonList>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 1200),
+    duration: const Duration(milliseconds: 1500),
   )..repeat();
 
   @override
@@ -57,11 +58,8 @@ class _SkeletonListState extends State<SkeletonList>
   @override
   Widget build(BuildContext context) {
     final baseColor = Theme.of(context).colorScheme.surfaceContainerHighest;
-    return FadeTransition(
-      opacity: Tween(
-        begin: 0.45,
-        end: 1.0,
-      ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut)),
+    return Shimmer(
+      animation: _controller,
       child: ListView.builder(
         padding: widget.padding ?? const EdgeInsets.all(AppSpacing.lg),
         shrinkWrap: widget.shrinkWrap,
@@ -264,5 +262,51 @@ class _SkeletonListState extends State<SkeletonList>
         borderRadius: BorderRadius.circular(radius),
       ),
     );
+  }
+}
+
+/// shimmer 扫光：高光条随动画从左到右滑过，srcATop 混合让高光
+/// 只叠加在骨架底色上而不影响背景。
+class Shimmer extends StatelessWidget {
+  final Animation<double> animation;
+  final Widget child;
+
+  const Shimmer({super.key, required this.animation, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, child) => ShaderMask(
+        blendMode: BlendMode.srcATop,
+        shaderCallback: (bounds) => LinearGradient(
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+          colors: [
+            Colors.transparent,
+            Colors.white.withValues(alpha: 0.55),
+            Colors.transparent,
+          ],
+          stops: const [0.3, 0.5, 0.7],
+          transform: _SlidingGradientTransform(
+            // 0 → 1 映射为渐变从视口左外滑到右外
+            slidePercent: animation.value * 2 - 1,
+          ),
+        ).createShader(bounds),
+        child: child,
+      ),
+      child: child,
+    );
+  }
+}
+
+class _SlidingGradientTransform extends GradientTransform {
+  final double slidePercent; // -1..1
+
+  const _SlidingGradientTransform({required this.slidePercent});
+
+  @override
+  Matrix4? transform(Rect bounds, {TextDirection? textDirection}) {
+    return Matrix4.translationValues(bounds.width * slidePercent, 0, 0);
   }
 }

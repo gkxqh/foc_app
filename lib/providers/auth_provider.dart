@@ -40,9 +40,17 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// 使用中登录态被 401 清除时触发（如 token 过期/账号在别处注销），
+  /// 用于展示"登录已过期"全局提示。登录页切换账号等未登录场景不触发。
+  Function()? onSessionExpiredHint;
+
   AuthProvider() {
     _client.onUnauthorized = () {
+      final wasLoggedIn = _isLoggedIn;
       logout();
+      if (wasLoggedIn) {
+        onSessionExpiredHint?.call();
+      }
     };
   }
 
