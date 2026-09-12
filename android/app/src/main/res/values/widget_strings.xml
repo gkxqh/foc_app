@@ -35,9 +35,9 @@
     <string name="widget_hand_fmt">在手 %1$d 单</string>
     <string name="widget_updated_fmt">更新于 %1$s</string>
 
+    <!-- 步骤条四节点：报修 · 接单 · 确认 · 完成（与 App 工单详情页一致） -->
     <string name="widget_step_report">报修</string>
     <string name="widget_step_accept">接单</string>
-    <string name="widget_step_repair">维修</string>
     <string name="widget_step_confirm">确认</string>
     <string name="widget_step_done">完成</string>
     <string name="widget_step_sep">·</string>

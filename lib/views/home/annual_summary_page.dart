@@ -93,13 +93,7 @@ class _AnnualSummaryPageState extends State<AnnualSummaryPage> {
                         end: Alignment.bottomRight,
                       ),
                       borderRadius: BorderRadius.circular(AppRadius.modal),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppTheme.primaryBlue.withValues(alpha: 0.3),
-                          blurRadius: 12,
-                          offset: const Offset(0, 6),
-                        ),
-                      ],
+                      boxShadow: AppShadow.glow(AppTheme.primaryBlue),
                     ),
                     child: Column(
                       children: [

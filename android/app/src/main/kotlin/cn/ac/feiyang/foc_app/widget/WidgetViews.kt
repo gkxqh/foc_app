@@ -121,7 +121,7 @@ internal object WidgetViews {
         }
         views.setViewVisibility(root, View.VISIBLE)
         views.setTextViewText(title, rowTitle(ticket, withCampus = technician))
-        views.setTextViewText(status, statusLabel(ticket.status, technician))
+        views.setTextViewText(status, statusLabel(ticket.status))
         views.setTextColor(status, statusColor(context, ticket.status))
         views.setOnClickPendingIntent(
             root,
@@ -179,7 +179,7 @@ internal object WidgetViews {
 
         views.setViewVisibility(R.id.user_block_main, View.VISIBLE)
         views.setTextViewText(R.id.user_device, rowTitle(ticket, withCampus = false))
-        views.setTextViewText(R.id.user_status, statusLabel(ticket.status, technician = false))
+        views.setTextViewText(R.id.user_status, statusLabel(ticket.status))
         views.setTextColor(R.id.user_status, statusColor(context, ticket.status))
         views.setOnClickPendingIntent(
             R.id.user_block_main,
@@ -248,7 +248,7 @@ internal object WidgetViews {
             }
             else -> {
                 val ticket = payload.firstTicket!!
-                views.setTextViewText(R.id.user2_status, statusLabel(ticket.status, technician = false))
+                views.setTextViewText(R.id.user2_status, statusLabel(ticket.status))
                 views.setTextColor(R.id.user2_status, statusColor(context, ticket.status))
                 views.setTextViewText(R.id.user2_device, rowTitle(ticket, withCampus = false))
                 views.setTextViewText(R.id.user2_hint, context.getString(R.string.widget_tap_detail))
@@ -267,13 +267,16 @@ internal object WidgetViews {
 
     // ---------- 公共片段 ----------
 
-    /** 四步进度条：报修-接单-维修-确认-完成；已过步骤强调色，当前步骤用状态色 */
+    /**
+     * 四步进度条：报修 · 接单 · 确认 · 完成（与 App 工单详情页步骤条一致）。
+     * 已过步骤强调色，当前步骤用状态色。
+     */
     private fun bindSteps(context: Context, views: RemoteViews, status: String) {
         val stepIds = intArrayOf(
-            R.id.user_step1, R.id.user_step2, R.id.user_step3, R.id.user_step4, R.id.user_step5,
+            R.id.user_step1, R.id.user_step2, R.id.user_step3, R.id.user_step4,
         )
         val sepIds = intArrayOf(
-            R.id.user_sep1, R.id.user_sep2, R.id.user_sep3, R.id.user_sep4,
+            R.id.user_sep1, R.id.user_sep2, R.id.user_sep3,
         )
         val current = currentStep(status)
         val accent = color(context, R.color.widget_accent)
@@ -293,11 +296,12 @@ internal object WidgetViews {
         sepIds.forEach { views.setTextColor(it, tertiary) }
     }
 
+    /** 取消/关闭为异常终态，与 App 一致落在最后一步；未知状态回落第一步 */
     private fun currentStep(status: String): Int = when (status.trim().lowercase()) {
         "pending" -> 1
-        "repairing" -> 3
-        "userconfirming", "techconfirming" -> 4
-        "done" -> 5
+        "repairing" -> 2
+        "userconfirming", "techconfirming" -> 3
+        "done", "closed", "canceled", "cancelled" -> 4
         else -> 1
     }
 
@@ -315,12 +319,16 @@ internal object WidgetViews {
         }
     }
 
-    private fun statusLabel(status: String, technician: Boolean): String =
+    /**
+     * 状态文案与 App 内 AppTheme.getStatusText 语义一致；
+     * 小组件空间受限用「待…」短形，不再按角色反转（App 侧为「等待…」全称）。
+     */
+    private fun statusLabel(status: String): String =
         when (status.trim().lowercase()) {
             "pending" -> "待分配"
             "repairing" -> "维修中"
-            "userconfirming" -> if (technician) "待用户确认" else "待你确认"
-            "techconfirming" -> if (technician) "待你确认" else "待技术员确认"
+            "userconfirming" -> "待用户确认"
+            "techconfirming" -> "待技术员确认"
             "done" -> "已完成"
             "closed" -> "已关闭"
             "canceled", "cancelled" -> "已取消"

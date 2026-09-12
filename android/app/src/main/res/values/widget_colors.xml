@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 小组件色板：状态色与 lib/core/theme/app_theme.dart 同源（2026-09-11 校准版） -->
+<!-- 小组件色板：状态色与 lib/core/theme/app_theme.dart 同源（由 tool/gen_widget_colors.dart 生成，勿手工修改） -->
 <resources>
     <color name="widget_bg">#FFFFFF</color>
     <color name="widget_text_primary">#1C1B1F</color>
@@ -7,7 +7,6 @@
     <color name="widget_text_tertiary">#9AA0A8</color>
     <color name="widget_accent">#4187F2</color>
     <color name="widget_button_ghost">#F0F2F5</color>
-
     <color name="widget_status_pending">#4187F2</color>
     <color name="widget_status_repairing">#F27F41</color>
     <color name="widget_status_confirming">#B8860B</color>
@@ -15,3 +14,4 @@
     <color name="widget_status_closed">#DA3231</color>
     <color name="widget_status_canceled">#9E9E9E</color>
 </resources>
+

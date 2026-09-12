@@ -13,6 +13,7 @@ import '../common/app_snackbar.dart';
 import '../common/confirm_dialog.dart';
 import '../common/image_preview.dart';
 import '../common/page_insets.dart';
+import '../common/step_progress.dart';
 import 'give_order_page.dart';
 
 class TicketDetailPage extends StatefulWidget {
@@ -387,42 +388,34 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
       body: ListView(
         padding: pageListPadding(context),
         children: [
-          // 步骤条
+          // 步骤条（取消/关闭走异常红终态，不播呼吸光环）
           Card(
             child: Padding(
               padding: const EdgeInsets.symmetric(
                 vertical: AppSpacing.xl,
                 horizontal: AppSpacing.sm,
               ),
-              child: Row(
-                children: [
-                  _buildStepItem('电脑报修', 0, stepIndex),
-                  _buildStepDivider(0, stepIndex),
-                  _buildStepItem('技术员接单', 1, stepIndex),
-                  _buildStepDivider(1, stepIndex),
-                  _buildStepItem(
-                    _ticket.repairStatus == 'UserConfirming'
-                        ? '用户确认'
-                        : _ticket.repairStatus == 'TechConfirming'
-                        ? '技术员确认'
-                        : '维修确认',
-                    2,
-                    stepIndex,
-                  ),
-                  _buildStepDivider(2, stepIndex),
-                  _buildStepItem(
-                    _ticket.repairStatus == 'Canceled'
-                        ? '已取消'
-                        : _ticket.repairStatus == 'Closed'
-                        ? '已关闭'
-                        : '工单完成',
-                    3,
-                    stepIndex,
-                    isSpecial:
-                        _ticket.repairStatus == 'Canceled' ||
-                        _ticket.repairStatus == 'Closed',
-                  ),
+              child: StepProgress(
+                labels: [
+                  '电脑报修',
+                  '技术员接单',
+                  if (_ticket.repairStatus == 'UserConfirming')
+                    '用户确认'
+                  else if (_ticket.repairStatus == 'TechConfirming')
+                    '技术员确认'
+                  else
+                    '维修确认',
+                  if (_ticket.repairStatus == 'Canceled')
+                    '已取消'
+                  else if (_ticket.repairStatus == 'Closed')
+                    '已关闭'
+                  else
+                    '工单完成',
                 ],
+                currentStep: stepIndex,
+                abnormalLast:
+                    _ticket.repairStatus == 'Canceled' ||
+                    _ticket.repairStatus == 'Closed',
               ),
             ),
           ),
@@ -671,59 +664,6 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
           const SizedBox(height: AppSpacing.xxxl),
         ],
       ),
-    );
-  }
-
-  Widget _buildStepItem(
-    String title,
-    int step,
-    int currentStep, {
-    bool isSpecial = false,
-  }) {
-    final bool isDone = currentStep >= step;
-    // 颜色随主题翻转：未完成步骤用 onSurfaceVariant 弱化，异常终态用语义红
-    final Color color = isSpecial
-        ? AppTheme.errorRed
-        : isDone
-        ? AppTheme.primaryBlue
-        : Theme.of(context).colorScheme.onSurfaceVariant
-              .withValues(alpha: 0.55);
-
-    return Expanded(
-      child: Column(
-        children: [
-          CircleAvatar(
-            radius: 12,
-            backgroundColor: color,
-            child: Icon(
-              isDone ? Icons.check : Icons.circle,
-              size: 14,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            title,
-            style: AppText.micro.copyWith(
-              fontWeight: isDone ? FontWeight.bold : FontWeight.normal,
-              color: color,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStepDivider(int step, int currentStep) {
-    final isDone = currentStep > step;
-    return Container(
-      width: 20,
-      height: 2,
-      color: isDone
-          ? AppTheme.primaryBlue
-          : Theme.of(context).colorScheme.onSurfaceVariant
-                .withValues(alpha: 0.3),
     );
   }
 

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoPageTransitionsBuilder;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -24,6 +25,33 @@ class AppRadius {
   static const double card = 12; // 卡片与输入框（同 cardTheme/inputDecorationTheme）
   static const double modal = 16; // 大数据卡、庆祝卡
   static const double pill = 24; // 按钮（同 elevated/outlined buttonTheme）
+}
+
+/// 阴影 token：浅色模式下的两档海拔投影与品牌色光晕。
+/// 深色模式阴影不可见，深色卡片层次由 _cardTheme 的 hairline 描边承担，
+/// 不提供深色版 BoxShadow。
+class AppShadow {
+  AppShadow._();
+
+  // 卡片级：极轻投影（与 cardTheme 浅色卡片一致，供 Container 版卡片使用）
+  static const List<BoxShadow> card = [
+    BoxShadow(color: Color(0x0A000000), blurRadius: 2, offset: Offset(0, 1)),
+    BoxShadow(color: Color(0x0F000000), blurRadius: 8, offset: Offset(0, 2)),
+  ];
+
+  // 悬浮级：横幅、浮层等需要明显脱离背景的元素
+  static const List<BoxShadow> elevated = [
+    BoxShadow(color: Color(0x1A000000), blurRadius: 16, offset: Offset(0, 4)),
+  ];
+
+  // 品牌色光晕：渐变英雄卡用主色投影替代中性阴影（年度总结总台数卡）
+  static List<BoxShadow> glow(Color color) => [
+    BoxShadow(
+      color: color.withValues(alpha: 0.3),
+      blurRadius: 12,
+      offset: const Offset(0, 6),
+    ),
+  ];
 }
 
 /// 文字样式 token：页面级 TextStyle 统一引用，保证字号层级一致；
@@ -107,6 +135,7 @@ class AppTheme {
   );
 
   // Ticket Status Colors（2026-09-11 校准：取消并入红系、确认色加深保证白字对比度）
+  // Android 小组件的色板 XML 由 tool/gen_widget_colors.dart 生成，改色后需同步该脚本
   static const Color statusPending = Color(0xFF4187F2); // 待分配（蓝）
   static const Color statusRepairing = Color(0xFFF27F41); // 维修中（橙）
   static const Color statusDone = Color(0xFF57BE6A); // 已完成（绿）
@@ -220,7 +249,16 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
-      cardTheme: _cardTheme(isDark ? const Color(0xFF1F1F1F) : Colors.white),
+      cardTheme: _cardTheme(isDark ? const Color(0xFF1F1F1F) : Colors.white, isDark),
+      // 页面转场统一：Android 用 M3 淡入前移（与 Tab 内容淡入、列表交错入场
+      // 的轻动效语言一致）；iOS/macOS 保持 Cupertino 转场以保留边缘滑动返回
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
+          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
+        },
+      ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryBlue,
@@ -281,13 +319,19 @@ class AppTheme {
     );
   }
 
-  static CardThemeData _cardTheme(Color color) {
+  static CardThemeData _cardTheme(Color color, bool isDark) {
     return CardThemeData(
       color: color,
-      elevation: 0.5,
+      // 浅色用极轻投影分层（近扁平但保留一点空间感）；
+      // 深色阴影不可见，改用 hairline 描边区分卡片与背景
+      elevation: isDark ? 0 : 1.5,
+      shadowColor: const Color(0x14000000),
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.card),
+        side: isDark
+            ? const BorderSide(color: Color(0x0FFFFFFF))
+            : BorderSide.none,
       ),
     );
   }

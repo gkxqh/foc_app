@@ -140,7 +140,7 @@
                 android:visibility="gone" />
         </LinearLayout>
 
-        <!-- 四步进度：报修 · 接单 · 维修 · 确认 · 完成 -->
+        <!-- 四步进度：报修 · 接单 · 确认 · 完成（与 App 工单详情页步骤条一致） -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -184,7 +184,7 @@
                 android:id="@+id/user_step3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/widget_step_repair"
+                android:text="@string/widget_step_confirm"
                 android:textSize="11sp" />
 
             <TextView
@@ -198,22 +198,6 @@
 
             <TextView
                 android:id="@+id/user_step4"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/widget_step_confirm"
-                android:textSize="11sp" />
-
-            <TextView
-                android:id="@+id/user_sep4"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingLeft="4dp"
-                android:paddingRight="4dp"
-                android:text="@string/widget_step_sep"
-                android:textSize="11sp" />
-
-            <TextView
-                android:id="@+id/user_step5"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/widget_step_done"
