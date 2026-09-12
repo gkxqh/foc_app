@@ -7,7 +7,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/app_update_model.dart';
 import '../services/update_service.dart';
-
 enum UpdateCheckResult { newVersion, upToDate, failed }
 
 enum UpdateStatus { idle, checking, available, downloading, installing, error }
@@ -39,6 +38,18 @@ class UpdateProvider extends ChangeNotifier {
     if (_dialogVisible == visible) return;
     _dialogVisible = visible;
     notifyListeners();
+  }
+
+  /// 仅测试用：绕过网络与平台检查，直接注入弹窗渲染所需的状态。
+  @visibleForTesting
+  void debugSeed({
+    UpdateStatus status = UpdateStatus.available,
+    AppUpdateInfo? info,
+    String currentVersion = '',
+  }) {
+    _status = status;
+    _info = info;
+    _currentVersion = currentVersion;
   }
 
   /// 检查更新。auto 为 true 时全程静默：失败不落错误态，命中「忽略的版本」

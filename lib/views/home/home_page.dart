@@ -102,29 +102,23 @@ class _HomePageState extends State<HomePage> {
 
     showDialog(
       context: context,
+      // scrollable + noScroll：Markdown 渲染为 Column 以支持 AlertDialog 的
+      // 固有尺寸查询（视口类不支持会布局崩溃，真机表现只剩暗色屏障），
+      // 长公告由外层滚动区限高滚动，短公告收紧弹窗
       builder: (ctx) => AlertDialog(
+        scrollable: true,
         title: const Text('公告与服务须知'),
-        // 高度自适应：短公告收紧弹窗，长公告限高滚动（此前固定 320 在小屏/大字号下失衡）
-        content: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxWidth: double.maxFinite,
-            maxHeight: MediaQuery.sizeOf(ctx).height * 0.6,
-          ),
-          child: SizedBox(
-            width: double.maxFinite,
-            child: Markdown(
-              data: body,
-              selectable: true,
-              shrinkWrap: true,
-              styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(ctx)).copyWith(
-                p: AppText.body.copyWith(
-                  height: 1.6,
-                  color: Theme.of(ctx).colorScheme.onSurface,
-                ),
-                listBullet: AppText.body.copyWith(
-                  color: Theme.of(ctx).colorScheme.onSurface,
-                ),
-              ),
+        content: Markdown(
+          data: body,
+          selectable: true,
+          noScroll: true,
+          styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(ctx)).copyWith(
+            p: AppText.body.copyWith(
+              height: 1.6,
+              color: Theme.of(ctx).colorScheme.onSurface,
+            ),
+            listBullet: AppText.body.copyWith(
+              color: Theme.of(ctx).colorScheme.onSurface,
             ),
           ),
         ),

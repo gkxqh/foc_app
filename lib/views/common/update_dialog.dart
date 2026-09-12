@@ -30,7 +30,12 @@ class _UpdateDialogBody extends StatelessWidget {
     return Consumer<UpdateProvider>(
       builder: (context, update, _) {
         final info = update.info;
+        // scrollable: true 由 AlertDialog 把标题+内容包进 SingleChildScrollView，
+        // 按钮固定在滚动区外。这同时是布局正确性的要求：AlertDialog 以固有尺寸
+        // 定宽高，Markdown 默认的惰性视口不支持该查询，会直接布局崩溃——
+        // 真机（release）上表现为弹窗只剩暗色屏障、内容完全不可见
         return AlertDialog(
+          scrollable: true,
           title: Text(switch (update.status) {
             UpdateStatus.downloading => '正在下载更新',
             UpdateStatus.installing => '准备安装',
@@ -106,32 +111,25 @@ class _UpdateDialogBody extends StatelessWidget {
       default:
         final changelog = info.changelog.trim();
         if (changelog.isEmpty) return const [SizedBox.shrink()];
-        // 更新日志为 Markdown（GitHub Release body）。Markdown 自带滚动，
-        // 只限高不限内容长度；不能用 Expanded——外层 Column 是 mainAxisSize.min
+        // noScroll: 渲染为 Column，支持固有尺寸查询（滚动由外层 scrollable 提供），
+        // 与首页公告弹窗的修复方式一致
         return [
-          SizedBox(
-            width: double.maxFinite,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.sizeOf(context).height * 0.4,
+          Markdown(
+            data: changelog,
+            selectable: false,
+            noScroll: true,
+            styleSheet:
+                MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
+              p: AppText.body.copyWith(
+                height: 1.6,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
-              child: Markdown(
-                data: changelog,
-                selectable: false,
-                styleSheet:
-                    MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
-                  p: AppText.body.copyWith(
-                    height: 1.6,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                  listBullet: AppText.body.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                  h1: AppText.titleSm,
-                  h2: AppText.titleSm,
-                  h3: AppText.title,
-                ),
+              listBullet: AppText.body.copyWith(
+                color: Theme.of(context).colorScheme.onSurface,
               ),
+              h1: AppText.titleSm,
+              h2: AppText.titleSm,
+              h3: AppText.title,
             ),
           ),
         ];
