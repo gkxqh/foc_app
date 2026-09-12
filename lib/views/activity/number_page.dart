@@ -10,6 +10,20 @@ class NumberPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    // 深浅主题分别取配色：浅色保持原有柔和底色，深色改用半透明叠加，
+    // 避免亮色底块刺眼、深色文字（amber.shade900）在暗背景上看不清
+    final Color cardBg = isWinner
+        ? (isDark
+              ? Colors.amber.withValues(alpha: 0.16)
+              : Colors.amber.shade100)
+        : (isDark
+              ? AppTheme.primaryBlue.withValues(alpha: 0.14)
+              : Colors.blue.shade50);
+    final Color numberColor = isWinner
+        ? (isDark ? Colors.amber.shade300 : Colors.amber.shade900)
+        : AppTheme.primaryBlue;
+
     return Scaffold(
       appBar: AppBar(title: const Text('我的抽奖号码')),
       body: Center(
@@ -25,7 +39,7 @@ class NumberPage extends StatelessWidget {
                   horizontal: 20,
                 ),
                 decoration: BoxDecoration(
-                  color: isWinner ? Colors.amber.shade100 : Colors.blue.shade50,
+                  color: cardBg,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
                     color: isWinner ? Colors.amber : AppTheme.primaryBlue,
@@ -39,9 +53,7 @@ class NumberPage extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: isWinner
-                            ? Colors.amber.shade900
-                            : AppTheme.primaryBlue,
+                        color: numberColor,
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -51,9 +63,7 @@ class NumberPage extends StatelessWidget {
                         fontSize: 52,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 4,
-                        color: isWinner
-                            ? Colors.amber.shade900
-                            : AppTheme.primaryBlue,
+                        color: numberColor,
                       ),
                     ),
                     const SizedBox(height: 16),

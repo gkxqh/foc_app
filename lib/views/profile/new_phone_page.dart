@@ -32,7 +32,8 @@ class _NewPhonePageState extends State<NewPhonePage> {
 
   Future<void> _sendCode() async {
     final phone = _phoneController.text.trim();
-    if (phone.length != 11) {
+    // 长度 + 纯数字双重校验，防止含非数字字符的输入透传到服务端
+    if (!RegExp(r'^\d{11}$').hasMatch(phone)) {
       _toast('请输入正确的11位新手机号');
       return;
     }
@@ -113,6 +114,10 @@ class _NewPhonePageState extends State<NewPhonePage> {
                         child: TextField(
                           controller: _phoneController,
                           keyboardType: TextInputType.phone,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                            LengthLimitingTextInputFormatter(11),
+                          ],
                           enabled: !_codeSent,
                           decoration: const InputDecoration(
                             labelText: '新手机号',

@@ -38,13 +38,13 @@ dependencies:
   provider: ^6.1.5+1
   shared_preferences: ^2.5.5
   image_picker: ^1.2.3
-  flutter_markdown: ^0.7.7+1
   intl: ^0.20.3
   uuid: ^4.6.0
   package_info_plus: ^9.0.0
   qr_flutter: ^4.1.0
   mobile_scanner: ^5.2.3
   flutter_dynamic_icon_plus: ^1.4.1
+  flutter_markdown_plus: ^1.0.12
 
 dev_dependencies:
   flutter_test:

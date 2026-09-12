@@ -354,7 +354,8 @@ class _SubmitTicketPageState extends State<SubmitTicketPage> {
                         labelText: '联系电话',
                         border: OutlineInputBorder(),
                       ),
-                      validator: (v) => (v == null || v.trim().length != 11)
+                      validator: (v) =>
+                          (v == null || !RegExp(r'^\d{11}$').hasMatch(v.trim()))
                           ? '请输入11位手机号'
                           : null,
                       onSaved: (v) => _phone = v?.trim() ?? '',

@@ -14,13 +14,20 @@ class _AboutPageState extends State<AboutPage> {
   @override
   void initState() {
     super.initState();
-    PackageInfo.fromPlatform()
-        .then((info) {
-          if (mounted) {
-            setState(() => _version = info.version);
-          }
-        })
-        .catchError((_) {});
+    _loadVersion();
+  }
+
+  // 用 try/catch 而非 catchError：catchError 回调返回 null 会让
+  // Future<PackageInfo> 以 null 完成，触发非空类型断言错误
+  Future<void> _loadVersion() async {
+    try {
+      final info = await PackageInfo.fromPlatform();
+      if (mounted) {
+        setState(() => _version = info.version);
+      }
+    } catch (_) {
+      // 读取失败保持空串，界面展示兜底文案
+    }
   }
 
   @override
@@ -65,7 +72,7 @@ class _AboutPageState extends State<AboutPage> {
             ),
             const Spacer(),
             const Text(
-              'Powered By 四川大学飞扬俱乐部研发部',
+              'Powered By 四川大学飞扬俱乐部研发部 ｜ 刻御晴空',
               style: TextStyle(fontSize: 12, color: Colors.grey),
             ),
             const SizedBox(height: 20),

@@ -132,15 +132,21 @@ class AuthProvider extends ChangeNotifier {
   }
 
   /// 切换到已保存的账号：静默验证其 token，有效则直接恢复登录态。
-  /// 返回 null 表示成功；否则返回错误文案（此时该账号已从列表移除）。
+  /// 返回 null 表示成功；否则返回错误文案。
+  /// 仅在服务端明确 401（token 过期/注销）时才移除该保存账号；
+  /// 网络瞬时异常时保留账号，避免一次超时就误删仍有效的登录凭据。
   Future<String?> switchToSavedAccount(SavedAccount account) async {
     await _client.setToken(account.token);
-    final userInfo = await _authService.getUserInfo();
+    final (userInfo, isAuthError) = await _authService.getUserInfoDetailed();
     if (userInfo == null) {
-      // token 已过期/账号已注销：清本地 token 并移除该保存账号
       await _client.clearToken();
-      await removeSavedAccount(account.phone);
-      return '该账号登录已过期，请重新验证码登录';
+      if (isAuthError) {
+        // token 已过期/账号已注销：移除该保存账号
+        await removeSavedAccount(account.phone);
+        return '该账号登录已过期，请重新验证码登录';
+      }
+      // 网络异常：该账号仍保留在列表中，可稍后重试
+      return '网络异常，请检查网络后重试';
     }
     _user = userInfo;
     _isLoggedIn = true;

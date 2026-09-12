@@ -29,9 +29,15 @@
 **🎪 社团活动**
 - 现场活动幸运抽奖号码与中奖状态展示
 
+**🎨 界面个性化**
+- 深色模式（跟随系统/浅色/深色）与全局文字大小调节
+- 应用内切换桌面图标，多款图标即时生效
+- 首页公告栏、技术员榜单显示开关
+
 **🔐 账号体系**
 - 手机号 + 短信验证码登录，30 天长效会话
 - 与微信小程序同账号互通
+- 「记住此设备」多账号管理：本机保存账号，登录页一键切换
 - 资料编辑、头像上传、换绑手机号、账号注销
 
 ## 技术栈
@@ -42,13 +48,15 @@
 | 状态管理 | Provider (`ChangeNotifier`) |
 | 网络层 | Dio 5.x（Bearer 注入、401 自动登出、错误防御） |
 | 扫码/二维码 | mobile_scanner · qr_flutter |
+| Markdown 渲染 | flutter_markdown_plus（公告、服务条款） |
+| 动态图标 | flutter_dynamic_icon_plus（iOS/Android 应用内换图标） |
 | 本地存储 | shared_preferences |
 
 ## 项目结构
 
 ```
 lib/
-├── core/          # 网络层、接口常量、主题
+├── core/          # 网络层、接口常量、主题、共享文案
 ├── models/        # 数据实体与序列化
 ├── services/      # RESTful API 交互
 ├── providers/     # 业务状态管理
@@ -68,6 +76,22 @@ flutter run             # 连接 iOS / Android 真机或模拟器
 
 > 后端接口基址：`https://focapi.feiyang.ac.cn`
 > 登录需要已在微信小程序「云上飞扬」注册并绑定手机号的账号。
+
+## 开发与质量
+
+提交前请确保静态分析与测试全部通过：
+
+```bash
+flutter analyze     # 静态检查
+flutter test        # 单元测试 + Widget 测试
+```
+
+应用图标源图处理脚本（需先在 `assets/icon/` 放置源图）：
+
+```bash
+dart run tool/gen_icon.dart   # 生成主图标与 Android 自适应前景
+dart run tool/gen_logo.dart   # 生成 Logo 备用图标（黑/白底）
+```
 
 ## 相关项目
 

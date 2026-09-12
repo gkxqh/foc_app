@@ -55,15 +55,18 @@ class ConfigService {
   }
 
   // 获取技术员年度总结
-  // 服务端响应为 { success, year, data: { first_time, total_orders, ... } }，字段嵌套在 data 中
-  Future<TechSummaryModel?> getTechSum() async {
+  // 服务端响应为 { success, year, data: { first_time, total_orders, ... } }，字段嵌套在 data 中。
+  // success 但缺 data 视为「暂无维修记录」，返回空模型；请求/业务失败时抛出异常，
+  // 由调用方区分「加载失败」与「暂无记录」，避免失败被误显示为 0 台。
+  Future<TechSummaryModel> getTechSum() async {
     final res = await _client.get(ApiConstants.getTechSum);
-    if (res.success && res.raw is Map && res.raw['data'] is Map) {
-      return TechSummaryModel.fromJson(
-        Map<String, dynamic>.from(res.raw['data']),
-      );
+    if (res.success) {
+      final data = (res.raw is Map && res.raw['data'] is Map)
+          ? Map<String, dynamic>.from(res.raw['data'])
+          : <String, dynamic>{};
+      return TechSummaryModel.fromJson(data);
     }
-    return null;
+    throw Exception(res.message ?? '年度总结加载失败');
   }
 
   // 提交意见反馈

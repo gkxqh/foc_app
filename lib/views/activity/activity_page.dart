@@ -21,6 +21,9 @@ class _ActivityPageState extends State<ActivityPage> {
   List<EventModel> _events = [];
   bool _isLoading = true;
   bool _wasLoggedIn = false;
+  bool _didInitialFetch = false;
+  String? _loadError; // 非空表示本次加载失败，需与“确实没有活动”的空态区分
+  int? _registeringEventId; // 正在提交报名的活动 id，防止重复提交
 
   final List<String> _departmentList = ["维修部", "研发部", "行政部", "设计部", "流媒部"];
   final List<String> _freeTimeList = [
@@ -31,16 +34,15 @@ class _ActivityPageState extends State<ActivityPage> {
   ];
 
   @override
-  void initState() {
-    super.initState();
-    _fetchEvents();
-  }
-
-  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final isLoggedIn = context.watch<AuthProvider>().isLoggedIn;
-    if (isLoggedIn != _wasLoggedIn) {
+    if (!_didInitialFetch) {
+      // 首次进入拉取一次（原 initState + didChangeDependencies 双入口会重复请求）
+      _didInitialFetch = true;
+      _wasLoggedIn = isLoggedIn;
+      _fetchEvents();
+    } else if (isLoggedIn != _wasLoggedIn) {
       _wasLoggedIn = isLoggedIn;
       if (isLoggedIn) {
         _fetchEvents();
@@ -49,11 +51,21 @@ class _ActivityPageState extends State<ActivityPage> {
   }
 
   Future<void> _fetchEvents() async {
-    setState(() => _isLoading = true);
-    final list = await _eventService.getEvents();
-    if (mounted) {
+    setState(() {
+      _isLoading = true;
+      _loadError = null;
+    });
+    try {
+      final list = await _eventService.getEvents();
+      if (!mounted) return;
       setState(() {
         _events = list;
+        _isLoading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _loadError = '活动加载失败，请检查网络后重试';
         _isLoading = false;
       });
     }
@@ -101,6 +113,7 @@ class _ActivityPageState extends State<ActivityPage> {
       ),
     ).then((result) async {
       if (result == null || !mounted) return;
+      setState(() => _registeringEventId = event.id);
       final ok = await _eventService.registerEvent(
         eventId: event.id,
         name: result.name,
@@ -109,6 +122,7 @@ class _ActivityPageState extends State<ActivityPage> {
         freeTimes: result.freeTimes,
       );
       if (!mounted) return;
+      setState(() => _registeringEventId = null);
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(ok ? '报名成功！' : '报名失败，请稍后重试')));
       // 成功后重新拉取列表，让"已报名"状态与按钮可用性与服务端保持同步
@@ -166,6 +180,24 @@ class _ActivityPageState extends State<ActivityPage> {
         onRefresh: _fetchEvents,
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
+            : _loadError != null
+            ? ListView(
+                children: [
+                  const SizedBox(height: 80),
+                  SizedBox(
+                    height: 240,
+                    child: EmptyState(
+                      icon: Icons.cloud_off_rounded,
+                      title: _loadError!,
+                      action: OutlinedButton.icon(
+                        onPressed: _fetchEvents,
+                        icon: const Icon(Icons.refresh_rounded),
+                        label: const Text('重新加载'),
+                      ),
+                    ),
+                  ),
+                ],
+              )
             : _events.isEmpty
             ? ListView(
                 children: [
@@ -203,8 +235,33 @@ class _ActivityPageState extends State<ActivityPage> {
                             height: 160,
                             width: double.infinity,
                             fit: BoxFit.cover,
+                            loadingBuilder: (context, child, progress) {
+                              if (progress == null) return child;
+                              return Container(
+                                height: 160,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .surfaceContainerHighest,
+                                child: const Center(
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                ),
+                              );
+                            },
+                            // 海报加载失败用占位图填满原高度，避免残留 160px 空白
                             errorBuilder: (context, error, stackTrace) =>
-                                const SizedBox.shrink(),
+                                Container(
+                                  height: 160,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .surfaceContainerHighest,
+                                  child: Icon(
+                                    Icons.image_not_supported_outlined,
+                                    size: 40,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
+                                ),
                           ),
                         Padding(
                           padding: const EdgeInsets.all(16.0),
@@ -313,12 +370,22 @@ class _ActivityPageState extends State<ActivityPage> {
                                         label: const Text('我的抽奖号'),
                                       ),
                                     ElevatedButton(
-                                      onPressed: (isSignUp && !event.registered)
+                                      onPressed: (isSignUp &&
+                                              !event.registered &&
+                                              _registeringEventId != event.id)
                                           ? () => _showSignUpDialog(event)
                                           : null,
-                                      child: Text(
-                                        event.registered ? '已报名' : '立即报名',
-                                      ),
+                                      child: _registeringEventId == event.id
+                                          ? const SizedBox(
+                                              width: 16,
+                                              height: 16,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                              ),
+                                            )
+                                          : Text(
+                                              event.registered ? '已报名' : '立即报名',
+                                            ),
                                     ),
                                   ],
                                 ),

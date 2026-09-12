@@ -85,7 +85,6 @@ class AppTheme {
           fontWeight: FontWeight.w600,
         ),
       ),
-      cardTheme: _cardTheme(const Color(0xFFFFFFFF)),
     );
   }
 
@@ -110,7 +109,6 @@ class AppTheme {
           fontWeight: FontWeight.w600,
         ),
       ),
-      cardTheme: _cardTheme(const Color(0xFF1F1F1F)),
     );
   }
 

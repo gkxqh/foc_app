@@ -136,6 +136,48 @@ void main() {
       expect(event.statusText, '已结束');
     });
 
+    test('报名已结束但活动未开始时应为 status 2「报名结束」', () {
+      // 时间相对 now 构造，避免用例随时间推移失效
+      String fmt(DateTime d) =>
+          '${d.year.toString().padLeft(4, '0')}-'
+          '${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')} '
+          '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}:${d.second.toString().padLeft(2, '0')}';
+      final now = DateTime.now();
+      final event = EventModel(
+        id: 2,
+        title: '招新宣讲',
+        description: '',
+        signupStartTime: fmt(now.subtract(const Duration(days: 7))),
+        signupEndTime: fmt(now.subtract(const Duration(hours: 1))),
+        startTime: fmt(now.add(const Duration(hours: 1))),
+        endTime: fmt(now.add(const Duration(hours: 3))),
+      );
+
+      event.calculateStatus();
+      expect(event.status, 2);
+      expect(event.statusText, '报名结束');
+    });
+
+    test('start_time 缺失时报名截止后仍视为进行中（向后兼容旧数据）', () {
+      String fmt(DateTime d) =>
+          '${d.year.toString().padLeft(4, '0')}-'
+          '${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')} '
+          '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}:${d.second.toString().padLeft(2, '0')}';
+      final now = DateTime.now();
+      final event = EventModel(
+        id: 3,
+        title: '无开始时间活动',
+        description: '',
+        signupStartTime: fmt(now.subtract(const Duration(days: 7))),
+        signupEndTime: fmt(now.subtract(const Duration(hours: 1))),
+        endTime: fmt(now.add(const Duration(hours: 3))),
+      );
+
+      event.calculateStatus();
+      expect(event.status, 3);
+      expect(event.statusText, '进行中');
+    });
+
     test('Parse real backend activity JSON', () {
       final json = {
         "id": "5",

@@ -31,6 +31,14 @@ class _ImagePreviewPage extends StatelessWidget {
               child: Image.network(
                 imageUrl,
                 fit: BoxFit.contain,
+                // 加载期间给出转圈反馈，避免全黑无响应感
+                loadingBuilder: (context, child, progress) {
+                  if (progress == null) return child;
+                  return const Padding(
+                    padding: EdgeInsets.all(48.0),
+                    child: CircularProgressIndicator(color: Colors.white70),
+                  );
+                },
                 errorBuilder: (_, _, _) => const Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [

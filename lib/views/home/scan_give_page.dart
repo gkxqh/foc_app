@@ -61,8 +61,13 @@ class _ScanGivePageState extends State<ScanGivePage> {
     final code = capture.barcodes.firstOrNull?.rawValue;
     if (code == null || code.isEmpty) return;
 
-    // 识别到码立即停相机：二维码留在取景框内会反复触发 onDetect，形成请求循环
-    await _controller.stop();
+    // 识别到码立即停相机：二维码留在取景框内会反复触发 onDetect，形成请求循环。
+    // 必须先同步置位 _submitting 再停相机：stop 挂起期间连帧 onDetect 仍会进入，
+    // 若等 _processCode 内才置位，同一单号会被并发重复提交
+    setState(() => _submitting = true);
+    try {
+      await _controller.stop();
+    } catch (_) {}
     if (!mounted) return;
 
     await _processCode(code);
@@ -71,20 +76,22 @@ class _ScanGivePageState extends State<ScanGivePage> {
   // 从相册选取图片并识别二维码
   Future<void> _pickImageFromGallery() async {
     if (_submitting) return;
-    await _controller.stop();
-    if (!mounted) return;
+    // 与 _handleBarcode 同理，入口先置位，防止停相机挂起期间并发进入
+    setState(() => _submitting = true);
 
     try {
+      await _controller.stop();
+      if (!mounted) return;
+
       final picker = ImagePicker();
       final XFile? image = await picker.pickImage(source: ImageSource.gallery);
       if (image == null) {
         // 用户取消选图，恢复相机取景
-        _resumeScan();
+        await _resumeScan();
         return;
       }
 
       setState(() {
-        _submitting = true;
         _resultMessage = '正在解析图片中的二维码...';
       });
 
@@ -104,12 +111,13 @@ class _ScanGivePageState extends State<ScanGivePage> {
       }
 
       await _processCode(code);
-    } catch (e) {
+    } catch (_) {
+      // 不向用户展示原始异常文本
       if (!mounted) return;
       setState(() {
         _submitting = false;
         _success = false;
-        _resultMessage = '识别图片失败: $e';
+        _resultMessage = '识别图片失败，请换一张更清晰的二维码图片重试';
       });
     }
   }
@@ -117,6 +125,7 @@ class _ScanGivePageState extends State<ScanGivePage> {
   // 失败后允许手动恢复取景重扫
   Future<void> _resumeScan() async {
     setState(() {
+      _submitting = false;
       _resultMessage = null;
       _success = false;
     });

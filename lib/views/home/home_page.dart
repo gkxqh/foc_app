@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/theme/app_theme.dart';
+import '../../core/constants/service_texts.dart';
 import '../common/empty_state.dart';
 import '../common/skeleton_list.dart';
 import '../common/rank_badge.dart';
@@ -26,21 +27,20 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   bool _wasLoggedIn = false;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _refreshData();
-    });
-  }
+  bool _didInitialRefresh = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // 登录态从未登录变为已登录时（如登录页返回），重新拉取工单，避免一直显示旧空态
+    // 首次进入刷新一次；此后仅在登录态从未登录变为已登录时（如登录页返回）
+    // 重新拉取，避免 initState 与 didChangeDependencies 双入口在启动时重复请求
     final loggedIn = context.watch<AuthProvider>().isLoggedIn;
-    if (loggedIn && !_wasLoggedIn) {
+    if (!_didInitialRefresh) {
+      _didInitialRefresh = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _refreshData();
+      });
+    } else if (loggedIn && !_wasLoggedIn) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _refreshData();
       });
@@ -82,7 +82,7 @@ class _HomePageState extends State<HomePage> {
           ? config.globalTips
           : (config.submitTips.isNotEmpty
                 ? config.submitTips
-                : '1. 送修前请移除电源外其余外设配件（包括鼠标、接收器、U盘、内存卡等）；\n2. 如要更换配件，请提前购买准备好；\n3. 如需重装系统，送修前电脑充满电；\n4. 请备份好重要数据，飞扬不对任何数据丢失负责；\n5. 我们志愿服务并非万能，不保证100%能够修好。');
+                : ServiceTexts.fallbackRepairTerms);
     }
 
     showDialog(
@@ -294,6 +294,8 @@ class _HomePageState extends State<HomePage> {
         child: InkWell(
           borderRadius: BorderRadius.circular(10),
           onTap: () {
+            // 请求进行中不再重复触发，防止连点与下拉刷新并发叠加
+            if (ticketProvider.isLoading) return;
             final auth = context.read<AuthProvider>();
             if (auth.isLoggedIn && auth.user != null) {
               ticketProvider.fetchTickets(

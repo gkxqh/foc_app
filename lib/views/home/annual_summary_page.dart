@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
 import '../../models/tech_stats_model.dart';
 import '../../services/config_service.dart';
+import '../common/empty_state.dart';
 
 class AnnualSummaryPage extends StatefulWidget {
   const AnnualSummaryPage({super.key});
@@ -15,6 +16,7 @@ class _AnnualSummaryPageState extends State<AnnualSummaryPage> {
   final ConfigService _configService = ConfigService();
   TechSummaryModel? _summary;
   bool _isLoading = true;
+  bool _loadFailed = false;
 
   @override
   void initState() {
@@ -23,15 +25,22 @@ class _AnnualSummaryPageState extends State<AnnualSummaryPage> {
   }
 
   Future<void> _loadData() async {
-    TechSummaryModel? sum;
+    setState(() {
+      _isLoading = true;
+      _loadFailed = false;
+    });
     try {
-      sum = await _configService.getTechSum();
-    } catch (_) {
-      // 拉取失败时以空总结兜底，避免页面卡死在加载态
-    }
-    if (mounted) {
+      final sum = await _configService.getTechSum();
+      if (!mounted) return;
       setState(() {
-        _summary = sum ?? TechSummaryModel();
+        _summary = sum;
+        _isLoading = false;
+      });
+    } catch (_) {
+      // 加载失败需明确提示并可重试，不能以“0 台/暂无记录”伪装成空数据
+      if (!mounted) return;
+      setState(() {
+        _loadFailed = true;
         _isLoading = false;
       });
     }
@@ -43,6 +52,18 @@ class _AnnualSummaryPageState extends State<AnnualSummaryPage> {
       appBar: AppBar(title: const Text('技术员年度总结')),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
+          : _loadFailed
+          ? Center(
+              child: EmptyState(
+                icon: Icons.cloud_off_rounded,
+                title: '年度总结加载失败，请检查网络后重试',
+                action: OutlinedButton.icon(
+                  onPressed: _loadData,
+                  icon: const Icon(Icons.refresh_rounded),
+                  label: const Text('重新加载'),
+                ),
+              ),
+            )
           : SingleChildScrollView(
               padding: const EdgeInsets.all(20.0),
               child: Column(

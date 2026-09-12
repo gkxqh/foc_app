@@ -94,11 +94,19 @@ class AuthService {
 
   // 获取当前用户信息
   Future<UserModel?> getUserInfo() async {
+    final result = await getUserInfoDetailed();
+    return result.$1;
+  }
+
+  /// 获取用户信息并区分失败原因，供需要区别对待的场景使用：
+  /// 成功返回 (user, false)；401 表示 token 已失效返回 (null, true)；
+  /// 超时/5xx 等瞬时异常返回 (null, false)，不应据此清除登录态或已保存账号。
+  Future<(UserModel?, bool)> getUserInfoDetailed() async {
     final res = await _client.get(ApiConstants.getUserInfo);
     if (res.success && res.raw != null && res.raw is Map) {
-      return UserModel.fromJson(Map<String, dynamic>.from(res.raw));
+      return (UserModel.fromJson(Map<String, dynamic>.from(res.raw)), false);
     }
-    return null;
+    return (null, res.statusCode == 401);
   }
 
   // 更新普通用户信息（仅提交后端白名单字段，见 UserModel.toUpdateJson）

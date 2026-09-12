@@ -39,6 +39,7 @@ class _HistoryPageState extends State<HistoryPage> {
     final ticketProvider = context.watch<TicketProvider>();
 
     final historyList = ticketProvider.historyTickets;
+    final loadError = ticketProvider.lastError;
 
     return Scaffold(
       appBar: AppBar(title: const Text('历史工单')),
@@ -53,6 +54,24 @@ class _HistoryPageState extends State<HistoryPage> {
         },
         child: ticketProvider.isLoading && historyList.isEmpty
             ? const SkeletonList()
+            : historyList.isEmpty && loadError != null
+            ? ListView(
+                children: [
+                  const SizedBox(height: 80),
+                  SizedBox(
+                    height: 240,
+                    child: EmptyState(
+                      icon: Icons.cloud_off_rounded,
+                      title: loadError,
+                      action: OutlinedButton.icon(
+                        onPressed: _fetch,
+                        icon: const Icon(Icons.refresh_rounded),
+                        label: const Text('重新加载'),
+                      ),
+                    ),
+                  ),
+                ],
+              )
             : historyList.isEmpty
             ? ListView(
                 children: [

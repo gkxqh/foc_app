@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/theme/app_theme.dart';
+import '../../core/constants/service_texts.dart';
 import '../../providers/config_provider.dart';
 import 'submit_ticket_page.dart';
 
@@ -83,7 +84,7 @@ class _RepairTermsPageState extends State<RepairTermsPage> {
     final config = context.watch<ConfigProvider>();
     final tips = config.globalTips.isNotEmpty
         ? config.globalTips
-        : '1. 送修前请移除电源外其余外设配件（包括鼠标、接收器、U盘、内存卡等）；\n2. 如要更换配件，请提前购买准备好；\n3. 如需重装系统，送修前电脑充满电；\n4. 请备份好重要数据，飞扬不对任何数据丢失负责；\n5. 我们志愿服务并非万能，不保证100%能够修好。';
+        : ServiceTexts.fallbackRepairTerms;
 
     return Scaffold(
       appBar: AppBar(title: const Text('报修须知与服务条款')),
@@ -115,40 +116,26 @@ class _RepairTermsPageState extends State<RepairTermsPage> {
                 ],
               ),
             ),
-            // 条款正文滚动区
+            // 条款正文滚动区（滚动到底检测由 _scrollController 监听统一负责）
             Expanded(
-              child: NotificationListener<ScrollNotification>(
-                onNotification: (notification) {
-                  if (notification.metrics.maxScrollExtent <= 20 ||
-                      notification.metrics.pixels >=
-                          notification.metrics.maxScrollExtent - 20) {
-                    if (!_hasScrolledToBottom) {
-                      setState(() {
-                        _hasScrolledToBottom = true;
-                      });
-                    }
-                  }
-                  return false;
-                },
-                child: Scrollbar(
+              child: Scrollbar(
+                controller: _scrollController,
+                thumbVisibility: true,
+                child: SingleChildScrollView(
                   controller: _scrollController,
-                  thumbVisibility: true,
-                  child: SingleChildScrollView(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.all(20.0),
-                    child: MarkdownBody(
-                      data: tips,
-                      selectable: true,
-                      styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
-                        p: TextStyle(
-                          fontSize: 14,
-                          height: 1.6,
-                          color: colorScheme.onSurface,
-                        ),
-                        listBullet: TextStyle(
-                          fontSize: 14,
-                          color: colorScheme.onSurface,
-                        ),
+                  padding: const EdgeInsets.all(20.0),
+                  child: MarkdownBody(
+                    data: tips,
+                    selectable: true,
+                    styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
+                      p: TextStyle(
+                        fontSize: 14,
+                        height: 1.6,
+                        color: colorScheme.onSurface,
+                      ),
+                      listBullet: TextStyle(
+                        fontSize: 14,
+                        color: colorScheme.onSurface,
                       ),
                     ),
                   ),

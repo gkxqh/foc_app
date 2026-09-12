@@ -4,6 +4,7 @@ class EventModel {
   final String description;
   final String signupStartTime;
   final String signupEndTime;
+  final String startTime; // 活动开始时间（服务端 start_time，可能缺失）
   final String endTime;
   final String? location;
   final String? poster;
@@ -19,6 +20,7 @@ class EventModel {
     required this.description,
     required this.signupStartTime,
     required this.signupEndTime,
+    this.startTime = '',
     required this.endTime,
     this.location,
     this.poster,
@@ -38,6 +40,7 @@ class EventModel {
       description: json['description']?.toString() ?? '',
       signupStartTime: json['signup_start_time']?.toString() ?? '',
       signupEndTime: json['signup_end_time']?.toString() ?? '',
+      startTime: json['start_time']?.toString() ?? '',
       endTime: json['end_time']?.toString() ?? '',
       location: json['location']?.toString(),
       poster: json['poster']?.toString(),
@@ -69,19 +72,26 @@ class EventModel {
           .millisecondsSinceEpoch;
       final sEnd = DateTime.parse(signupEndTime.replaceAll('/', '-'))
           .millisecondsSinceEpoch;
+      // start_time 缺失/不可解析时回退为报名结束时间：status 2 窗口收敛为 0，
+      // 行为与旧版（报名截止即视为进行中）保持一致
+      final start = (startTime.isEmpty)
+          ? sEnd
+          : DateTime.parse(
+              startTime.replaceAll('/', '-'),
+            ).millisecondsSinceEpoch;
       final eEnd = DateTime.parse(endTime.replaceAll('/', '-'))
           .millisecondsSinceEpoch;
 
       if (now < sStart) {
         status = 0; // 报名未开始
-      } else if (sStart <= now && now <= sEnd) {
-        status = 1; // 报名进行中
-      } else if (sEnd <= now && now <= eEnd) {
+      } else if (now <= sEnd) {
+        status = 1; // 报名进行中（报名期与活动期重叠时报名状态优先）
+      } else if (now < start) {
+        status = 2; // 报名已结束，活动尚未开始
+      } else if (now <= eEnd) {
         status = 3; // 活动进行中
-      } else if (now >= eEnd) {
-        status = 4; // 活动已结束
       } else {
-        status = 5;
+        status = 4; // 活动已结束
       }
     } catch (_) {
       status = 5;

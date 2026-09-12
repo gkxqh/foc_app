@@ -5,29 +5,33 @@ import '../models/event_model.dart';
 class EventService {
   final ApiClient _client = ApiClient();
 
-  // 获取活动列表
+  // 获取活动列表。
+  // 加载失败时抛出异常，由调用方区分「加载失败」与「确实没有活动」，
+  // 避免网络错误被误显示为空态；单条脏数据仍跳过，不影响整体列表。
   Future<List<EventModel>> getEvents() async {
-    try {
-      final res = await _client.get(ApiConstants.getEvent);
-      List? rawList;
-      if (res.raw is Map && res.raw['activities'] is List) {
-        rawList = res.raw['activities'] as List;
-      } else if (res.raw is List) {
-        rawList = res.raw as List;
-      }
+    final res = await _client.get(ApiConstants.getEvent);
+    List? rawList;
+    if (res.raw is Map && res.raw['activities'] is List) {
+      rawList = res.raw['activities'] as List;
+    } else if (res.raw is List) {
+      rawList = res.raw as List;
+    }
 
-      if (rawList != null) {
-        final List<EventModel> list = [];
-        for (final item in rawList) {
-          try {
-            // fromJson 内已自动计算活动状态
-            list.add(EventModel.fromJson(Map<String, dynamic>.from(item)));
-          } catch (_) {}
-        }
-        return list;
+    if (rawList == null) {
+      if (!res.success) {
+        throw Exception(res.message ?? '活动加载失败');
       }
-    } catch (_) {}
-    return [];
+      return [];
+    }
+
+    final List<EventModel> list = [];
+    for (final item in rawList) {
+      try {
+        // fromJson 内已自动计算活动状态
+        list.add(EventModel.fromJson(Map<String, dynamic>.from(item)));
+      } catch (_) {}
+    }
+    return list;
   }
 
   // 招新 / 飞扬维修部或研发部报名

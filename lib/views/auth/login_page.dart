@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -93,7 +94,8 @@ class _LoginPageState extends State<LoginPage> {
 
   void _sendCode() async {
     final phone = _phoneController.text.trim();
-    if (phone.length != 11) {
+    // 长度 + 纯数字双重校验，防止含非数字字符的输入透传到服务端
+    if (!RegExp(r'^\d{11}$').hasMatch(phone)) {
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('请输入正确的11位手机号码')));
       return;
@@ -345,6 +347,10 @@ class _LoginPageState extends State<LoginPage> {
             TextField(
               controller: _phoneController,
               keyboardType: TextInputType.phone,
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+                LengthLimitingTextInputFormatter(11),
+              ],
               decoration: InputDecoration(
                 labelText: '手机号码',
                 hintText: '请输入手机号',
@@ -417,9 +423,6 @@ class _LoginPageState extends State<LoginPage> {
                 setState(() => _rememberLogin = v ?? true);
                 final prefs = await SharedPreferences.getInstance();
                 await prefs.setBool('remember_enabled', _rememberLogin);
-                if (!_rememberLogin) {
-                  await prefs.remove('remembered_token');
-                }
               },
               title: const Text('记住此设备', style: TextStyle(fontSize: 14)),
               subtitle: const Text(

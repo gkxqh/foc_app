@@ -79,15 +79,29 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
   @override
   void initState() {
     super.initState();
-    PackageInfo.fromPlatform()
-        .then((info) {
-          if (mounted) setState(() => _version = info.version);
-        })
-        .catchError((_) {});
-    context.read<AuthProvider>().isRememberEnabled().then((v) {
-      if (mounted) setState(() => _rememberLogin = v);
-    });
+    _loadVersion();
+    _loadRememberEnabled();
     _loadCurrentIcon();
+  }
+
+  // 用 try/catch 而非 catchError：catchError 回调返回 null 会让
+  // Future<PackageInfo> 以 null 完成，触发非空类型断言错误
+  Future<void> _loadVersion() async {
+    try {
+      final info = await PackageInfo.fromPlatform();
+      if (mounted) setState(() => _version = info.version);
+    } catch (_) {
+      // 读取失败保持空串，界面展示兜底文案
+    }
+  }
+
+  Future<void> _loadRememberEnabled() async {
+    try {
+      final v = await context.read<AuthProvider>().isRememberEnabled();
+      if (mounted) setState(() => _rememberLogin = v);
+    } catch (_) {
+      // 读取失败保持默认开启
+    }
   }
 
   Future<void> _loadCurrentIcon() async {
