@@ -7,6 +7,7 @@ import '../../core/theme/app_theme.dart';
 import '../../models/saved_account.dart';
 import '../../providers/auth_provider.dart';
 import '../common/confirm_dialog.dart';
+import '../common/page_insets.dart';
 
 const String _privacyText = '''
 1. 本应用会收集您的手机号、邮箱地址和昵称。
@@ -195,7 +196,7 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       appBar: AppBar(title: const Text('手机验证码登录')),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
+        padding: pageListPadding(context, horizontal: 24, top: 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

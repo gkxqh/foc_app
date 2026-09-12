@@ -9,6 +9,7 @@ import '../../models/user_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/auth_service.dart';
 import '../common/confirm_dialog.dart';
+import '../common/page_insets.dart';
 import 'new_phone_page.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -235,7 +236,7 @@ class _SettingsPageState extends State<SettingsPage> {
     return Scaffold(
       appBar: AppBar(title: const Text('个人设置')),
       body: ListView(
-        padding: const EdgeInsets.all(16.0),
+        padding: pageListPadding(context),
         children: [
           Card(
             child: Padding(

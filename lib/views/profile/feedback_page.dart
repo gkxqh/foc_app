@@ -50,51 +50,54 @@ class _FeedbackPageState extends State<FeedbackPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('意见与问题反馈')),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TextField(
-              controller: _contactController,
-              decoration: const InputDecoration(
-                labelText: '联系方式 (选填)',
-                hintText: 'QQ / 手机号 / 邮箱',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: TextField(
-                controller: _contentController,
-                maxLines: null,
-                expands: true,
-                textAlignVertical: TextAlignVertical.top,
+      body: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextField(
+                controller: _contactController,
                 decoration: const InputDecoration(
-                  labelText: '问题或建议',
-                  hintText: '请详述您在报修、接单或使用过程中遇到的问题或改进建议...',
+                  labelText: '联系方式 (选填)',
+                  hintText: 'QQ / 手机号 / 邮箱',
                   border: OutlineInputBorder(),
                 ),
               ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _isSubmitting ? null : _submit,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 14),
+              const SizedBox(height: 16),
+              Expanded(
+                child: TextField(
+                  controller: _contentController,
+                  maxLines: null,
+                  expands: true,
+                  textAlignVertical: TextAlignVertical.top,
+                  decoration: const InputDecoration(
+                    labelText: '问题或建议',
+                    hintText: '请详述您在报修、接单或使用过程中遇到的问题或改进建议...',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
               ),
-              child: _isSubmitting
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Text('提交反馈'),
-            ),
-          ],
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _isSubmitting ? null : _submit,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+                child: _isSubmitting
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text('提交反馈'),
+              ),
+            ],
+          ),
         ),
       ),
     );

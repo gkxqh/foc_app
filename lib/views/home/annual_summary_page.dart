@@ -4,6 +4,7 @@ import '../../core/theme/app_theme.dart';
 import '../../models/tech_stats_model.dart';
 import '../../services/config_service.dart';
 import '../common/empty_state.dart';
+import '../common/page_insets.dart';
 
 class AnnualSummaryPage extends StatefulWidget {
   const AnnualSummaryPage({super.key});
@@ -65,7 +66,7 @@ class _AnnualSummaryPageState extends State<AnnualSummaryPage> {
               ),
             )
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(20.0),
+              padding: pageListPadding(context, horizontal: 20, top: 20),
               child: Column(
                 children: [
                   Container(

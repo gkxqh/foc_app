@@ -10,6 +10,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/ticket_provider.dart';
 import '../common/confirm_dialog.dart';
 import '../common/image_preview.dart';
+import '../common/page_insets.dart';
 import 'give_order_page.dart';
 
 class TicketDetailPage extends StatefulWidget {
@@ -390,7 +391,7 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.all(16.0),
+        padding: pageListPadding(context),
         children: [
           // 步骤条
           Card(

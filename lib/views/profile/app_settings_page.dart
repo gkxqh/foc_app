@@ -10,6 +10,7 @@ import '../../core/theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/config_provider.dart';
 import '../../providers/theme_provider.dart';
+import '../common/page_insets.dart';
 import 'about_page.dart';
 
 /// 软件设置：界面外观（主题模式、文字大小、应用图标）与关于信息。
@@ -197,7 +198,7 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
     return Scaffold(
       appBar: AppBar(title: const Text('软件设置')),
       body: ListView(
-        padding: const EdgeInsets.all(16.0),
+        padding: pageListPadding(context),
         children: [
           _groupTitle('界面设置'),
           Card(

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../providers/auth_provider.dart';
 import '../../services/auth_service.dart';
+import '../common/page_insets.dart';
 
 /// 换绑手机号：向新手机号发送验证码（newphone），回填验证码完成换绑
 /// （服务端 phonechange_verify 只校验 vcode，新号码已在第一步绑定待验证状态）
@@ -95,7 +96,7 @@ class _NewPhonePageState extends State<NewPhonePage> {
     return Scaffold(
       appBar: AppBar(title: const Text('更换手机号')),
       body: ListView(
-        padding: const EdgeInsets.all(16.0),
+        padding: pageListPadding(context),
         children: [
           Card(
             child: Padding(

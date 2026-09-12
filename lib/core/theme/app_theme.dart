@@ -1,10 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class AppTheme {
   // Brand colors
   static const Color primaryBlue = Color(0xFF4187F2);
   static const Color primaryDark = Color(0xFF1976D2);
   static const Color accentColor = Color(0xFF57BE6A);
+
+  // edge-to-edge 系统栏样式：系统栏透明，图标明度随主题。
+  // 经 AppBarTheme 挂到各页 AppBar；main() 启动时先应用浅色值兜底。
+  static const SystemUiOverlayStyle lightSystemUi = SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent,
+    statusBarIconBrightness: Brightness.dark,
+    systemNavigationBarColor: Colors.transparent,
+    systemNavigationBarIconBrightness: Brightness.dark,
+    systemNavigationBarDividerColor: Colors.transparent,
+  );
+  static const SystemUiOverlayStyle darkSystemUi = SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent,
+    statusBarIconBrightness: Brightness.light,
+    systemNavigationBarColor: Colors.transparent,
+    systemNavigationBarIconBrightness: Brightness.light,
+    systemNavigationBarDividerColor: Colors.transparent,
+  );
 
   // Ticket Status Colors（2026-09-11 校准：取消并入红系、确认色加深保证白字对比度）
   static const Color statusPending = Color(0xFF4187F2); // 待分配（蓝）
@@ -79,6 +97,7 @@ class AppTheme {
         foregroundColor: Colors.black87,
         elevation: 0,
         centerTitle: true,
+        systemOverlayStyle: lightSystemUi,
         titleTextStyle: TextStyle(
           color: Colors.black87,
           fontSize: 18,
@@ -103,6 +122,7 @@ class AppTheme {
         foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
+        systemOverlayStyle: darkSystemUi,
         titleTextStyle: TextStyle(
           color: Colors.white,
           fontSize: 18,

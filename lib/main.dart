@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import 'core/theme/app_theme.dart';
@@ -10,6 +11,12 @@ import 'views/splash/launch_gate.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 全局 edge-to-edge：内容延伸到系统栏之后（系统栏透明）。
+  // Android 15+ 本就会强制该行为，显式开启让 Android 14 及以下表现一致，
+  // 页面 inset 由 AppBarTheme 与 SafeArea 统一消费。
+  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  SystemChrome.setSystemUIOverlayStyle(AppTheme.lightSystemUi);
 
   final authProvider = AuthProvider();
   await authProvider.initialize();

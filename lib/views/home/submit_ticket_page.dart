@@ -9,6 +9,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/ticket_provider.dart';
 import '../common/confirm_dialog.dart';
 import '../common/image_preview.dart';
+import '../common/page_insets.dart';
 
 class SubmitTicketPage extends StatefulWidget {
   const SubmitTicketPage({super.key});
@@ -173,7 +174,7 @@ class _SubmitTicketPageState extends State<SubmitTicketPage> {
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.all(16.0),
+          padding: pageListPadding(context),
           children: [
             Card(
               child: Padding(

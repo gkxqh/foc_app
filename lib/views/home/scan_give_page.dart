@@ -171,113 +171,122 @@ class _ScanGivePageState extends State<ScanGivePage> {
               ],
             ),
           ),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            color: _success
-                ? AppTheme.accentColor.withValues(alpha: 0.12)
-                : (_resultMessage == null
-                      ? Theme.of(context).colorScheme.surfaceContainerHighest
-                            .withValues(alpha: 0.35)
-                      : Colors.orange.withValues(alpha: 0.12)),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  _resultMessage ?? '将取景框对准工单二维码即可自动接单',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: _resultMessage == null
-                        ? Theme.of(context).colorScheme.onSurfaceVariant
-                        : null,
-                    fontWeight: _resultMessage == null
-                        ? FontWeight.normal
-                        : FontWeight.bold,
+          SafeArea(
+            top: false,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              color: _success
+                  ? AppTheme.accentColor.withValues(alpha: 0.12)
+                  : (_resultMessage == null
+                        ? Theme.of(context).colorScheme.surfaceContainerHighest
+                              .withValues(alpha: 0.35)
+                        : Colors.orange.withValues(alpha: 0.12)),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    _resultMessage ?? '将取景框对准工单二维码即可自动接单',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: _resultMessage == null
+                          ? Theme.of(context).colorScheme.onSurfaceVariant
+                          : null,
+                      fontWeight: _resultMessage == null
+                          ? FontWeight.normal
+                          : FontWeight.bold,
+                    ),
                   ),
-                ),
-                if (_resultMessage == null) ...[
-                  const SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      OutlinedButton.icon(
-                        onPressed: _pickImageFromGallery,
-                        icon: const Icon(
-                          Icons.photo_library_outlined,
-                          size: 18,
-                        ),
-                        label: const Text('相册导入'),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
+                  if (_resultMessage == null) ...[
+                    const SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        OutlinedButton.icon(
+                          onPressed: _pickImageFromGallery,
+                          icon: const Icon(
+                            Icons.photo_library_outlined,
+                            size: 18,
+                          ),
+                          label: const Text('相册导入'),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 14),
-                      OutlinedButton.icon(
-                        onPressed: _openManualInput,
-                        icon: const Icon(Icons.keyboard_alt_outlined, size: 18),
-                        label: const Text('手动输码'),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
+                        const SizedBox(width: 14),
+                        OutlinedButton.icon(
+                          onPressed: _openManualInput,
+                          icon: const Icon(
+                            Icons.keyboard_alt_outlined,
+                            size: 18,
+                          ),
+                          label: const Text('手动输码'),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
+                  ],
+                  // 失败后相机已暂停，提供手动重扫、相册重试或手动输码入口
+                  if (!_success && _resultMessage != null) ...[
+                    const SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton.icon(
+                          onPressed: _resumeScan,
+                          icon: const Icon(Icons.refresh_rounded, size: 18),
+                          label: const Text('重新扫描'),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 8,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        OutlinedButton.icon(
+                          onPressed: _pickImageFromGallery,
+                          icon: const Icon(
+                            Icons.photo_library_outlined,
+                            size: 18,
+                          ),
+                          label: const Text('相册'),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        OutlinedButton.icon(
+                          onPressed: _openManualInput,
+                          icon: const Icon(
+                            Icons.keyboard_alt_outlined,
+                            size: 18,
+                          ),
+                          label: const Text('输码'),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
-                // 失败后相机已暂停，提供手动重扫、相册重试或手动输码入口
-                if (!_success && _resultMessage != null) ...[
-                  const SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      ElevatedButton.icon(
-                        onPressed: _resumeScan,
-                        icon: const Icon(Icons.refresh_rounded, size: 18),
-                        label: const Text('重新扫描'),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 8,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      OutlinedButton.icon(
-                        onPressed: _pickImageFromGallery,
-                        icon: const Icon(
-                          Icons.photo_library_outlined,
-                          size: 18,
-                        ),
-                        label: const Text('相册'),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      OutlinedButton.icon(
-                        onPressed: _openManualInput,
-                        icon: const Icon(Icons.keyboard_alt_outlined, size: 18),
-                        label: const Text('输码'),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ],
+              ),
             ),
           ),
         ],

@@ -6,6 +6,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../../core/theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/ticket_provider.dart';
+import '../common/page_insets.dart';
 
 class GiveOrderPage extends StatefulWidget {
   final String? transcodeToShare; // 如果传入，则展示该转单码和二维码
@@ -79,7 +80,7 @@ class _GiveOrderPageState extends State<GiveOrderPage> {
     return Scaffold(
       appBar: AppBar(title: Text(isShowingShare ? '转单凭证' : '手动接单')),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
+        padding: pageListPadding(context, horizontal: 24, top: 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

@@ -5,6 +5,7 @@ import '../../core/theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/ticket_provider.dart';
 import '../common/empty_state.dart';
+import '../common/page_insets.dart';
 import '../common/skeleton_list.dart';
 import '../home/ticket_detail_page.dart';
 
@@ -43,92 +44,99 @@ class _HistoryPageState extends State<HistoryPage> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('历史工单')),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          if (auth.user != null) {
-            await ticketProvider.fetchTickets(
-              role: auth.user!.role,
-              uid: auth.user!.uid,
-            );
-          }
-        },
-        child: ticketProvider.isLoading && historyList.isEmpty
-            ? const SkeletonList()
-            : historyList.isEmpty && loadError != null
-            ? ListView(
-                children: [
-                  const SizedBox(height: 80),
-                  SizedBox(
-                    height: 240,
-                    child: EmptyState(
-                      icon: Icons.cloud_off_rounded,
-                      title: loadError,
-                      action: OutlinedButton.icon(
-                        onPressed: _fetch,
-                        icon: const Icon(Icons.refresh_rounded),
-                        label: const Text('重新加载'),
+      body: SafeArea(
+        top: false,
+        child: RefreshIndicator(
+          onRefresh: () async {
+            if (auth.user != null) {
+              await ticketProvider.fetchTickets(
+                role: auth.user!.role,
+                uid: auth.user!.uid,
+              );
+            }
+          },
+          child: ticketProvider.isLoading && historyList.isEmpty
+              ? const SkeletonList()
+              : historyList.isEmpty && loadError != null
+              ? ListView(
+                  children: [
+                    const SizedBox(height: 80),
+                    SizedBox(
+                      height: 240,
+                      child: EmptyState(
+                        icon: Icons.cloud_off_rounded,
+                        title: loadError,
+                        action: OutlinedButton.icon(
+                          onPressed: _fetch,
+                          icon: const Icon(Icons.refresh_rounded),
+                          label: const Text('重新加载'),
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              )
-            : historyList.isEmpty
-            ? ListView(
-                children: [
-                  const SizedBox(height: 80),
-                  SizedBox(
-                    height: 220,
-                    child: EmptyState(
-                      icon: Icons.history_toggle_off_rounded,
-                      title: '暂无历史已结束工单',
+                  ],
+                )
+              : historyList.isEmpty
+              ? ListView(
+                  children: [
+                    const SizedBox(height: 80),
+                    SizedBox(
+                      height: 220,
+                      child: EmptyState(
+                        icon: Icons.history_toggle_off_rounded,
+                        title: '暂无历史已结束工单',
+                      ),
                     ),
-                  ),
-                ],
-              )
-            : ListView.builder(
-                padding: const EdgeInsets.all(16.0),
-                itemCount: historyList.length,
-                itemBuilder: (ctx, i) {
-                  final ticket = historyList[i];
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    child: ListTile(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => TicketDetailPage(ticket: ticket),
+                  ],
+                )
+              : ListView.builder(
+                  padding: pageListPadding(context),
+                  itemCount: historyList.length,
+                  itemBuilder: (ctx, i) {
+                    final ticket = historyList[i];
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      child: ListTile(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => TicketDetailPage(ticket: ticket),
+                            ),
+                          );
+                        },
+                        leading: CircleAvatar(
+                          backgroundColor: AppTheme.getStatusColor(
+                            ticket.repairStatus,
+                          ).withValues(alpha: 0.15),
+                          child: Icon(
+                            ticket.repairStatus == 'Done'
+                                ? Icons.check
+                                : ticket.repairStatus == 'Canceled'
+                                ? Icons.cancel_outlined
+                                : Icons.close,
+                            color: AppTheme.getStatusColor(ticket.repairStatus),
+                            size: 20,
                           ),
-                        );
-                      },
-                      leading: CircleAvatar(
-                        backgroundColor: AppTheme.getStatusColor(
-                          ticket.repairStatus,
-                        ).withValues(alpha: 0.15),
-                        child: Icon(
-                          ticket.repairStatus == 'Done'
-                              ? Icons.check
-                              : ticket.repairStatus == 'Canceled'
-                              ? Icons.cancel_outlined
-                              : Icons.close,
-                          color: AppTheme.getStatusColor(ticket.repairStatus),
-                          size: 20,
+                        ),
+                        title: Text(
+                          '${ticket.deviceType} • ${ticket.faultType}',
+                        ),
+                        subtitle: Text(
+                          '${ticket.campus} | ${ticket.createTime}',
+                        ),
+                        trailing: Text(
+                          AppTheme.getStatusText(ticket.repairStatus),
+                          style: TextStyle(
+                            color: AppTheme.getStatusColor(ticket.repairStatus),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
                         ),
                       ),
-                      title: Text('${ticket.deviceType} • ${ticket.faultType}'),
-                      subtitle: Text('${ticket.campus} | ${ticket.createTime}'),
-                      trailing: Text(
-                        AppTheme.getStatusText(ticket.repairStatus),
-                        style: TextStyle(
-                          color: AppTheme.getStatusColor(ticket.repairStatus),
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
+                    );
+                  },
+                ),
+        ),
       ),
     );
   }

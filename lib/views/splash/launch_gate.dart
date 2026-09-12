@@ -2,6 +2,7 @@ import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dynamic_icon_plus/flutter_dynamic_icon_plus.dart';
 
 import '../main_scaffold.dart';
@@ -70,24 +71,28 @@ class _IconSplashPageState extends State<IconSplashPage> {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedSwitcher(
-      duration: _fadeDuration,
-      child: _entered
-          ? const MainScaffold(key: ValueKey('main'))
-          : Container(
-              key: const ValueKey('splash'),
-              color: Colors.black,
-              alignment: Alignment.center,
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 250),
-                child: Image.asset(
-                  _asset,
-                  key: ValueKey(_asset),
-                  width: 220,
-                  fit: BoxFit.contain,
+    // 黑底开屏页：浅色系统栏图标，避免状态栏内容融入黑底不可见
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light,
+      child: AnimatedSwitcher(
+        duration: _fadeDuration,
+        child: _entered
+            ? const MainScaffold(key: ValueKey('main'))
+            : Container(
+                key: const ValueKey('splash'),
+                color: Colors.black,
+                alignment: Alignment.center,
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 250),
+                  child: Image.asset(
+                    _asset,
+                    key: ValueKey(_asset),
+                    width: 220,
+                    fit: BoxFit.contain,
+                  ),
                 ),
               ),
-            ),
+      ),
     );
   }
 }
