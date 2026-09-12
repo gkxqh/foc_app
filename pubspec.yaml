@@ -45,6 +45,7 @@ dependencies:
   mobile_scanner: ^5.2.3
   flutter_dynamic_icon_plus: ^1.4.1
   flutter_markdown_plus: ^1.0.12
+  home_widget: ^0.9.4
 
 dev_dependencies:
   flutter_test:

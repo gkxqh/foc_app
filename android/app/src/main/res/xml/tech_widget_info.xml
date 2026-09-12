@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 技术员工作台：添加时默认 4x2（targetCellWidth），可缩至 2x2；更新由
+     App 快照 / WorkManager 轮询 / 刷新按钮驱动，故 updatePeriodMillis 关闭 -->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="110dp"
+    android:minHeight="110dp"
+    android:targetCellWidth="4"
+    android:targetCellHeight="2"
+    android:maxResizeWidth="320dp"
+    android:maxResizeHeight="180dp"
+    android:updatePeriodMillis="0"
+    android:initialLayout="@layout/widget_loading"
+    android:previewLayout="@layout/widget_tech_4x2"
+    android:resizeMode="horizontal|vertical"
+    android:description="@string/widget_tech_desc"
+    android:widgetCategory="home_screen" />

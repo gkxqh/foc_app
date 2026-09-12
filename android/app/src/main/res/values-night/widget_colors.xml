@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 深色模式色板：小组件只能跟随系统深浅，无法读取 App 内深色设置 -->
+<resources>
+    <color name="widget_bg">#1B1C1E</color>
+    <color name="widget_text_primary">#E7E9EE</color>
+    <color name="widget_text_secondary">#A8AEB8</color>
+    <color name="widget_text_tertiary">#6E747E</color>
+    <color name="widget_accent">#4187F2</color>
+    <color name="widget_button_ghost">#2A2C30</color>
+
+    <color name="widget_status_pending">#4187F2</color>
+    <color name="widget_status_repairing">#F27F41</color>
+    <color name="widget_status_confirming">#B8860B</color>
+    <color name="widget_status_done">#57BE6A</color>
+    <color name="widget_status_closed">#DA3231</color>
+    <color name="widget_status_canceled">#9E9E9E</color>
+</resources>

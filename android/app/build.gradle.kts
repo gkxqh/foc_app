@@ -69,6 +69,11 @@ kotlin {
     }
 }
 
+dependencies {
+    // 桌面小组件的 30 分钟周期轮询（原生 Worker，避免拉起 Flutter 引擎）
+    implementation("androidx.work:work-runtime:2.9.1")
+}
+
 flutter {
     source = "../.."
 }

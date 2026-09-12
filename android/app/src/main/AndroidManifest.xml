@@ -95,6 +95,34 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+
+        <!-- 桌面小组件：技术员工作台 / 我的报修（同一 Provider 按 宽度 渲染 4x2 或 2x2） -->
+        <receiver
+            android:name=".widget.TechWidgetProvider"
+            android:exported="false"
+            android:label="飞扬·接单工作台">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/tech_widget_info" />
+        </receiver>
+        <receiver
+            android:name=".widget.UserWidgetProvider"
+            android:exported="false"
+            android:label="飞扬·我的报修">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/user_widget_info" />
+        </receiver>
+        <!-- 组件上的「刷新」按钮 -->
+        <receiver
+            android:name=".widget.WidgetRefreshReceiver"
+            android:exported="false" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

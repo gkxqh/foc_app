@@ -7,6 +7,7 @@ import 'providers/auth_provider.dart';
 import 'providers/config_provider.dart';
 import 'providers/ticket_provider.dart';
 import 'providers/theme_provider.dart';
+import 'services/widget_link_service.dart';
 import 'views/splash/launch_gate.dart';
 
 void main() async {
@@ -27,18 +28,30 @@ void main() async {
   runApp(FeiyangApp(authProvider: authProvider, themeProvider: themeProvider));
 }
 
-class FeiyangApp extends StatelessWidget {
+class FeiyangApp extends StatefulWidget {
   final AuthProvider? authProvider;
   final ThemeProvider? themeProvider;
 
   const FeiyangApp({super.key, this.authProvider, this.themeProvider});
 
   @override
+  State<FeiyangApp> createState() => _FeiyangAppState();
+}
+
+class _FeiyangAppState extends State<FeiyangApp> {
+  @override
+  void initState() {
+    super.initState();
+    // 桌面小组件点击回跳：冷启动落点登记 + 热点击订阅
+    WidgetLinkService.init();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider.value(value: authProvider ?? AuthProvider()),
-        ChangeNotifierProvider.value(value: themeProvider ?? ThemeProvider()),
+        ChangeNotifierProvider.value(value: widget.authProvider ?? AuthProvider()),
+        ChangeNotifierProvider.value(value: widget.themeProvider ?? ThemeProvider()),
         ChangeNotifierProvider(create: (_) => ConfigProvider()),
         ChangeNotifierProvider(create: (_) => TicketProvider()),
       ],
@@ -49,6 +62,8 @@ class FeiyangApp extends StatelessWidget {
           return MaterialApp(
             title: '云上飞扬',
             debugShowCheckedModeBanner: false,
+            // 小组件深链统一经此 key 跳转（WidgetLinkService）
+            navigatorKey: WidgetLinkService.navigatorKey,
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
             themeMode: theme.themeMode,

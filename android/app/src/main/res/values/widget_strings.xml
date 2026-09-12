@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 桌面小组件文案（独立文件，避免与主 strings 冲突） -->
+<resources>
+    <string name="widget_app_name">云上飞扬</string>
+    <string name="widget_loading_hint">小组件加载中…</string>
+
+    <string name="widget_tech_title">技术员工作台</string>
+    <string name="widget_tech_desc">掌握在手工单与可接单余量</string>
+    <string name="widget_user_title">我的报修</string>
+    <string name="widget_user_desc">实时跟进报修进度</string>
+
+    <string name="widget_logged_out">登录后可查看工单动态</string>
+    <string name="widget_expired">登录已过期，请打开应用重新登录</string>
+    <string name="widget_open_app">打开应用</string>
+    <string name="widget_tap_open">点按打开应用</string>
+    <string name="widget_tap_report">点按立即报修</string>
+    <string name="widget_tap_detail">点按查看详情</string>
+
+    <!-- 角色不匹配引导 -->
+    <string name="widget_tech_wrong_role">当前账号不是技术员，接单工作台不可用</string>
+    <string name="widget_tech_unavailable_short">工作台不可用</string>
+    <string name="widget_tech_wrong_role_short">仅技术员账号可用</string>
+    <string name="widget_user_wrong_role">技术员账号请使用「接单工作台」小组件</string>
+    <string name="widget_user_unavailable_short">请换组件</string>
+    <string name="widget_user_wrong_role_short">技术员账号请用接单工作台</string>
+
+    <string name="widget_tech_empty">暂无在手工单</string>
+    <string name="widget_user_empty">暂无进行中工单</string>
+
+    <string name="widget_btn_scan">扫码接单</string>
+    <string name="widget_btn_refresh">刷新</string>
+    <string name="widget_btn_report">立即报修</string>
+    <string name="widget_btn_confirm">去确认</string>
+
+    <string name="widget_hand_fmt">在手 %1$d 单</string>
+    <string name="widget_updated_fmt">更新于 %1$s</string>
+
+    <string name="widget_step_report">报修</string>
+    <string name="widget_step_accept">接单</string>
+    <string name="widget_step_repair">维修</string>
+    <string name="widget_step_confirm">确认</string>
+    <string name="widget_step_done">完成</string>
+    <string name="widget_step_sep">·</string>
+</resources>

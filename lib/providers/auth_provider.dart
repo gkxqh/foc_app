@@ -8,6 +8,7 @@ import '../core/network/api_client.dart';
 import '../models/saved_account.dart';
 import '../models/user_model.dart';
 import '../services/auth_service.dart';
+import '../services/widget_snapshot_service.dart';
 
 class AuthProvider extends ChangeNotifier {
   final AuthService _authService = AuthService();
@@ -89,6 +90,8 @@ class AuthProvider extends ChangeNotifier {
 
     _isLoading = false;
     notifyListeners();
+    // 登录态/用户信息同步到桌面小组件；快照管线内部吞掉异常
+    unawaited(WidgetSnapshotService.refreshUser());
   }
 
   // ============ 本机保存账号（QQ 式快速切换） ============
@@ -163,6 +166,8 @@ class AuthProvider extends ChangeNotifier {
       ),
     );
     notifyListeners();
+    // 切换账号后旧工单不再属于当前用户，丢弃快照中的工单数据
+    unawaited(WidgetSnapshotService.refreshUser(resetTickets: true));
     return null;
   }
 
@@ -230,6 +235,8 @@ class AuthProvider extends ChangeNotifier {
       }
       _isLoading = false;
       notifyListeners();
+      // 新登录会话：丢弃快照中可能残留的旧账号工单
+      unawaited(WidgetSnapshotService.refreshUser(resetTickets: true));
       return true;
     }
 
@@ -263,6 +270,7 @@ class AuthProvider extends ChangeNotifier {
     if (userInfo != null) {
       _user = userInfo;
       notifyListeners();
+      unawaited(WidgetSnapshotService.refreshUser());
     }
   }
 
@@ -298,6 +306,8 @@ class AuthProvider extends ChangeNotifier {
         canDuo: canDuo,
         maxConcurrent: maxConcurrent,
       );
+      // 接单上限变化直接影响小组件上的「可接单余量」
+      unawaited(WidgetSnapshotService.refreshUser());
     }
     _isLoading = false;
     notifyListeners();
@@ -320,6 +330,8 @@ class AuthProvider extends ChangeNotifier {
     _user = null;
     _isLoggedIn = false;
     notifyListeners();
+    // 小组件回落到未登录引导态
+    unawaited(WidgetSnapshotService.clear());
   }
 
   @override

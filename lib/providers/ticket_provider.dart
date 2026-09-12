@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
 import '../models/ticket_model.dart';
 import '../services/ticket_service.dart';
+import '../services/widget_snapshot_service.dart';
 
 class TicketProvider extends ChangeNotifier {
   final TicketService _ticketService = TicketService();
@@ -10,6 +13,10 @@ class TicketProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _lastError;
   String? _lastActionError; // 最近一次提交类操作（提交工单/接单）失败的服务端原因
+
+  // 最近一次 fetchTickets 的查询维度，供本地状态流转后重建小组件快照
+  String? _lastRole;
+  String? _lastUid;
 
   List<TicketModel> get tickets => _tickets;
   bool get isLoading => _isLoading;
@@ -26,6 +33,8 @@ class TicketProvider extends ChangeNotifier {
 
   // 刷新工单
   Future<void> fetchTickets({required String role, required String uid}) async {
+    _lastRole = role;
+    _lastUid = uid;
     _isLoading = true;
     _lastError = null;
     notifyListeners();
@@ -43,6 +52,10 @@ class TicketProvider extends ChangeNotifier {
 
     _isLoading = false;
     notifyListeners();
+    // 桌面小组件快照随工单数据同步（内部吞掉一切异常，不影响主流程）
+    unawaited(
+      WidgetSnapshotService.refreshTickets(role: role, uid: uid, tickets: _tickets),
+    );
   }
 
   // 提交报修
@@ -154,6 +167,17 @@ class TicketProvider extends ChangeNotifier {
     if (index != -1) {
       _tickets[index] = _tickets[index].copyWith(repairStatus: newStatus);
       notifyListeners();
+      final role = _lastRole;
+      final uid = _lastUid;
+      if (role != null && uid != null) {
+        unawaited(
+          WidgetSnapshotService.refreshTickets(
+            role: role,
+            uid: uid,
+            tickets: _tickets,
+          ),
+        );
+      }
     }
   }
 
