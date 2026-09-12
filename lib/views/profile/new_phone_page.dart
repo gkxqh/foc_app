@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/auth_service.dart';
 import '../common/page_insets.dart';
@@ -100,15 +101,12 @@ class _NewPhonePageState extends State<NewPhonePage> {
         children: [
           Card(
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(AppSpacing.lg),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    '第一步：输入新手机号',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                  ),
-                  const SizedBox(height: 12),
+                  Text('第一步：输入新手机号', style: AppText.titleSm),
+                  const SizedBox(height: AppSpacing.md),
                   Row(
                     children: [
                       Expanded(
@@ -120,13 +118,10 @@ class _NewPhonePageState extends State<NewPhonePage> {
                             LengthLimitingTextInputFormatter(11),
                           ],
                           enabled: !_codeSent,
-                          decoration: const InputDecoration(
-                            labelText: '新手机号',
-                            border: OutlineInputBorder(),
-                          ),
+                          decoration: const InputDecoration(labelText: '新手机号'),
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: AppSpacing.md),
                       OutlinedButton(
                         onPressed: _isLoading || (_codeSent && _countdown > 0)
                             ? null
@@ -143,18 +138,15 @@ class _NewPhonePageState extends State<NewPhonePage> {
               ),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           Card(
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(AppSpacing.lg),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    '第二步：输入收到的验证码',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                  ),
-                  const SizedBox(height: 12),
+                  Text('第二步：输入收到的验证码', style: AppText.titleSm),
+                  const SizedBox(height: AppSpacing.md),
                   TextField(
                     controller: _codeController,
                     keyboardType: TextInputType.number,
@@ -163,12 +155,9 @@ class _NewPhonePageState extends State<NewPhonePage> {
                       LengthLimitingTextInputFormatter(6),
                     ],
                     enabled: _codeSent,
-                    decoration: const InputDecoration(
-                      labelText: '验证码',
-                      border: OutlineInputBorder(),
-                    ),
+                    decoration: const InputDecoration(labelText: '验证码'),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.lg),
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -183,13 +172,12 @@ class _NewPhonePageState extends State<NewPhonePage> {
               ),
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
             child: Text(
               '换绑成功后，维修进度短信将发送至新手机号；原手机号将无法再登录本应用。',
-              style: TextStyle(
-                fontSize: 12,
+              style: AppText.captionSm.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
                 height: 1.5,
               ),

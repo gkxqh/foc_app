@@ -20,29 +20,34 @@ class ProfilePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('个人中心')),
       body: ListView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
           Card(
             child: Padding(
-              padding: const EdgeInsets.all(20.0),
+              padding: const EdgeInsets.all(AppSpacing.lg),
               child: Row(
                 children: [
                   CircleAvatar(
                     radius: 36,
-                    backgroundColor: Colors.grey.shade200,
+                    // 底色随主题翻转，深色模式下不再是刺眼亮灰圆盘
+                    backgroundColor: Theme.of(context)
+                        .colorScheme
+                        .surfaceContainerHighest,
                     // 无头像时显示本地图标兜底，不向第三方图床发起请求
                     backgroundImage: (user?.avatarUrl.isNotEmpty ?? false)
                         ? NetworkImage(user!.avatarUrl)
                         : null,
                     child: (user?.avatarUrl.isNotEmpty ?? false)
                         ? null
-                        : const Icon(
+                        : Icon(
                             Icons.person_rounded,
                             size: 40,
-                            color: Colors.grey,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurfaceVariant,
                           ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: AppSpacing.lg),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -53,10 +58,7 @@ class ProfilePage extends StatelessWidget {
                                     ? user!.nickname
                                     : '同学')
                               : '点击登录',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: AppText.heading,
                         ),
                         const SizedBox(height: 6),
                         if (auth.isLoggedIn) ...[
@@ -64,7 +66,7 @@ class ProfilePage extends StatelessWidget {
                             children: [
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
+                                  horizontal: AppSpacing.sm,
                                   vertical: 2,
                                 ),
                                 decoration: BoxDecoration(
@@ -75,17 +77,18 @@ class ProfilePage extends StatelessWidget {
                                       : AppTheme.primaryBlue.withValues(
                                           alpha: 0.15,
                                         ),
-                                  borderRadius: BorderRadius.circular(4),
+                                  borderRadius: BorderRadius.circular(
+                                    AppRadius.badge,
+                                  ),
                                 ),
                                 child: Text(
                                   user?.isTechnician == true
                                       ? '技术员 ${user?.uid ?? ''}'
                                       : '普通用户',
-                                  style: TextStyle(
-                                    fontSize: 11,
+                                  style: AppText.micro.copyWith(
                                     fontWeight: FontWeight.bold,
                                     color: user?.isTechnician == true
-                                        ? Colors.green
+                                        ? AppTheme.accentColor
                                         : AppTheme.primaryBlue,
                                   ),
                                 ),
@@ -94,18 +97,23 @@ class ProfilePage extends StatelessWidget {
                                 const SizedBox(width: 6),
                                 Text(
                                   user!.campus,
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey,
+                                  style: AppText.captionSm.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
                                   ),
                                 ),
                               ],
                             ],
                           ),
                         ] else ...[
-                          const Text(
+                          Text(
                             '登录后查看工单与个性化设置',
-                            style: TextStyle(fontSize: 12, color: Colors.grey),
+                            style: AppText.captionSm.copyWith(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
                           ),
                         ],
                       ],
@@ -125,7 +133,7 @@ class ProfilePage extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
           Card(
             child: Column(
               children: [
@@ -135,10 +143,7 @@ class ProfilePage extends StatelessWidget {
                     color: AppTheme.primaryBlue,
                   ),
                   title: const Text('历史工单'),
-                  subtitle: const Text(
-                    '已结束的报修记录',
-                    style: TextStyle(fontSize: 12),
-                  ),
+                  subtitle: const Text('已结束的报修记录', style: AppText.captionSm),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                   onTap: () {
                     if (!auth.isLoggedIn) {
@@ -158,10 +163,7 @@ class ProfilePage extends StatelessWidget {
                     color: AppTheme.primaryBlue,
                   ),
                   title: const Text('个人设置'),
-                  subtitle: const Text(
-                    '修改个人资料',
-                    style: TextStyle(fontSize: 12),
-                  ),
+                  subtitle: const Text('修改个人资料', style: AppText.captionSm),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                   onTap: () {
                     if (!auth.isLoggedIn) {
@@ -181,7 +183,7 @@ class ProfilePage extends StatelessWidget {
                     color: AppTheme.primaryBlue,
                   ),
                   title: const Text('问题反馈'),
-                  subtitle: const Text('意见与建议', style: TextStyle(fontSize: 12)),
+                  subtitle: const Text('意见与建议', style: AppText.captionSm),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                   onTap: () {
                     Navigator.push(
@@ -199,8 +201,7 @@ class ProfilePage extends StatelessWidget {
                   title: const Text('软件设置'),
                   subtitle: Text(
                     '主题与文字大小',
-                    style: TextStyle(
-                      fontSize: 12,
+                    style: AppText.captionSm.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),

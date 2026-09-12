@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_theme.dart';
+
 /// 统一的确认弹窗：返回 true 表示用户确认。
-/// danger 为 true 时确认按钮呈红色（用于取消/强制关闭等破坏性操作）。
+/// danger 为 true 时确认按钮呈错误红色（取语义 token，随品牌色板统一）。
 Future<bool> showConfirmDialog(
   BuildContext context, {
   required String title,
@@ -23,7 +25,7 @@ Future<bool> showConfirmDialog(
         ElevatedButton(
           onPressed: () => Navigator.pop(ctx, true),
           style: danger
-              ? ElevatedButton.styleFrom(backgroundColor: Colors.red)
+              ? ElevatedButton.styleFrom(backgroundColor: AppTheme.errorRed)
               : null,
           child: Text(confirmText),
         ),

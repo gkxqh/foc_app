@@ -175,21 +175,23 @@ class _ScanGivePageState extends State<ScanGivePage> {
             top: false,
             child: Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.xl,
+                vertical: AppSpacing.lg,
+              ),
               color: _success
                   ? AppTheme.accentColor.withValues(alpha: 0.12)
                   : (_resultMessage == null
                         ? Theme.of(context).colorScheme.surfaceContainerHighest
                               .withValues(alpha: 0.35)
-                        : Colors.orange.withValues(alpha: 0.12)),
+                        : AppTheme.warningOrange.withValues(alpha: 0.12)),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     _resultMessage ?? '将取景框对准工单二维码即可自动接单',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 14,
+                    style: AppText.body.copyWith(
                       color: _resultMessage == null
                           ? Theme.of(context).colorScheme.onSurfaceVariant
                           : null,
@@ -212,8 +214,8 @@ class _ScanGivePageState extends State<ScanGivePage> {
                           label: const Text('相册导入'),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
+                              horizontal: AppSpacing.lg,
+                              vertical: AppSpacing.sm,
                             ),
                           ),
                         ),
@@ -227,8 +229,8 @@ class _ScanGivePageState extends State<ScanGivePage> {
                           label: const Text('手动输码'),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
+                              horizontal: AppSpacing.lg,
+                              vertical: AppSpacing.sm,
                             ),
                           ),
                         ),
@@ -248,11 +250,11 @@ class _ScanGivePageState extends State<ScanGivePage> {
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 14,
-                              vertical: 8,
+                              vertical: AppSpacing.sm,
                             ),
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: AppSpacing.sm),
                         OutlinedButton.icon(
                           onPressed: _pickImageFromGallery,
                           icon: const Icon(
@@ -262,12 +264,12 @@ class _ScanGivePageState extends State<ScanGivePage> {
                           label: const Text('相册'),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
+                              horizontal: AppSpacing.md,
+                              vertical: AppSpacing.sm,
                             ),
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: AppSpacing.sm),
                         OutlinedButton.icon(
                           onPressed: _openManualInput,
                           icon: const Icon(
@@ -277,8 +279,8 @@ class _ScanGivePageState extends State<ScanGivePage> {
                           label: const Text('输码'),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
+                              horizontal: AppSpacing.md,
+                              vertical: AppSpacing.sm,
                             ),
                           ),
                         ),

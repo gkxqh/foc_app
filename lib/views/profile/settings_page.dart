@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../../core/constants/api_constants.dart';
 import '../../core/network/api_client.dart';
+import '../../core/theme/app_theme.dart';
 import '../../models/user_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/auth_service.dart';
@@ -240,7 +241,7 @@ class _SettingsPageState extends State<SettingsPage> {
         children: [
           Card(
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(AppSpacing.lg),
               child: Column(
                 children: [
                   GestureDetector(
@@ -249,17 +250,22 @@ class _SettingsPageState extends State<SettingsPage> {
                       children: [
                         CircleAvatar(
                           radius: 40,
-                          backgroundColor: Colors.grey.shade200,
+                          // 底色随主题翻转，深色模式下不再是刺眼亮灰圆盘
+                          backgroundColor: Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHighest,
                           // 无头像时显示本地图标兜底，不向第三方图床发起请求
                           backgroundImage: _avatarUrl.isNotEmpty
                               ? NetworkImage(_avatarUrl)
                               : null,
                           child: _avatarUrl.isNotEmpty
                               ? null
-                              : const Icon(
+                              : Icon(
                                   Icons.person_rounded,
                                   size: 44,
-                                  color: Colors.grey,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
                                 ),
                         ),
                         Positioned(
@@ -267,7 +273,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           right: 0,
                           child: CircleAvatar(
                             radius: 12,
-                            backgroundColor: Colors.blue,
+                            backgroundColor: AppTheme.primaryBlue,
                             child: _isUploadingAvatar
                                 ? const SizedBox(
                                     width: 12,
@@ -287,26 +293,22 @@ class _SettingsPageState extends State<SettingsPage> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  const Text(
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
                     '点击更换头像',
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                    style: AppText.captionSm.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.lg),
                   TextField(
                     controller: _nicknameController,
-                    decoration: const InputDecoration(
-                      labelText: '用户昵称',
-                      border: OutlineInputBorder(),
-                    ),
+                    decoration: const InputDecoration(labelText: '用户昵称'),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.lg),
                   DropdownButtonFormField<String>(
                     initialValue: _campus,
-                    decoration: const InputDecoration(
-                      labelText: '所在校区',
-                      border: OutlineInputBorder(),
-                    ),
+                    decoration: const InputDecoration(labelText: '所在校区'),
                     items: ApiConstants.campuses
                         .map((c) => DropdownMenuItem(value: c, child: Text(c)))
                         .toList(),
@@ -317,21 +319,15 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ),
           if (isTech) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.lg),
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(AppSpacing.lg),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      '技术员接单意愿与设置',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
+                    Text('技术员接单意愿与设置', style: AppText.title),
+                    const SizedBox(height: AppSpacing.lg),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -340,9 +336,8 @@ class _SettingsPageState extends State<SettingsPage> {
                           _wantsLabels[_wantsLetters[_wantsSliderValue
                                   .round()]] ??
                               '',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue,
+                          style: AppText.titleSm.copyWith(
+                            color: AppTheme.primaryBlue,
                           ),
                         ),
                       ],
@@ -360,9 +355,8 @@ class _SettingsPageState extends State<SettingsPage> {
                         const Text('同时接单上限：'),
                         Text(
                           '$_maxConcurrent 单',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue,
+                          style: AppText.titleSm.copyWith(
+                            color: AppTheme.primaryBlue,
                           ),
                         ),
                       ],
@@ -378,8 +372,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                     Text(
                       '同时维修中的工单达到上限后，系统将暂停自动派新单给您',
-                      style: TextStyle(
-                        fontSize: 12,
+                      style: AppText.captionSm.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
@@ -395,7 +388,7 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
           ],
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
           Card(
             child: Column(
               children: [
@@ -448,18 +441,18 @@ class _SettingsPageState extends State<SettingsPage> {
                 ListTile(
                   leading: const Icon(
                     Icons.delete_forever_outlined,
-                    color: Colors.red,
+                    color: AppTheme.errorRed,
                   ),
                   title: const Text(
                     '注销云上飞扬账号',
-                    style: TextStyle(color: Colors.red),
+                    style: TextStyle(color: AppTheme.errorRed),
                   ),
                   onTap: _deleteAccount,
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpacing.xxl),
           ElevatedButton(
             onPressed: _isSaving ? null : _saveSettings,
             style: ElevatedButton.styleFrom(
@@ -473,7 +466,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   )
                 : const Text('保存修改'),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           OutlinedButton(
             onPressed: () async {
               await auth.logout();
@@ -484,8 +477,8 @@ class _SettingsPageState extends State<SettingsPage> {
               }
             },
             style: OutlinedButton.styleFrom(
-              foregroundColor: Colors.red,
-              side: const BorderSide(color: Colors.red),
+              foregroundColor: AppTheme.errorRed,
+              side: const BorderSide(color: AppTheme.errorRed),
               padding: const EdgeInsets.symmetric(vertical: 14),
             ),
             child: const Text('退出当前账号'),

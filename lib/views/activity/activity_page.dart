@@ -7,6 +7,7 @@ import '../../providers/auth_provider.dart';
 import '../../services/event_service.dart';
 import '../auth/login_page.dart';
 import '../common/empty_state.dart';
+import '../common/skeleton_list.dart';
 import 'number_page.dart';
 
 class ActivityPage extends StatefulWidget {
@@ -178,22 +179,24 @@ class _ActivityPageState extends State<ActivityPage> {
       ),
       body: RefreshIndicator(
         onRefresh: _fetchEvents,
+        // 与首页/历史工单统一：加载占位用骨架屏而非全屏转圈
         child: _isLoading
-            ? const Center(child: CircularProgressIndicator())
+            ? const SkeletonList(
+                variant: SkeletonVariant.activity,
+                itemCount: 3,
+              )
             : _loadError != null
             ? ListView(
                 children: [
                   const SizedBox(height: 80),
-                  SizedBox(
-                    height: 240,
-                    child: EmptyState(
-                      icon: Icons.cloud_off_rounded,
-                      title: _loadError!,
-                      action: OutlinedButton.icon(
-                        onPressed: _fetchEvents,
-                        icon: const Icon(Icons.refresh_rounded),
-                        label: const Text('重新加载'),
-                      ),
+                  EmptyState(
+                    icon: Icons.cloud_off_rounded,
+                    title: _loadError!,
+                    minHeight: 240,
+                    action: OutlinedButton.icon(
+                      onPressed: _fetchEvents,
+                      icon: const Icon(Icons.refresh_rounded),
+                      label: const Text('重新加载'),
                     ),
                   ),
                 ],
@@ -202,22 +205,20 @@ class _ActivityPageState extends State<ActivityPage> {
             ? ListView(
                 children: [
                   const SizedBox(height: 80),
-                  SizedBox(
-                    height: 240,
-                    child: EmptyState(
-                      icon: Icons.event_busy_outlined,
-                      title: '近期暂无正在进行的招新或技术活动',
-                      action: OutlinedButton.icon(
-                        onPressed: _fetchEvents,
-                        icon: const Icon(Icons.refresh_rounded),
-                        label: const Text('重新加载'),
-                      ),
+                  EmptyState(
+                    icon: Icons.event_busy_outlined,
+                    title: '近期暂无正在进行的招新或技术活动',
+                    minHeight: 240,
+                    action: OutlinedButton.icon(
+                      onPressed: _fetchEvents,
+                      icon: const Icon(Icons.refresh_rounded),
+                      label: const Text('重新加载'),
                     ),
                   ),
                 ],
               )
             : ListView.builder(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(AppSpacing.lg),
                 itemCount: _events.length,
                 itemBuilder: (ctx, i) {
                   final event = _events[i];
@@ -225,7 +226,7 @@ class _ActivityPageState extends State<ActivityPage> {
 
                   return Card(
                     clipBehavior: Clip.antiAlias,
-                    margin: const EdgeInsets.only(bottom: 16),
+                    margin: const EdgeInsets.only(bottom: AppSpacing.lg),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -243,7 +244,9 @@ class _ActivityPageState extends State<ActivityPage> {
                                     .colorScheme
                                     .surfaceContainerHighest,
                                 child: const Center(
-                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
                                 ),
                               );
                             },
@@ -264,7 +267,7 @@ class _ActivityPageState extends State<ActivityPage> {
                                 ),
                           ),
                         Padding(
-                          padding: const EdgeInsets.all(16.0),
+                          padding: const EdgeInsets.all(AppSpacing.lg),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -281,77 +284,77 @@ class _ActivityPageState extends State<ActivityPage> {
                                         color: AppTheme.primaryBlue.withValues(
                                           alpha: 0.1,
                                         ),
-                                        borderRadius: BorderRadius.circular(4),
+                                        borderRadius: BorderRadius.circular(
+                                          AppRadius.badge,
+                                        ),
                                       ),
                                       child: Text(
                                         event.type!,
-                                        style: const TextStyle(
+                                        style: AppText.micro.copyWith(
                                           color: AppTheme.primaryBlue,
-                                          fontSize: 11,
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
                                     ),
-                                    const SizedBox(width: 8),
+                                    const SizedBox(width: AppSpacing.sm),
                                   ],
                                   Expanded(
                                     child: Text(
                                       event.title,
-                                      style: const TextStyle(
-                                        fontSize: 17,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                      style: AppText.titleLg,
                                     ),
                                   ),
                                   Container(
                                     padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 4,
+                                      horizontal: AppSpacing.sm,
+                                      vertical: AppSpacing.xs,
                                     ),
                                     decoration: BoxDecoration(
                                       color: isSignUp
                                           ? AppTheme.accentColor.withValues(
                                               alpha: 0.15,
                                             )
-                                          : Colors.grey.withValues(alpha: 0.15),
+                                          : Theme.of(context)
+                                                .colorScheme
+                                                .onSurfaceVariant
+                                                .withValues(alpha: 0.12),
                                       borderRadius: BorderRadius.circular(6),
                                     ),
                                     child: Text(
                                       event.statusText,
-                                      style: TextStyle(
+                                      style: AppText.captionSm.copyWith(
                                         color: isSignUp
                                             ? AppTheme.accentColor
-                                            : Colors.grey,
-                                        fontSize: 12,
+                                            : Theme.of(context)
+                                                  .colorScheme
+                                                  .onSurfaceVariant,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: AppSpacing.sm),
                               Text(
                                 event.description,
-                                style: TextStyle(
-                                  fontSize: 13,
+                                style: AppText.caption.copyWith(
                                   color: Theme.of(context)
                                       .colorScheme
                                       .onSurfaceVariant,
                                   height: 1.4,
                                 ),
                               ),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: AppSpacing.md),
                               if (event.signupStartTime.isNotEmpty)
                                 Text(
                                   '报名时间：${event.signupStartTime} ~ ${event.signupEndTime}',
-                                  style: TextStyle(
-                                    fontSize: 11,
+                                  style: AppText.micro.copyWith(
                                     color: Theme.of(context)
                                         .colorScheme
                                         .onSurfaceVariant,
                                   ),
                                 ),
-                              const SizedBox(height: 16),
+                              const SizedBox(height: AppSpacing.lg),
                               Align(
                                 alignment: Alignment.centerRight,
                                 child: Wrap(
@@ -370,7 +373,8 @@ class _ActivityPageState extends State<ActivityPage> {
                                         label: const Text('我的抽奖号'),
                                       ),
                                     ElevatedButton(
-                                      onPressed: (isSignUp &&
+                                      onPressed:
+                                          (isSignUp &&
                                               !event.registered &&
                                               _registeringEventId != event.id)
                                           ? () => _showSignUpDialog(event)
@@ -461,7 +465,7 @@ class _SignUpDialogState extends State<_SignUpDialog> {
                 hintText: '请输入姓名',
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
             Row(
               children: [
                 const Text('性别：'),
@@ -477,10 +481,10 @@ class _SignUpDialogState extends State<_SignUpDialog> {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-            const Text(
+            const SizedBox(height: AppSpacing.md),
+            Text(
               '意向部门（可多选）：',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+              style: AppText.caption.copyWith(fontWeight: FontWeight.bold),
             ),
             Wrap(
               spacing: 6,
@@ -501,10 +505,10 @@ class _SignUpDialogState extends State<_SignUpDialog> {
                 );
               }).toList(),
             ),
-            const SizedBox(height: 12),
-            const Text(
+            const SizedBox(height: AppSpacing.md),
+            Text(
               '空闲面试/值班时段（可多选）：',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+              style: AppText.caption.copyWith(fontWeight: FontWeight.bold),
             ),
             Wrap(
               spacing: 6,

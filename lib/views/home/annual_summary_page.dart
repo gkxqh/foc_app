@@ -5,6 +5,7 @@ import '../../models/tech_stats_model.dart';
 import '../../services/config_service.dart';
 import '../common/empty_state.dart';
 import '../common/page_insets.dart';
+import '../common/skeleton_list.dart';
 
 class AnnualSummaryPage extends StatefulWidget {
   const AnnualSummaryPage({super.key});
@@ -52,7 +53,16 @@ class _AnnualSummaryPageState extends State<AnnualSummaryPage> {
     return Scaffold(
       appBar: AppBar(title: const Text('技术员年度总结')),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          // 与其他页面统一：加载占位用统计卡骨架屏而非全屏转圈
+          ? Padding(
+              padding: pageListPadding(context, horizontal: 20, top: 20),
+              child: const SkeletonList(
+                variant: SkeletonVariant.stats,
+                itemCount: 1,
+                shrinkWrap: true,
+                padding: EdgeInsets.zero,
+              ),
+            )
           : _loadFailed
           ? Center(
               child: EmptyState(
@@ -72,8 +82,8 @@ class _AnnualSummaryPageState extends State<AnnualSummaryPage> {
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(
-                      vertical: 32,
-                      horizontal: 20,
+                      vertical: AppSpacing.xxxl,
+                      horizontal: AppSpacing.xl,
                     ),
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
@@ -81,7 +91,7 @@ class _AnnualSummaryPageState extends State<AnnualSummaryPage> {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(AppRadius.modal),
                       boxShadow: [
                         BoxShadow(
                           color: AppTheme.primaryBlue.withValues(alpha: 0.3),
@@ -92,31 +102,29 @@ class _AnnualSummaryPageState extends State<AnnualSummaryPage> {
                     ),
                     child: Column(
                       children: [
-                        const Text(
+                        Text(
                           '年度维修总台数',
-                          style: TextStyle(color: Colors.white70, fontSize: 14),
+                          style: AppText.body.copyWith(color: Colors.white70),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: AppSpacing.sm),
                         Text(
                           _summary?.totalOrders ?? '0',
-                          style: const TextStyle(
+                          style: AppText.displayNumber.copyWith(
                             color: Colors.white,
-                            fontSize: 48,
-                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        const Text(
+                        const SizedBox(height: AppSpacing.sm),
+                        Text(
                           '感谢你为川大师生排忧解难！',
-                          style: TextStyle(color: Colors.white, fontSize: 13),
+                          style: AppText.caption.copyWith(color: Colors.white),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: AppSpacing.xl),
                   Card(
                     child: Padding(
-                      padding: const EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.all(AppSpacing.lg),
                       child: Column(
                         children: [
                           _buildStatTile(
@@ -166,23 +174,25 @@ class _AnnualSummaryPageState extends State<AnnualSummaryPage> {
     required String value,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
       child: Row(
         children: [
           CircleAvatar(
             backgroundColor: AppTheme.primaryBlue.withValues(alpha: 0.1),
             child: Icon(icon, color: AppTheme.primaryBlue, size: 20),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: AppSpacing.lg),
           Expanded(
             child: Text(
               title,
-              style: const TextStyle(fontSize: 14, color: Colors.grey),
+              style: AppText.body.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
           ),
           Text(
             value,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            style: AppText.body.copyWith(fontWeight: FontWeight.bold),
           ),
         ],
       ),

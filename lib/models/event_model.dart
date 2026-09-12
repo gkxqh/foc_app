@@ -76,9 +76,8 @@ class EventModel {
       // 行为与旧版（报名截止即视为进行中）保持一致
       final start = (startTime.isEmpty)
           ? sEnd
-          : DateTime.parse(
-              startTime.replaceAll('/', '-'),
-            ).millisecondsSinceEpoch;
+          : DateTime.parse(startTime.replaceAll('/', '-'))
+                .millisecondsSinceEpoch;
       final eEnd = DateTime.parse(endTime.replaceAll('/', '-'))
           .millisecondsSinceEpoch;
 

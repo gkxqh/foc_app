@@ -19,7 +19,7 @@ class NumberPage extends StatelessWidget {
               : Colors.amber.shade100)
         : (isDark
               ? AppTheme.primaryBlue.withValues(alpha: 0.14)
-              : Colors.blue.shade50);
+              : AppTheme.primaryBlue.withValues(alpha: 0.08));
     final Color numberColor = isWinner
         ? (isDark ? Colors.amber.shade300 : Colors.amber.shade900)
         : AppTheme.primaryBlue;
@@ -40,7 +40,7 @@ class NumberPage extends StatelessWidget {
                 ),
                 decoration: BoxDecoration(
                   color: cardBg,
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(AppRadius.modal),
                   border: Border.all(
                     color: isWinner ? Colors.amber : AppTheme.primaryBlue,
                     width: 2,
@@ -50,37 +50,30 @@ class NumberPage extends StatelessWidget {
                   children: [
                     Text(
                       isWinner ? '🎉 恭喜中奖！' : '🎟️ 您的活动专属幸运号码',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: numberColor,
-                      ),
+                      style: AppText.title.copyWith(color: numberColor),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: AppSpacing.xl),
                     Text(
                       luckyNum,
-                      style: TextStyle(
-                        fontSize: 52,
-                        fontWeight: FontWeight.bold,
+                      style: AppText.displayNumber.copyWith(
                         letterSpacing: 4,
                         color: numberColor,
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.lg),
                     Text(
                       isWinner
                           ? '请凭此号码前往飞扬俱乐部摊位或活动负责人处领奖！'
                           : '活动现场将根据该号码进行互动与抽奖，请妥善保存！',
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 13,
+                      style: AppText.caption.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: AppSpacing.xxxl),
               ElevatedButton(
                 onPressed: () => Navigator.pop(context),
                 child: const Text('返回活动列表'),

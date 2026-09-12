@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../../core/constants/api_constants.dart';
 import '../../core/network/api_client.dart';
+import '../../core/theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/ticket_provider.dart';
 import '../common/confirm_dialog.dart';
@@ -178,24 +179,15 @@ class _SubmitTicketPageState extends State<SubmitTicketPage> {
           children: [
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(AppSpacing.lg),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      '基本设备信息',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
+                    const Text('基本设备信息', style: AppText.title),
+                    const SizedBox(height: AppSpacing.lg),
                     DropdownButtonFormField<String>(
                       initialValue: _deviceType,
-                      decoration: const InputDecoration(
-                        labelText: '设备类型',
-                        border: OutlineInputBorder(),
-                      ),
+                      decoration: const InputDecoration(labelText: '设备类型'),
                       items: ApiConstants.deviceTypes
                           .map(
                             (t) => DropdownMenuItem(value: t, child: Text(t)),
@@ -203,13 +195,10 @@ class _SubmitTicketPageState extends State<SubmitTicketPage> {
                           .toList(),
                       onChanged: (v) => setState(() => _deviceType = v!),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.md),
                     DropdownButtonFormField<String>(
                       initialValue: _brand,
-                      decoration: const InputDecoration(
-                        labelText: '设备品牌',
-                        border: OutlineInputBorder(),
-                      ),
+                      decoration: const InputDecoration(labelText: '设备品牌'),
                       items: ApiConstants.brands
                           .map(
                             (b) => DropdownMenuItem(value: b, child: Text(b)),
@@ -217,23 +206,19 @@ class _SubmitTicketPageState extends State<SubmitTicketPage> {
                           .toList(),
                       onChanged: (v) => setState(() => _brand = v!),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.md),
                     TextFormField(
                       initialValue: _model,
                       decoration: const InputDecoration(
                         labelText: '具体型号 (选填)',
                         hintText: '如联想小新Pro 16 / 华硕天选7 Pro Max',
-                        border: OutlineInputBorder(),
                       ),
                       onSaved: (v) => _model = v?.trim() ?? '',
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.md),
                     DropdownButtonFormField<String>(
                       initialValue: _warrantyStatus,
-                      decoration: const InputDecoration(
-                        labelText: '在保状态',
-                        border: OutlineInputBorder(),
-                      ),
+                      decoration: const InputDecoration(labelText: '在保状态'),
                       items: const [
                         DropdownMenuItem(value: 'expired', child: Text('过保')),
                         DropdownMenuItem(value: 'under', child: Text('在保')),
@@ -241,7 +226,7 @@ class _SubmitTicketPageState extends State<SubmitTicketPage> {
                       ],
                       onChanged: (v) => setState(() => _warrantyStatus = v!),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.md),
                     InkWell(
                       onTap: _pickPurchaseDate,
                       borderRadius: BorderRadius.circular(4),
@@ -249,7 +234,6 @@ class _SubmitTicketPageState extends State<SubmitTicketPage> {
                         decoration: const InputDecoration(
                           labelText: '购买时间',
                           helperText: '用于判断保修状态，点击选择日期',
-                          border: OutlineInputBorder(),
                           suffixIcon: Icon(Icons.calendar_today_outlined),
                         ),
                         child: Text(_purchaseDate),
@@ -259,27 +243,18 @@ class _SubmitTicketPageState extends State<SubmitTicketPage> {
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(AppSpacing.lg),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      '故障与送修信息',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
+                    const Text('故障与送修信息', style: AppText.title),
+                    const SizedBox(height: AppSpacing.lg),
                     DropdownButtonFormField<String>(
                       initialValue: _faultType,
-                      decoration: const InputDecoration(
-                        labelText: '问题类型',
-                        border: OutlineInputBorder(),
-                      ),
+                      decoration: const InputDecoration(labelText: '问题类型'),
                       items: ApiConstants.problemTypes
                           .map(
                             (p) => DropdownMenuItem(value: p, child: Text(p)),
@@ -287,7 +262,7 @@ class _SubmitTicketPageState extends State<SubmitTicketPage> {
                           .toList(),
                       onChanged: (v) => setState(() => _faultType = v!),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.md),
                     SwitchListTile(
                       title: const Text('是否线下接单'),
                       subtitle: const Text('参加社团大型线下集中维修时勾选'),
@@ -305,10 +280,7 @@ class _SubmitTicketPageState extends State<SubmitTicketPage> {
                     if (!_isOffline) ...[
                       DropdownButtonFormField<String>(
                         initialValue: _campus,
-                        decoration: const InputDecoration(
-                          labelText: '所在校区',
-                          border: OutlineInputBorder(),
-                        ),
+                        decoration: const InputDecoration(labelText: '所在校区'),
                         items: ApiConstants.campuses
                             .map(
                               (c) => DropdownMenuItem(value: c, child: Text(c)),
@@ -316,14 +288,13 @@ class _SubmitTicketPageState extends State<SubmitTicketPage> {
                             .toList(),
                         onChanged: (v) => setState(() => _campus = v!),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: AppSpacing.md),
                     ],
                     TextFormField(
                       maxLines: 4,
                       decoration: const InputDecoration(
                         labelText: '问题详细描述',
                         hintText: '请详述设备故障表现（如开机黑屏、风扇狂转、无法进入系统等）',
-                        border: OutlineInputBorder(),
                       ),
                       validator: (v) =>
                           (v == null || v.trim().isEmpty) ? '请填写问题描述' : null,
@@ -333,44 +304,33 @@ class _SubmitTicketPageState extends State<SubmitTicketPage> {
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(AppSpacing.lg),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      '联系方式',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
+                    const Text('联系方式', style: AppText.title),
+                    const SizedBox(height: AppSpacing.lg),
                     TextFormField(
                       initialValue: _phone,
                       keyboardType: TextInputType.phone,
-                      decoration: const InputDecoration(
-                        labelText: '联系电话',
-                        border: OutlineInputBorder(),
-                      ),
+                      decoration: const InputDecoration(labelText: '联系电话'),
                       validator: (v) =>
                           (v == null || !RegExp(r'^\d{11}$').hasMatch(v.trim()))
                           ? '请输入11位手机号'
                           : null,
                       onSaved: (v) => _phone = v?.trim() ?? '',
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.md),
                     Row(
                       children: [
                         SizedBox(
                           width: 120,
                           child: DropdownButtonFormField<String>(
                             initialValue: _contactType,
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                            ),
+                            decoration: const InputDecoration(),
                             items: ApiConstants.contactTypes
                                 .map(
                                   (c) => DropdownMenuItem(
@@ -382,14 +342,13 @@ class _SubmitTicketPageState extends State<SubmitTicketPage> {
                             onChanged: (v) => setState(() => _contactType = v!),
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: AppSpacing.sm),
                         Expanded(
                           child: TextFormField(
                             initialValue: _contactNumber,
                             decoration: InputDecoration(
                               labelText: '联系账号',
                               hintText: '输入$_contactType',
-                              border: const OutlineInputBorder(),
                             ),
                             validator: (v) => (v == null || v.trim().isEmpty)
                                 ? '请输入联系账号'
@@ -403,32 +362,25 @@ class _SubmitTicketPageState extends State<SubmitTicketPage> {
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(AppSpacing.lg),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      '故障图片',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
+                    const Text('故障图片', style: AppText.title),
+                    const SizedBox(height: AppSpacing.sm),
                     Text(
                       '上传故障画面、外观损坏等照片有助于技术员提前准备工具（目前支持 1 张，工单将使用第一张）。',
-                      style: TextStyle(
-                        fontSize: 12,
+                      style: AppText.captionSm.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.md),
                     Wrap(
-                      spacing: 12,
-                      runSpacing: 12,
+                      spacing: AppSpacing.md,
+                      runSpacing: AppSpacing.md,
                       children: [
                         ..._uploadedImageUrls.map(
                           (url) => Stack(
@@ -446,10 +398,14 @@ class _SubmitTicketPageState extends State<SubmitTicketPage> {
                                     errorBuilder: (_, _, _) => Container(
                                       width: 80,
                                       height: 80,
-                                      color: Colors.grey.withValues(alpha: 0.1),
-                                      child: const Icon(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .surfaceContainerHighest,
+                                      child: Icon(
                                         Icons.broken_image_outlined,
-                                        color: Colors.grey,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurfaceVariant,
                                       ),
                                     ),
                                   ),
@@ -466,7 +422,7 @@ class _SubmitTicketPageState extends State<SubmitTicketPage> {
                                   },
                                   child: Container(
                                     decoration: const BoxDecoration(
-                                      color: Colors.red,
+                                      color: AppTheme.errorRed,
                                       shape: BoxShape.circle,
                                     ),
                                     padding: const EdgeInsets.all(2),
@@ -490,10 +446,18 @@ class _SubmitTicketPageState extends State<SubmitTicketPage> {
                               width: 80,
                               height: 80,
                               decoration: BoxDecoration(
-                                color: Colors.grey.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(8),
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .surfaceContainerHighest
+                                    .withValues(alpha: 0.4),
+                                borderRadius: BorderRadius.circular(
+                                  AppRadius.thumb,
+                                ),
                                 border: Border.all(
-                                  color: Colors.grey.withValues(alpha: 0.3),
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant
+                                      .withValues(alpha: 0.3),
                                 ),
                               ),
                               child: _isUploadingImage
@@ -502,9 +466,11 @@ class _SubmitTicketPageState extends State<SubmitTicketPage> {
                                         strokeWidth: 2,
                                       ),
                                     )
-                                  : const Icon(
+                                  : Icon(
                                       Icons.add_a_photo_outlined,
-                                      color: Colors.grey,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant,
                                     ),
                             ),
                           ),
@@ -514,14 +480,11 @@ class _SubmitTicketPageState extends State<SubmitTicketPage> {
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.xxl),
             ElevatedButton(
               onPressed: _isSubmitting ? null : _submit,
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
               ),
               child: _isSubmitting
                   ? const SizedBox(
@@ -529,9 +492,9 @@ class _SubmitTicketPageState extends State<SubmitTicketPage> {
                       height: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text('确认提交工单', style: TextStyle(fontSize: 16)),
+                  : const Text('确认提交工单', style: AppText.bodyLg),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.xxl),
           ],
         ),
       ),

@@ -94,7 +94,10 @@ class _RepairTermsPageState extends State<RepairTermsPage> {
             // 顶部提示条
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg,
+                vertical: 10,
+              ),
               color: AppTheme.primaryBlue.withValues(alpha: 0.08),
               child: Row(
                 children: [
@@ -103,12 +106,11 @@ class _RepairTermsPageState extends State<RepairTermsPage> {
                     size: 18,
                     color: AppTheme.primaryBlue,
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Text(
                       '报修前请务必仔细阅读以下服务须知与免责条款',
-                      style: TextStyle(
-                        fontSize: 12,
+                      style: AppText.captionSm.copyWith(
                         color: colorScheme.onSurfaceVariant,
                       ),
                     ),
@@ -123,18 +125,16 @@ class _RepairTermsPageState extends State<RepairTermsPage> {
                 thumbVisibility: true,
                 child: SingleChildScrollView(
                   controller: _scrollController,
-                  padding: const EdgeInsets.all(20.0),
+                  padding: const EdgeInsets.all(AppSpacing.xl),
                   child: MarkdownBody(
                     data: tips,
                     selectable: true,
                     styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
-                      p: TextStyle(
-                        fontSize: 14,
+                      p: AppText.body.copyWith(
                         height: 1.6,
                         color: colorScheme.onSurface,
                       ),
-                      listBullet: TextStyle(
-                        fontSize: 14,
+                      listBullet: AppText.body.copyWith(
                         color: colorScheme.onSurface,
                       ),
                     ),
@@ -154,17 +154,21 @@ class _RepairTermsPageState extends State<RepairTermsPage> {
                     ),
                   ),
                 ),
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.lg,
+                  AppSpacing.sm,
+                  AppSpacing.lg,
+                  AppSpacing.lg,
+                ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     CheckboxListTile(
                       value: _agreed,
                       onChanged: _onCheckboxChanged,
-                      title: const Text(
+                      title: Text(
                         '我已阅读并同意上述报修须知与服务条款',
-                        style: TextStyle(
-                          fontSize: 13,
+                        style: AppText.caption.copyWith(
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -172,7 +176,7 @@ class _RepairTermsPageState extends State<RepairTermsPage> {
                       controlAffinity: ListTileControlAffinity.leading,
                       dense: true,
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSpacing.sm),
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton.icon(
@@ -185,18 +189,9 @@ class _RepairTermsPageState extends State<RepairTermsPage> {
                               .withValues(alpha: 0.12),
                           disabledForegroundColor: colorScheme.onSurface
                               .withValues(alpha: 0.38),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
                         ),
                         icon: const Icon(Icons.arrow_forward_rounded, size: 18),
-                        label: const Text(
-                          '我已知晓并同意，开始报修',
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                        label: Text('我已知晓并同意，开始报修', style: AppText.titleSm),
                       ),
                     ),
                   ],

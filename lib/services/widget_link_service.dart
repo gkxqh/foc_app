@@ -104,7 +104,7 @@ class WidgetLinkService {
       case '/report':
         _openReport(context);
       case '/home':
-        // 仅拉起 App 到默认页，无需额外跳转
+      // 仅拉起 App 到默认页，无需额外跳转
       default:
         break;
     }
@@ -135,9 +135,8 @@ class WidgetLinkService {
       return;
     }
     if (!auth.isTechnician) {
-      ScaffoldMessenger.maybeOf(
-        context,
-      )?.showSnackBar(const SnackBar(content: Text('扫码接单仅对技术员开放')));
+      ScaffoldMessenger.maybeOf(context)
+          ?.showSnackBar(const SnackBar(content: Text('扫码接单仅对技术员开放')));
       return;
     }
     navigator?.push(
@@ -171,13 +170,13 @@ class WidgetLinkService {
     }
     final resolved = ticket;
     if (resolved == null) {
-      messenger?.showSnackBar(
-        const SnackBar(content: Text('工单不存在或加载失败')),
-      );
+      messenger?.showSnackBar(const SnackBar(content: Text('工单不存在或加载失败')));
       return;
     }
     navigator?.push(
-      MaterialPageRoute<void>(builder: (_) => TicketDetailPage(ticket: resolved)),
+      MaterialPageRoute<void>(
+        builder: (_) => TicketDetailPage(ticket: resolved),
+      ),
     );
   }
 

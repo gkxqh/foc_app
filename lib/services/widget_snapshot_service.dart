@@ -38,7 +38,9 @@ class WidgetSnapshotService {
     required List<TicketModel> tickets,
   }) async {
     final user = await _loadCachedUser();
-    await _write(buildPayload(user: user, role: role, uid: uid, tickets: tickets));
+    await _write(
+      buildPayload(user: user, role: role, uid: uid, tickets: tickets),
+    );
   }
 
   /// 仅用户信息变化（登录 / 切换账号 / 资料刷新 / 接单上限调整）。
@@ -65,7 +67,14 @@ class WidgetSnapshotService {
         }
       }
     }
-    await _write(_payloadFromTicketDicts(user: user, role: user.role, uid: user.uid, ticketDicts: tickets));
+    await _write(
+      _payloadFromTicketDicts(
+        user: user,
+        role: user.role,
+        uid: user.uid,
+        ticketDicts: tickets,
+      ),
+    );
   }
 
   /// 退出登录 / 登录态失效：清空为未登录快照。
@@ -105,12 +114,16 @@ class WidgetSnapshotService {
             .where((t) => !isFinishedStatus(t['status']?.toString() ?? ''))
             .toList()
           ..sort(
-            (a, b) => priority(
-              a['status']?.toString() ?? '',
-              technician: technician,
-            ).compareTo(
-              priority(b['status']?.toString() ?? '', technician: technician),
-            ),
+            (a, b) =>
+                priority(
+                  a['status']?.toString() ?? '',
+                  technician: technician,
+                ).compareTo(
+                  priority(
+                    b['status']?.toString() ?? '',
+                    technician: technician,
+                  ),
+                ),
           );
     return {
       'v': schemaVersion,
@@ -125,10 +138,12 @@ class WidgetSnapshotService {
       'maxConcurrent': user?.maxConcurrent ?? 1,
       'tickets': active.take(maxTickets).toList(),
       'countTotal': active.length,
-      'countTechConfirm':
-          active.where((t) => t['status'] == 'TechConfirming').length,
-      'countUserConfirm':
-          active.where((t) => t['status'] == 'UserConfirming').length,
+      'countTechConfirm': active
+          .where((t) => t['status'] == 'TechConfirming')
+          .length,
+      'countUserConfirm': active
+          .where((t) => t['status'] == 'UserConfirming')
+          .length,
     };
   }
 

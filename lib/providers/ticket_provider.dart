@@ -54,7 +54,11 @@ class TicketProvider extends ChangeNotifier {
     notifyListeners();
     // 桌面小组件快照随工单数据同步（内部吞掉一切异常，不影响主流程）
     unawaited(
-      WidgetSnapshotService.refreshTickets(role: role, uid: uid, tickets: _tickets),
+      WidgetSnapshotService.refreshTickets(
+        role: role,
+        uid: uid,
+        tickets: _tickets,
+      ),
     );
   }
 

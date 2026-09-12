@@ -87,17 +87,16 @@ class _GiveOrderPageState extends State<GiveOrderPage> {
             if (isShowingShare) ...[
               Card(
                 child: Padding(
-                  padding: const EdgeInsets.all(24.0),
+                  padding: const EdgeInsets.all(AppSpacing.xxl),
                   child: Column(
                     children: [
                       Text(
                         '请其他技术员扫码或输入转单码接单',
-                        style: TextStyle(
-                          fontSize: 14,
+                        style: AppText.body.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: AppSpacing.xl),
                       QrImageView(
                         data: widget.transcodeToShare!,
                         version: QrVersions.auto,
@@ -111,16 +110,15 @@ class _GiveOrderPageState extends State<GiveOrderPage> {
                           color: qrColor,
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: AppSpacing.xl),
                       SelectableText(
                         '转单码：${widget.transcodeToShare}',
-                        style: const TextStyle(
-                          fontSize: 16,
+                        style: AppText.bodyLg.copyWith(
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1.2,
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: AppSpacing.xl),
                       ElevatedButton.icon(
                         onPressed: () {
                           Clipboard.setData(
@@ -132,43 +130,30 @@ class _GiveOrderPageState extends State<GiveOrderPage> {
                         },
                         icon: const Icon(Icons.copy_rounded, size: 18),
                         label: const Text('复制转单码'),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 12,
-                          ),
-                        ),
                       ),
                     ],
                   ),
                 ),
               ),
             ] else ...[
-              const Text(
-                '技术员接单',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
+              Text('技术员接单', style: AppText.title),
+              const SizedBox(height: AppSpacing.sm),
               Text(
                 '如需接收其他技术员转让的工单，请在下方粘贴或输入转单码：',
-                style: TextStyle(
-                  fontSize: 13,
+                style: AppText.caption.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.lg),
               TextField(
                 controller: _codeController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: '转单码',
                   hintText: '单号',
-                  prefixIcon: const Icon(Icons.qr_code_2_rounded),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                  prefixIcon: Icon(Icons.qr_code_2_rounded),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.xxl),
               ElevatedButton.icon(
                 onPressed: _isSubmitting ? null : _submitTransfer,
                 icon: _isSubmitting
@@ -181,9 +166,6 @@ class _GiveOrderPageState extends State<GiveOrderPage> {
                 label: const Text('确认接单'),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
                 ),
               ),
             ],

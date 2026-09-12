@@ -50,8 +50,12 @@ class _FeiyangAppState extends State<FeiyangApp> {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider.value(value: widget.authProvider ?? AuthProvider()),
-        ChangeNotifierProvider.value(value: widget.themeProvider ?? ThemeProvider()),
+        ChangeNotifierProvider.value(
+          value: widget.authProvider ?? AuthProvider(),
+        ),
+        ChangeNotifierProvider.value(
+          value: widget.themeProvider ?? ThemeProvider(),
+        ),
         ChangeNotifierProvider(create: (_) => ConfigProvider()),
         ChangeNotifierProvider(create: (_) => TicketProvider()),
       ],

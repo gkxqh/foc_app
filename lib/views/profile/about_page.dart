@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
+import '../../core/theme/app_theme.dart';
+
 class AboutPage extends StatefulWidget {
   const AboutPage({super.key});
 
@@ -37,13 +39,13 @@ class _AboutPageState extends State<AboutPage> {
       body: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(AppSpacing.xxl),
           child: Column(
             children: [
-              const SizedBox(height: 40),
+              const SizedBox(height: AppSpacing.xxxl),
               Center(
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(28),
+                  borderRadius: BorderRadius.circular(AppRadius.pill),
                   child: Image.asset(
                     'assets/icon/icon.png',
                     width: 100,
@@ -52,32 +54,33 @@ class _AboutPageState extends State<AboutPage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
-              const Text(
-                '云上飞扬 (Feiyang on Cloud)',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
+              const SizedBox(height: AppSpacing.lg),
+              const Text('云上飞扬 (Feiyang on Cloud)', style: AppText.titleXl),
               const SizedBox(height: 6),
               Text(
                 _version.isEmpty ? 'Flutter 跨平台版' : '版本 $_version ',
-                style: const TextStyle(fontSize: 13, color: Colors.grey),
+                style: AppText.caption.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
-              const SizedBox(height: 24),
-              const Card(
+              const SizedBox(height: AppSpacing.xxl),
+              Card(
                 child: Padding(
-                  padding: EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(AppSpacing.lg),
                   child: Text(
                     '“云上飞扬”是四川大学飞扬俱乐部研发部打造的校园个人设备一体化服务平台。其前身为“小川电脑管家”。',
-                    style: TextStyle(fontSize: 14, height: 1.6),
+                    style: AppText.body.copyWith(height: 1.6),
                   ),
                 ),
               ),
               const Spacer(),
-              const Text(
+              Text(
                 'Powered By 四川大学飞扬俱乐部研发部 ｜ 刻御晴空',
-                style: TextStyle(fontSize: 12, color: Colors.grey),
+                style: AppText.captionSm.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: AppSpacing.xl),
             ],
           ),
         ),

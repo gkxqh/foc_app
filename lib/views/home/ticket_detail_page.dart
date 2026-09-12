@@ -56,23 +56,22 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
   Widget _buildContactRow(String label, String? value) {
     final hasValue = value != null && value.isNotEmpty;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       child: Row(
         children: [
           Text(
             label,
-            style: TextStyle(
+            style: AppText.caption.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
-              fontSize: 13,
             ),
           ),
           const Spacer(),
           Text(
             hasValue ? value : '未预留',
-            style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
+            style: AppText.caption.copyWith(fontWeight: FontWeight.w500),
           ),
           if (hasValue) ...[
-            const SizedBox(width: 4),
+            const SizedBox(width: AppSpacing.xs),
             InkWell(
               borderRadius: BorderRadius.circular(6),
               onTap: () => _copyToClipboard(label, value),
@@ -355,13 +354,12 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
               decoration: BoxDecoration(
                 color: AppTheme.getStatusColor(_ticket.repairStatus)
                     .withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(4),
+                borderRadius: BorderRadius.circular(AppRadius.badge),
               ),
               child: Text(
                 AppTheme.getStatusText(_ticket.repairStatus),
-                style: TextStyle(
+                style: AppText.caption.copyWith(
                   color: AppTheme.getStatusColor(_ticket.repairStatus),
-                  fontSize: 13,
                   fontWeight: FontWeight.bold,
                   decoration: TextDecoration.none,
                 ),
@@ -397,8 +395,8 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
           Card(
             child: Padding(
               padding: const EdgeInsets.symmetric(
-                vertical: 20.0,
-                horizontal: 8.0,
+                vertical: AppSpacing.xl,
+                horizontal: AppSpacing.sm,
               ),
               child: Row(
                 children: [
@@ -432,14 +430,14 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
               ),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           // 状态 Banner
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
               color: AppTheme.getStatusColor(_ticket.repairStatus)
                   .withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(AppRadius.banner),
               border: Border.all(
                 color: AppTheme.getStatusColor(_ticket.repairStatus)
                     .withValues(alpha: 0.4),
@@ -465,9 +463,8 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
                       ),
                       Text(
                         '创建时间：${_ticket.createTime}',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
+                        style: AppText.captionSm.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -476,11 +473,11 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
               ],
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           // 故障详情卡片
           Card(
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(AppSpacing.lg),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -488,46 +485,41 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
+                          horizontal: AppSpacing.sm,
+                          vertical: AppSpacing.xs,
                         ),
                         decoration: BoxDecoration(
                           color: AppTheme.primaryBlue.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(4),
+                          borderRadius: BorderRadius.circular(AppRadius.badge),
                         ),
                         child: Text(
                           _ticket.campus,
-                          style: const TextStyle(
+                          style: AppText.captionSm.copyWith(
                             color: AppTheme.primaryBlue,
-                            fontSize: 12,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppSpacing.sm),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
+                          horizontal: AppSpacing.sm,
+                          vertical: AppSpacing.xs,
                         ),
                         decoration: BoxDecoration(
                           color: AppTheme.warningOrange.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(4),
+                          borderRadius: BorderRadius.circular(AppRadius.badge),
                         ),
                         child: Text(
                           _ticket.computerBrand,
-                          style: const TextStyle(
+                          style: AppText.captionSm.copyWith(
                             color: AppTheme.warningOrange,
-                            fontSize: 12,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
                       const Spacer(),
-                      Text(
-                        _ticket.faultType,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
+                      Text(_ticket.faultType, style: AppText.title),
                     ],
                   ),
                   const Divider(height: 24),
@@ -547,26 +539,25 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
                   if (_ticket.purchaseDate != null &&
                       _ticket.purchaseDate!.isNotEmpty)
                     _buildDetailRow('购买日期', _ticket.purchaseDate!),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.sm),
                   Text(
                     '故障描述：',
-                    style: TextStyle(
+                    style: AppText.caption.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      fontSize: 13,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: AppSpacing.xs),
                   Text(
                     _ticket.repairDescription,
-                    style: const TextStyle(fontSize: 14, height: 1.4),
+                    style: AppText.body.copyWith(height: 1.4),
                   ),
                   if (_ticket.repairImageUrl.isNotEmpty) ...[
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.md),
                     GestureDetector(
                       onTap: () =>
                           showImagePreview(context, _ticket.repairImageUrl),
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(AppRadius.thumb),
                         child: Image.network(
                           _ticket.repairImageUrl,
                           height: 180,
@@ -574,11 +565,15 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
                           fit: BoxFit.cover,
                           errorBuilder: (_, _, _) => Container(
                             height: 180,
-                            color: Colors.grey.withValues(alpha: 0.1),
-                            child: const Center(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerHighest,
+                            child: Center(
                               child: Icon(
                                 Icons.broken_image_outlined,
-                                color: Colors.grey,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
                               ),
                             ),
                           ),
@@ -590,45 +585,39 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
               ),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           // 联系方式卡片
           Card(
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(AppSpacing.lg),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    '联系信息',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
+                  Text('联系信息', style: AppText.title),
+                  const SizedBox(height: AppSpacing.sm),
                   _buildContactRow('联系电话', _plainPhone),
                   _buildContactRow('QQ号', _plainQq),
                 ],
               ),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           // 维修完成凭证 (如果已上传)
           if (_ticket.completeImageUrl != null &&
               _ticket.completeImageUrl!.isNotEmpty)
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(AppSpacing.lg),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      '技术员维修完成凭证',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 12),
+                    Text('技术员维修完成凭证', style: AppText.title),
+                    const SizedBox(height: AppSpacing.md),
                     GestureDetector(
                       onTap: () =>
                           showImagePreview(context, _ticket.completeImageUrl!),
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(AppRadius.thumb),
                         child: Image.network(
                           _ticket.completeImageUrl!,
                           height: 180,
@@ -636,11 +625,15 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
                           fit: BoxFit.cover,
                           errorBuilder: (_, _, _) => Container(
                             height: 180,
-                            color: Colors.grey.withValues(alpha: 0.1),
-                            child: const Center(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerHighest,
+                            child: Center(
                               child: Icon(
                                 Icons.broken_image_outlined,
-                                color: Colors.grey,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
                               ),
                             ),
                           ),
@@ -651,7 +644,7 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
                 ),
               ),
             ),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpacing.xxl),
           // 底部操作区（双向确认/直接结束仅在维修中状态开放，防止绕过状态机）
           if (!_ticket.isFinished) ...[
             if (isTech) ...[
@@ -668,28 +661,30 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
                 ),
               ),
               if (_ticket.repairStatus == 'Repairing') ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 ElevatedButton.icon(
                   onPressed: () => _confirmTicket(true),
                   icon: const Icon(Icons.check_circle_outline),
                   label: const Text('请求用户确认完成'),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 TextButton(
                   onPressed: _completeDirectly,
-                  child: const Text(
+                  child: Text(
                     '无需确认直接结束工单',
-                    style: TextStyle(color: Colors.grey),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ),
               ],
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               TextButton.icon(
                 onPressed: _forceCloseTicket,
                 icon: const Icon(Icons.warning_amber_rounded, size: 18),
                 label: const Text(
                   '强制关闭工单',
-                  style: TextStyle(color: Colors.red),
+                  style: TextStyle(color: AppTheme.errorRed),
                 ),
               ),
             ] else ...[
@@ -700,16 +695,18 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
                   label: const Text('确认电脑维修完成'),
                 ),
               if (_ticket.repairStatus == 'Pending') ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 OutlinedButton(
                   onPressed: _cancelTicket,
-                  style: OutlinedButton.styleFrom(foregroundColor: Colors.red),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppTheme.errorRed,
+                  ),
                   child: const Text('取消报修'),
                 ),
               ],
             ],
           ],
-          const SizedBox(height: 32),
+          const SizedBox(height: AppSpacing.xxxl),
         ],
       ),
     );
@@ -722,11 +719,13 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
     bool isSpecial = false,
   }) {
     final bool isDone = currentStep >= step;
+    // 颜色随主题翻转：未完成步骤用 onSurfaceVariant 弱化，异常终态用语义红
     final Color color = isSpecial
-        ? Colors.red
+        ? AppTheme.errorRed
         : isDone
         ? AppTheme.primaryBlue
-        : Colors.grey;
+        : Theme.of(context).colorScheme.onSurfaceVariant
+              .withValues(alpha: 0.55);
 
     return Expanded(
       child: Column(
@@ -740,11 +739,10 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
               color: Colors.white,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             title,
-            style: TextStyle(
-              fontSize: 11,
+            style: AppText.micro.copyWith(
               fontWeight: isDone ? FontWeight.bold : FontWeight.normal,
               color: color,
             ),
@@ -760,26 +758,28 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
     return Container(
       width: 20,
       height: 2,
-      color: isDone ? AppTheme.primaryBlue : Colors.grey.withValues(alpha: 0.3),
+      color: isDone
+          ? AppTheme.primaryBlue
+          : Theme.of(context).colorScheme.onSurfaceVariant
+                .withValues(alpha: 0.3),
     );
   }
 
   Widget _buildDetailRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             label,
-            style: TextStyle(
+            style: AppText.caption.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
-              fontSize: 13,
             ),
           ),
           Text(
             value,
-            style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
+            style: AppText.caption.copyWith(fontWeight: FontWeight.w500),
           ),
         ],
       ),

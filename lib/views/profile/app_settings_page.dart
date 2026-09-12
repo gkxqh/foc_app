@@ -203,15 +203,12 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
           _groupTitle('界面设置'),
           Card(
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(AppSpacing.lg),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    '深色模式',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                  ),
-                  const SizedBox(height: 12),
+                  const Text('深色模式', style: AppText.titleSm),
+                  const SizedBox(height: AppSpacing.md),
                   SegmentedButton<ThemeMode>(
                     segments: const [
                       ButtonSegment(
@@ -234,12 +231,9 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
                     onSelectionChanged: (set) =>
                         context.read<ThemeProvider>().setThemeMode(set.first),
                   ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    '文字大小',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                  ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppSpacing.xl),
+                  const Text('文字大小', style: AppText.titleSm),
+                  const SizedBox(height: AppSpacing.md),
                   SegmentedButton<int>(
                     segments: [
                       for (
@@ -262,56 +256,50 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
                         .read<ThemeProvider>()
                         .setTextScale(ThemeProvider.textScales[set.first]),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.lg),
                   // 实时预览
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(AppSpacing.md),
                     decoration: BoxDecoration(
                       color: Theme.of(context)
                           .colorScheme
                           .surfaceContainerHighest
                           .withValues(alpha: 0.4),
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(AppRadius.banner),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text(
-                          '预览：笔记本 · 设备清灰',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(height: 4),
-                        Text('戴尔 G15', style: TextStyle(fontSize: 14)),
-                        SizedBox(height: 2),
+                      children: [
+                        Text('预览：笔记本 · 设备清灰', style: AppText.title),
+                        const SizedBox(height: AppSpacing.xs),
+                        const Text('戴尔 G15', style: AppText.body),
+                        const SizedBox(height: 2),
                         Text(
                           '小风扇嗡嗡嗡叫不停',
-                          style: TextStyle(fontSize: 12, color: Colors.grey),
+                          style: AppText.captionSm.copyWith(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurfaceVariant,
+                          ),
                         ),
                       ],
                     ),
                   ),
                   if (auth.isTechnician) ...[
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.lg),
                     const Divider(height: 1),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSpacing.sm),
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
                       value: config.showAnnouncement,
                       onChanged: (v) => config.setShowAnnouncement(v),
-                      title: const Text(
-                        '首页显示公告',
-                        style: TextStyle(fontSize: 15),
-                      ),
+                      title: const Text('首页显示公告'),
                       subtitle: Text(
                         config.showAnnouncement
                             ? '首页顶部展示最新公告与服务须知'
                             : '首页顶部不展示公告栏',
-                        style: TextStyle(
-                          fontSize: 12,
+                        style: AppText.captionSm.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
@@ -320,14 +308,10 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
                       contentPadding: EdgeInsets.zero,
                       value: config.showTechRank,
                       onChanged: (v) => config.setShowTechRank(v),
-                      title: const Text(
-                        '首页显示技术员排行榜',
-                        style: TextStyle(fontSize: 15),
-                      ),
+                      title: const Text('首页显示技术员排行榜'),
                       subtitle: Text(
                         config.showTechRank ? '展示技术员排行榜' : '仅展示进行中工单',
-                        style: TextStyle(
-                          fontSize: 12,
+                        style: AppText.captionSm.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
@@ -337,11 +321,11 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
           _groupTitle('应用图标'),
           Card(
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(AppSpacing.lg),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -349,12 +333,12 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
                     _canSwitchIcon
                         ? '选择桌面图标的样式，切换后桌面可能需要几秒刷新'
                         : '当前平台暂不支持应用内切换图标',
-                    style: TextStyle(
-                      fontSize: 12,
+                    style: AppText.captionSm.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(height: 14),
+                  // 每行两个；奇数个选项时末位用空位填充，避免最后一项被拉伸占满整行
                   Column(
                     children: [
                       for (var i = 0; i < _iconOptions.length; i += 2)
@@ -369,6 +353,8 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
                               Expanded(
                                 child: _buildIconOption(context, option),
                               ),
+                            if (_iconOptions.length - i == 1)
+                              const Expanded(child: SizedBox.shrink()),
                           ],
                         ),
                     ],
@@ -377,7 +363,7 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
           _groupTitle('登录'),
           Card(
             child: SwitchListTile(
@@ -386,19 +372,18 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
                 setState(() => _rememberLogin = v);
                 await context.read<AuthProvider>().setRememberEnabled(v);
               },
-              title: const Text('记住登录状态', style: TextStyle(fontSize: 15)),
+              title: const Text('记住登录状态'),
               subtitle: Text(
                 _rememberLogin
                     ? '退出登录后，30 天内在本机重新打开无需验证码；已保存账号可在登录页快速切换'
                     : '已关闭：已保存账号将被清空，退出后需重新验证码登录',
-                style: TextStyle(
-                  fontSize: 12,
+                style: AppText.captionSm.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
           _groupTitle('关于'),
           Card(
             clipBehavior: Clip.antiAlias,
@@ -418,13 +403,12 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
               },
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
             child: Text(
               '以上设置仅保存在本设备',
-              style: TextStyle(
-                fontSize: 12,
+              style: AppText.captionSm.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
@@ -441,12 +425,13 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
   ) {
     final selected = _currentIcon == option.value;
     return InkWell(
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(AppRadius.card),
       onTap: _iconSwitching ? null : () => _switchIcon(option.value),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10),
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+        margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(AppRadius.card),
           border: Border.all(
             color: selected ? AppTheme.primaryBlue : Colors.transparent,
             width: 2,
@@ -459,7 +444,7 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
         child: Column(
           children: [
             ClipRRect(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(AppRadius.card - 2),
               child: Image.asset(
                 option.asset,
                 width: 52,
@@ -477,7 +462,7 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
               option.label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+              style: AppText.captionSm.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 2),
             Icon(
@@ -495,13 +480,15 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
 
   Widget _groupTitle(String title) {
     return Padding(
-      padding: const EdgeInsets.only(left: 4, bottom: 8),
+      padding: const EdgeInsets.only(
+        left: AppSpacing.xs,
+        bottom: AppSpacing.sm,
+      ),
       child: Text(
         title,
-        style: const TextStyle(
-          fontSize: 13,
+        style: AppText.caption.copyWith(
           fontWeight: FontWeight.bold,
-          color: Colors.grey,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
         ),
       ),
     );

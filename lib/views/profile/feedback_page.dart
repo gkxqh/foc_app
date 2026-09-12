@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_theme.dart';
 import '../../services/config_service.dart';
 
 class FeedbackPage extends StatefulWidget {
@@ -53,7 +54,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
       body: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(AppSpacing.xl),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -62,10 +63,9 @@ class _FeedbackPageState extends State<FeedbackPage> {
                 decoration: const InputDecoration(
                   labelText: '联系方式 (选填)',
                   hintText: 'QQ / 手机号 / 邮箱',
-                  border: OutlineInputBorder(),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.lg),
               Expanded(
                 child: TextField(
                   controller: _contentController,
@@ -75,11 +75,10 @@ class _FeedbackPageState extends State<FeedbackPage> {
                   decoration: const InputDecoration(
                     labelText: '问题或建议',
                     hintText: '请详述您在报修、接单或使用过程中遇到的问题或改进建议...',
-                    border: OutlineInputBorder(),
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: AppSpacing.xl),
               ElevatedButton(
                 onPressed: _isSubmitting ? null : _submit,
                 style: ElevatedButton.styleFrom(

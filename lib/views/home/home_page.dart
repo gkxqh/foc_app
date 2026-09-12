@@ -89,10 +89,29 @@ class _HomePageState extends State<HomePage> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('公告与服务须知'),
-        content: SizedBox(
-          width: double.maxFinite,
-          height: 320,
-          child: Markdown(data: body, selectable: true),
+        // 高度自适应：短公告收紧弹窗，长公告限高滚动（此前固定 320 在小屏/大字号下失衡）
+        content: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: double.maxFinite,
+            maxHeight: MediaQuery.sizeOf(ctx).height * 0.6,
+          ),
+          child: SizedBox(
+            width: double.maxFinite,
+            child: Markdown(
+              data: body,
+              selectable: true,
+              shrinkWrap: true,
+              styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(ctx)).copyWith(
+                p: AppText.body.copyWith(
+                  height: 1.6,
+                  color: Theme.of(ctx).colorScheme.onSurface,
+                ),
+                listBullet: AppText.body.copyWith(
+                  color: Theme.of(ctx).colorScheme.onSurface,
+                ),
+              ),
+            ),
+          ),
         ),
         actions: [
           TextButton(
@@ -112,17 +131,17 @@ class _HomePageState extends State<HomePage> {
     if (tipText.isEmpty) return const SizedBox.shrink();
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
       child: Material(
         color: AppTheme.primaryBlue.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(AppRadius.banner),
         child: InkWell(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(AppRadius.banner),
           onTap: _showAnnouncementDialog,
           child: Padding(
             padding: const EdgeInsets.symmetric(
-              horizontal: 12.0,
-              vertical: 10.0,
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.md,
             ),
             child: Row(
               children: [
@@ -131,20 +150,19 @@ class _HomePageState extends State<HomePage> {
                   color: AppTheme.primaryBlue,
                   size: 20,
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
                     tipText,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 13,
+                    style: AppText.caption.copyWith(
                       color: AppTheme.primaryBlue,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
-                const SizedBox(width: 4),
+                const SizedBox(width: AppSpacing.xs),
                 const Icon(
                   Icons.chevron_right_rounded,
                   color: AppTheme.primaryBlue,
@@ -218,9 +236,9 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildNotLoggedInView() {
     return ListView(
-      padding: const EdgeInsets.all(24.0),
+      padding: const EdgeInsets.all(AppSpacing.xxl),
       children: [
-        const SizedBox(height: 40),
+        const SizedBox(height: AppSpacing.xxxl),
         Center(
           child: Container(
             width: 90,
@@ -236,24 +254,18 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
         ),
-        const SizedBox(height: 20),
-        const Center(
-          child: Text(
-            '欢迎使用云上飞扬',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-        ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.xl),
+        const Center(child: Text('欢迎使用云上飞扬', style: AppText.titleXl)),
+        const SizedBox(height: AppSpacing.sm),
         Center(
           child: Text(
             '四川大学飞扬俱乐部设备报修及维护服务',
-            style: TextStyle(
-              fontSize: 13,
+            style: AppText.caption.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
         ),
-        const SizedBox(height: 32),
+        const SizedBox(height: AppSpacing.xxxl),
         ElevatedButton.icon(
           onPressed: () {
             Navigator.push(
@@ -267,12 +279,11 @@ class _HomePageState extends State<HomePage> {
             padding: const EdgeInsets.symmetric(vertical: 14),
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.md),
         Center(
           child: Text(
             '未注册用户请先前往微信小程序「云上飞扬」完成注册',
-            style: TextStyle(
-              fontSize: 12,
+            style: AppText.captionSm.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
@@ -287,12 +298,12 @@ class _HomePageState extends State<HomePage> {
     if (error == null) return const SizedBox.shrink();
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
       child: Material(
         color: AppTheme.warningOrange.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(AppRadius.banner),
         child: InkWell(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(AppRadius.banner),
           onTap: () {
             // 请求进行中不再重复触发，防止连点与下拉刷新并发叠加
             if (ticketProvider.isLoading) return;
@@ -306,8 +317,8 @@ class _HomePageState extends State<HomePage> {
           },
           child: Padding(
             padding: const EdgeInsets.symmetric(
-              horizontal: 12.0,
-              vertical: 10.0,
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.md,
             ),
             child: Row(
               children: [
@@ -316,19 +327,20 @@ class _HomePageState extends State<HomePage> {
                   color: AppTheme.warningOrange,
                   size: 20,
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
                     error,
-                    style: const TextStyle(
-                      fontSize: 13,
+                    style: AppText.caption.copyWith(
                       color: AppTheme.warningOrange,
                     ),
                   ),
                 ),
-                const Text(
+                Text(
                   '点击重试',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                  style: AppText.captionSm.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -346,16 +358,16 @@ class _HomePageState extends State<HomePage> {
     }
 
     return ListView(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       children: [
         if (config.showAnnouncement) _buildAnnouncementBanner(config),
         _buildTicketErrorBanner(ticketProvider),
         if (!config.repairFlag) ...[
           Container(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(AppSpacing.xl),
             decoration: BoxDecoration(
               color: AppTheme.warningOrange.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(AppRadius.card),
               border: Border.all(
                 color: AppTheme.warningOrange.withValues(alpha: 0.3),
               ),
@@ -367,59 +379,48 @@ class _HomePageState extends State<HomePage> {
                   size: 48,
                   color: AppTheme.warningOrange,
                 ),
-                SizedBox(height: 12),
+                SizedBox(height: AppSpacing.md),
                 Text(
                   '报修通道暂未开启',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.warningOrange,
-                  ),
+                  style: AppText.title.copyWith(color: AppTheme.warningOrange),
                 ),
-                SizedBox(height: 8),
+                SizedBox(height: AppSpacing.sm),
                 Text(
                   '当前为假期或技术员休整时间，系统已暂停接收新工单。感谢您的理解！',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 13,
+                  style: AppText.caption.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
         ],
         if (activeList.isNotEmpty) ...[
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                '我的进行中工单',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
+              const Text('我的进行中工单', style: AppText.title),
               Text(
                 '共 ${activeList.length} 单',
-                style: TextStyle(
-                  fontSize: 12,
+                style: AppText.captionSm.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           ...activeList.map((t) => _buildTicketCard(t)),
-          const SizedBox(height: 20),
+          const SizedBox(height: AppSpacing.xl),
         ] else if (config.repairFlag) ...[
-          SizedBox(
-            height: 220,
-            child: EmptyState(
-              icon: Icons.assignment_turned_in_outlined,
-              title: '您当前没有进行中的报修工单',
-              subtitle: '如遇电脑软硬件故障，请点击右下方按钮发起报修',
-            ),
+          const EmptyState(
+            icon: Icons.assignment_turned_in_outlined,
+            title: '您当前没有进行中的报修工单',
+            subtitle: '如遇电脑软硬件故障，请点击右下方按钮发起报修',
+            minHeight: 220,
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: AppSpacing.xl),
         ],
       ],
     );
@@ -436,7 +437,7 @@ class _HomePageState extends State<HomePage> {
     }
 
     return ListView(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       children: [
         if (config.showAnnouncement) _buildAnnouncementBanner(config),
         _buildTicketErrorBanner(ticketProvider),
@@ -444,32 +445,25 @@ class _HomePageState extends State<HomePage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                '我的进行中工单',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
+              const Text('我的进行中工单', style: AppText.title),
               Text(
                 '共 ${activeList.length} 单',
-                style: TextStyle(
-                  fontSize: 12,
+                style: AppText.captionSm.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           ...activeList.map((t) => _buildTicketCard(t)),
-          const SizedBox(height: 20),
+          const SizedBox(height: AppSpacing.xl),
         ],
         // 技术员排行榜（受软件设置开关控制）
         if (config.showTechRank) ...[
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                '技术员英雄榜',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
+              const Text('技术员英雄榜', style: AppText.title),
               Row(
                 children: ['总榜', '江安', '望江'].map((tab) {
                   final isSelected = config.selectedCampusTab == tab;
@@ -485,16 +479,14 @@ class _HomePageState extends State<HomePage> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
           _buildPodiumView(config),
         ] else if (activeList.isEmpty) ...[
-          const SizedBox(
-            height: 220,
-            child: EmptyState(
-              icon: Icons.done_all_rounded,
-              title: '当前没有进行中的工单',
-              subtitle: '如需接单，请点击右上角扫码接单',
-            ),
+          const EmptyState(
+            icon: Icons.done_all_rounded,
+            title: '当前没有进行中的工单',
+            subtitle: '如需接单，请点击右上角扫码接单',
+            minHeight: 220,
           ),
         ],
       ],
@@ -505,25 +497,29 @@ class _HomePageState extends State<HomePage> {
     final list = config.topTechList;
 
     if (config.isLoadingRank) {
-      return const SizedBox(
-        height: 180,
-        child: Center(child: CircularProgressIndicator()),
+      // 与其他页面统一：加载占位用骨架屏而非转圈
+      return const SkeletonList(
+        variant: SkeletonVariant.podium,
+        itemCount: 1,
+        shrinkWrap: true,
+        padding: EdgeInsets.zero,
       );
     }
 
     if (list.isEmpty) {
-      return const SizedBox(
-        height: 160,
-        child: EmptyState(
-          icon: Icons.emoji_events_outlined,
-          title: '本期暂无上榜技术员',
-        ),
+      return const EmptyState(
+        icon: Icons.emoji_events_outlined,
+        title: '本期暂无上榜技术员',
+        minHeight: 160,
       );
     }
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 12.0),
+        padding: const EdgeInsets.symmetric(
+          vertical: AppSpacing.xl,
+          horizontal: AppSpacing.md,
+        ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           crossAxisAlignment: CrossAxisAlignment.end,
@@ -544,9 +540,9 @@ class _HomePageState extends State<HomePage> {
     double height,
   ) {
     final Color color = switch (rank) {
-      1 => const Color(0xFFF5B301),
-      2 => const Color(0xFF9EA7B3),
-      _ => const Color(0xFFB07A4B),
+      1 => AppTheme.rankGold,
+      2 => AppTheme.rankSilver,
+      _ => AppTheme.rankBronze,
     };
     return Column(
       children: [
@@ -556,24 +552,25 @@ class _HomePageState extends State<HomePage> {
           item.nickname,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+          style: AppText.caption.copyWith(fontWeight: FontWeight.bold),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: AppSpacing.xs),
         Text(
           '${item.count} 台',
-          style: TextStyle(
-            fontSize: 12,
+          style: AppText.captionSm.copyWith(
             color: color,
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         Container(
           width: 70,
           height: height - 60,
           decoration: BoxDecoration(
             color: color.withValues(alpha: 0.2),
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(AppRadius.thumb),
+            ),
             border: Border.all(color: color.withValues(alpha: 0.5)),
           ),
           alignment: Alignment.center,
@@ -591,9 +588,9 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildTicketCard(TicketModel ticket) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: AppSpacing.md),
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppRadius.card),
         onTap: () async {
           await Navigator.push(
             context,
@@ -604,7 +601,7 @@ class _HomePageState extends State<HomePage> {
           }
         },
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(AppSpacing.lg),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -616,19 +613,18 @@ class _HomePageState extends State<HomePage> {
                       type: MaterialType.transparency,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
+                          horizontal: AppSpacing.sm,
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
                           color: AppTheme.getStatusColor(ticket.repairStatus)
                               .withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(4),
+                          borderRadius: BorderRadius.circular(AppRadius.badge),
                         ),
                         child: Text(
                           AppTheme.getStatusText(ticket.repairStatus),
-                          style: TextStyle(
+                          style: AppText.captionSm.copyWith(
                             color: AppTheme.getStatusColor(ticket.repairStatus),
-                            fontSize: 12,
                             fontWeight: FontWeight.bold,
                             decoration: TextDecoration.none,
                           ),
@@ -639,8 +635,7 @@ class _HomePageState extends State<HomePage> {
                   const Spacer(),
                   Text(
                     ticket.createTime,
-                    style: TextStyle(
-                      fontSize: 12,
+                    style: AppText.captionSm.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
@@ -649,18 +644,14 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(height: 10),
               Text(
                 '${ticket.deviceType} • ${ticket.faultType}',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: AppText.title,
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: AppSpacing.xs),
               Text(
                 ticket.repairDescription,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 13,
+                style: AppText.caption.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
@@ -668,19 +659,13 @@ class _HomePageState extends State<HomePage> {
               Row(
                 children: [
                   Chip(
-                    label: Text(
-                      ticket.campus,
-                      style: const TextStyle(fontSize: 11),
-                    ),
+                    label: Text(ticket.campus, style: AppText.micro),
                     visualDensity: VisualDensity.compact,
                     padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 6),
                   Chip(
-                    label: Text(
-                      ticket.computerBrand,
-                      style: const TextStyle(fontSize: 11),
-                    ),
+                    label: Text(ticket.computerBrand, style: AppText.micro),
                     visualDensity: VisualDensity.compact,
                     padding: EdgeInsets.zero,
                   ),
