@@ -21,9 +21,17 @@ class TechWidgetProvider : HomeWidgetProvider() {
         val payload =
             WidgetPayload.fromJson(widgetData.getString(WidgetDataSync.KEY_PAYLOAD, null))
         for (id in appWidgetIds) {
+            val (page, totalPages) = pagedPosition(context, id, payload)
             appWidgetManager.updateAppWidget(
                 id,
-                WidgetViews.tech(context, payload, isWide(appWidgetManager, id)),
+                WidgetViews.tech(
+                    context,
+                    payload,
+                    isWide(appWidgetManager, id),
+                    appWidgetId = id,
+                    page = page,
+                    totalPages = totalPages,
+                ),
             )
         }
     }
@@ -35,15 +43,32 @@ class TechWidgetProvider : HomeWidgetProvider() {
         newOptions: Bundle,
     ) {
         super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions)
-        val payload = WidgetPayload.fromJson(
-            context
-                .getSharedPreferences(WidgetDataSync.WIDGET_PREFS, Context.MODE_PRIVATE)
-                .getString(WidgetDataSync.KEY_PAYLOAD, null),
-        )
+        val payload = WidgetDataSync.readPayload(context)
+        val (page, totalPages) = pagedPosition(context, appWidgetId, payload)
         appWidgetManager.updateAppWidget(
             appWidgetId,
-            WidgetViews.tech(context, payload, isWide(appWidgetManager, appWidgetId)),
+            WidgetViews.tech(
+                context,
+                payload,
+                isWide(appWidgetManager, appWidgetId),
+                appWidgetId = appWidgetId,
+                page = page,
+                totalPages = totalPages,
+            ),
         )
+    }
+
+    /** 工单数变化后 clamp 已记忆的页码，返回（页码, 总页数） */
+    private fun pagedPosition(
+        context: Context,
+        appWidgetId: Int,
+        payload: WidgetPayload,
+    ): Pair<Int, Int> {
+        val totalPages =
+            if (payload.tickets.isEmpty()) 1
+            else (payload.tickets.size + WidgetPageReceiver.ROWS_PER_PAGE - 1) /
+                WidgetPageReceiver.ROWS_PER_PAGE
+        return WidgetPageReceiver.clampedPage(context, appWidgetId, totalPages) to totalPages
     }
 
     override fun onEnabled(context: Context) {
@@ -53,6 +78,9 @@ class TechWidgetProvider : HomeWidgetProvider() {
 
     override fun onDeleted(context: Context, appWidgetIds: IntArray) {
         super.onDeleted(context, appWidgetIds)
+        val prefs =
+            context.getSharedPreferences(WidgetDataSync.WIDGET_PREFS, Context.MODE_PRIVATE)
+        appWidgetIds.forEach { prefs.edit().remove(WidgetPageReceiver.pageKey(it)).apply() }
         WidgetPollWorker.cancelIfNoWidgets(context)
     }
 

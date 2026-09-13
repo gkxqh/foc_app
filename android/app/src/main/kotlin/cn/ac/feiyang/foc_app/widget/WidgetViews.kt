@@ -4,6 +4,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.view.View
 import android.widget.RemoteViews
 import cn.ac.feiyang.foc_app.MainActivity
@@ -16,8 +17,9 @@ import java.util.Locale
 /**
  * 小组件 RemoteViews 组装。状态口径：
  * - 未登录 / token 过期 → 引导态
+ * - 角色不匹配 → 引导更换组件
  * - 正常但无工单 → 空态
- * - 正常 → 内容态（4x2 显示前两条工单，2x2 紧凑数字）
+ * - 正常 → 内容态（4x2 为可滑动工单列表，2x2 紧凑数字）
  */
 internal object WidgetViews {
     private const val LINK_SCAN = "focapp://widget/scan"
@@ -28,15 +30,33 @@ internal object WidgetViews {
 
     // ---------- 技术员版 ----------
 
-    fun tech(context: Context, payload: WidgetPayload, wide: Boolean): RemoteViews {
+    fun tech(
+        context: Context,
+        payload: WidgetPayload,
+        wide: Boolean,
+        appWidgetId: Int = -1,
+        page: Int = 0,
+        totalPages: Int = 1,
+    ): RemoteViews {
         val views = RemoteViews(
             context.packageName,
             if (wide) R.layout.widget_tech_4x2 else R.layout.widget_tech_2x2,
         )
-        return if (wide) techWide(context, payload, views) else techSmall(context, payload, views)
+        return if (wide) {
+            techWide(context, payload, views, appWidgetId, page, totalPages)
+        } else {
+            techSmall(context, payload, views)
+        }
     }
 
-    private fun techWide(context: Context, payload: WidgetPayload, views: RemoteViews): RemoteViews {
+    private fun techWide(
+        context: Context,
+        payload: WidgetPayload,
+        views: RemoteViews,
+        appWidgetId: Int,
+        page: Int,
+        totalPages: Int,
+    ): RemoteViews {
         val openApp = launchHome(context)
         views.setOnClickPendingIntent(R.id.tech_root, openApp)
 
@@ -58,19 +78,64 @@ internal object WidgetViews {
                 },
             )
             views.setOnClickPendingIntent(R.id.tech_off_action, openApp)
-            views.setViewVisibility(R.id.tech_block_empty, View.GONE)
             views.setViewVisibility(R.id.tech_rows, View.GONE)
+            views.setViewVisibility(R.id.tech_block_empty, View.GONE)
+            views.setViewVisibility(R.id.tech_page_prev, View.GONE)
+            views.setViewVisibility(R.id.tech_page_label, View.GONE)
+            views.setViewVisibility(R.id.tech_page_next, View.GONE)
             return views
         }
 
         if (payload.tickets.isEmpty()) {
             views.setViewVisibility(R.id.tech_block_empty, View.VISIBLE)
             views.setViewVisibility(R.id.tech_rows, View.GONE)
+            views.setViewVisibility(R.id.tech_page_prev, View.GONE)
+            views.setViewVisibility(R.id.tech_page_label, View.GONE)
+            views.setViewVisibility(R.id.tech_page_next, View.GONE)
         } else {
             views.setViewVisibility(R.id.tech_block_empty, View.GONE)
             views.setViewVisibility(R.id.tech_rows, View.VISIBLE)
-            bindTechRow(context, views, 1, payload.tickets.getOrNull(0), payload.isTechnician)
-            bindTechRow(context, views, 2, payload.tickets.getOrNull(1), payload.isTechnician)
+            bindTechRow(
+                context,
+                views,
+                1,
+                payload.tickets.getOrNull(page * WidgetPageReceiver.ROWS_PER_PAGE),
+            )
+            bindTechRow(
+                context,
+                views,
+                2,
+                payload.tickets.getOrNull(page * WidgetPageReceiver.ROWS_PER_PAGE + 1),
+            )
+            // 翻页器：单页时整体隐藏，多页时显示 页码 与可用的方向
+            views.setViewVisibility(
+                R.id.tech_page_prev,
+                if (totalPages > 1 && page > 0) View.VISIBLE else View.GONE,
+            )
+            views.setViewVisibility(
+                R.id.tech_page_next,
+                if (totalPages > 1 && page < totalPages - 1) View.VISIBLE else View.GONE,
+            )
+            views.setViewVisibility(
+                R.id.tech_page_label,
+                if (totalPages > 1) View.VISIBLE else View.GONE,
+            )
+            views.setTextViewText(
+                R.id.tech_page_label,
+                context.getString(
+                    R.string.widget_page_fmt,
+                    page + 1,
+                    totalPages,
+                ),
+            )
+            views.setOnClickPendingIntent(
+                R.id.tech_page_prev,
+                pagePendingIntent(context, appWidgetId, forward = false),
+            )
+            views.setOnClickPendingIntent(
+                R.id.tech_page_next,
+                pagePendingIntent(context, appWidgetId, forward = true),
+            )
         }
         views.setOnClickPendingIntent(R.id.tech_btn_scan, launchScan(context))
         views.setOnClickPendingIntent(R.id.tech_btn_refresh, refreshPendingIntent(context))
@@ -103,12 +168,12 @@ internal object WidgetViews {
         return views
     }
 
+
     private fun bindTechRow(
         context: Context,
         views: RemoteViews,
         row: Int,
         ticket: WidgetTicket?,
-        technician: Boolean,
     ) {
         val (root, title, status) = if (row == 1) {
             Triple(R.id.tech_row1, R.id.tech_row1_title, R.id.tech_row1_status)
@@ -120,7 +185,7 @@ internal object WidgetViews {
             return
         }
         views.setViewVisibility(root, View.VISIBLE)
-        views.setTextViewText(title, rowTitle(ticket, withCampus = technician))
+        views.setTextViewText(title, rowTitle(ticket, withCampus = true))
         views.setTextViewText(status, statusLabel(ticket.status))
         views.setTextColor(status, statusColor(context, ticket.status))
         views.setOnClickPendingIntent(
@@ -305,7 +370,7 @@ internal object WidgetViews {
         else -> 1
     }
 
-    private fun rowTitle(ticket: WidgetTicket, withCampus: Boolean): String {
+    internal fun rowTitle(ticket: WidgetTicket, withCampus: Boolean): String {
         val head = listOf(ticket.brand.trim(), ticket.model.trim())
             .filter { it.isNotEmpty() }
             .joinToString(" ")
@@ -323,7 +388,7 @@ internal object WidgetViews {
      * 状态文案与 App 内 AppTheme.getStatusText 语义一致；
      * 小组件空间受限用「待…」短形，不再按角色反转（App 侧为「等待…」全称）。
      */
-    private fun statusLabel(status: String): String =
+    internal fun statusLabel(status: String): String =
         when (status.trim().lowercase()) {
             "pending" -> "待分配"
             "repairing" -> "维修中"
@@ -336,7 +401,7 @@ internal object WidgetViews {
         }
 
     /** 状态色与 App 内 AppTheme.getStatusColor 同源 */
-    private fun statusColor(context: Context, status: String): Int =
+    internal fun statusColor(context: Context, status: String): Int =
         color(
             context,
             when (status.trim().lowercase()) {
@@ -348,7 +413,6 @@ internal object WidgetViews {
                 else -> R.color.widget_status_canceled
             },
         )
-
     private fun updatedLabel(context: Context, ts: Long): String =
         if (ts <= 0L) {
             ""
@@ -366,6 +430,16 @@ internal object WidgetViews {
 
     private fun launchScan(context: Context): PendingIntent =
         HomeWidgetLaunchIntent.getActivity(context, MainActivity::class.java, Uri.parse(LINK_SCAN))
+
+    private fun pagePendingIntent(context: Context, appWidgetId: Int, forward: Boolean): PendingIntent =
+        PendingIntent.getBroadcast(
+            context,
+            if (forward) appWidgetId * 2 + 1 else appWidgetId * 2,
+            Intent(context, WidgetPageReceiver::class.java)
+                .putExtra(WidgetPageReceiver.EXTRA_WIDGET_ID, appWidgetId)
+                .putExtra(WidgetPageReceiver.EXTRA_FORWARD, forward),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
 
     private fun refreshPendingIntent(context: Context): PendingIntent =
         PendingIntent.getBroadcast(

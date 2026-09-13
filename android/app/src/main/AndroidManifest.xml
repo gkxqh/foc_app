@@ -125,6 +125,10 @@
         <receiver
             android:name=".widget.WidgetRefreshReceiver"
             android:exported="false" />
+        <!-- 工作台 4x2 的工单翻页 -->
+        <receiver
+            android:name=".widget.WidgetPageReceiver"
+            android:exported="false" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

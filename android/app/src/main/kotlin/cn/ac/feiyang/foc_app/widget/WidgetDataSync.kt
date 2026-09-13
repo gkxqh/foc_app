@@ -27,7 +27,7 @@ object WidgetDataSync {
     private const val API_ROOT = "https://focapi.feiyang.ac.cn"
     private const val TICKET_PATH = "/v1/status/getTicket"
     private const val TIMEOUT_MS = 10_000
-    private const val MAX_TICKETS = 4
+    private const val MAX_TICKETS = 10
 
     private val FINISHED_STATUSES = setOf("done", "closed", "canceled", "cancelled")
 
@@ -173,6 +173,14 @@ object WidgetDataSync {
             .put("countTotal", 0)
             .put("countTechConfirm", 0)
             .put("countUserConfirm", 0)
+
+    /** 读取当前快照 payload（翻页等就地重渲染场景使用） */
+    fun readPayload(context: Context): WidgetPayload =
+        WidgetPayload.fromJson(
+            context
+                .getSharedPreferences(WIDGET_PREFS, Context.MODE_PRIVATE)
+                .getString(KEY_PAYLOAD, null),
+        )
 
     private fun writePayload(context: Context, payload: JSONObject) {
         context.getSharedPreferences(WIDGET_PREFS, Context.MODE_PRIVATE)

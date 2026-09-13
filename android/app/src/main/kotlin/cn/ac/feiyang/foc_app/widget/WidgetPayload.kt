@@ -25,19 +25,17 @@ data class WidgetPayload(
     val quota: String,
     val maxConcurrent: Int,
     val tickets: List<WidgetTicket>,
+    val countTotal: Int,
     val updatedAt: Long,
 ) {
     val isTechnician: Boolean get() = role == "technician"
 
-    /** 需要当前角色亲自确认的单量：技术员看 TechConfirming，用户看 UserConfirming */
-    val needSelfConfirmCount: Int
-        get() {
-            val target = if (isTechnician) "techconfirming" else "userconfirming"
-            return tickets.count { it.status.trim().equals(target, ignoreCase = true) }
-        }
+    /** 内容态：登录有效且角色匹配且有工单（此时渲染列表） */
+    val showList: Boolean
+        get() = loggedIn && !tokenExpired && isTechnician && tickets.isNotEmpty()
 
-    /** 在手工单数（payload 中仅携带进行中的工单） */
-    val inHandCount: Int get() = tickets.size
+    /** 在手工单数：优先用写入端统计的真实总数，兜底列表长度（列表可能被截断） */
+    val inHandCount: Int get() = if (countTotal > 0) countTotal else tickets.size
 
     val firstTicket: WidgetTicket? get() = tickets.firstOrNull()
 
@@ -70,6 +68,7 @@ data class WidgetPayload(
                     quota = obj.optString("quota"),
                     maxConcurrent = obj.optInt("maxConcurrent", 1),
                     tickets = tickets,
+                    countTotal = obj.optInt("countTotal", tickets.size),
                     updatedAt = obj.optLong("ts"),
                 )
             } catch (_: Exception) {
@@ -86,6 +85,7 @@ data class WidgetPayload(
             quota = "",
             maxConcurrent = 1,
             tickets = emptyList(),
+            countTotal = 0,
             updatedAt = 0L,
         )
     }

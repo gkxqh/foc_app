@@ -28,8 +28,9 @@ class WidgetSnapshotService {
   /// 避免冷启动/资料刷新用尚未拉取的空列表覆盖原生轮询刚写入的数据造成闪烁。
   static const freshWindow = Duration(minutes: 30);
 
-  /// payload 最多携带的工单条数（4x2 布局渲染前两条，留少量余量）。
-  static const maxTickets = 4;
+  /// payload 最多携带的工单条数（工作台 4x2 为可滑动列表，容量给足；
+  /// 超出截断，在手总数以 countTotal 为准）。
+  static const maxTickets = 10;
 
   /// 工单数据变化（fetchTickets / 本地状态流转）后的完整重建。
   static Future<void> refreshTickets({

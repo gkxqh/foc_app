@@ -33,6 +33,9 @@
     <string name="widget_btn_confirm">去确认</string>
 
     <string name="widget_hand_fmt">在手 %1$d 单</string>
+    <string name="widget_page_prev">‹</string>
+    <string name="widget_page_next">›</string>
+    <string name="widget_page_fmt">%1$d/%2$d</string>
     <string name="widget_updated_fmt">更新于 %1$s</string>
 
     <!-- 步骤条四节点：报修 · 接单 · 确认 · 完成（与 App 工单详情页一致） -->

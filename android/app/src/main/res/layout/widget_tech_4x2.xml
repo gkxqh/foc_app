@@ -21,6 +21,36 @@
             android:textSize="13sp"
             android:textStyle="bold"
             android:textColor="@color/widget_text_primary" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <TextView
+            android:id="@+id/tech_page_prev"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:gravity="center"
+            android:text="@string/widget_page_prev"
+            android:textSize="15sp"
+            android:textColor="@color/widget_text_secondary" />
+
+        <TextView
+            android:id="@+id/tech_page_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="11sp"
+            android:textColor="@color/widget_text_tertiary" />
+
+        <TextView
+            android:id="@+id/tech_page_next"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:gravity="center"
+            android:text="@string/widget_page_next"
+            android:textSize="15sp"
+            android:textColor="@color/widget_text_secondary" />
     </LinearLayout>
 
     <!-- 未登录 / 登录过期引导 -->
