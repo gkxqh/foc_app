@@ -53,6 +53,10 @@ android {
 
     buildTypes {
         release {
+            // AGP 9 起 release 默认开启 R8 混淆收缩，会裁剪 MLKit/Barhopper 经反射/JNI
+            // 调用的类，导致 mobile_scanner 仅在 release 扫码失效；显式关闭保持与 debug 一致
+            isMinifyEnabled = false
+            isShrinkResources = false
             // 有 key.properties 时用正式 keystore 签名，否则回退 debug 签名
             signingConfig = if (keystorePropertiesFile.exists()) {
                 signingConfigs.getByName("release")
