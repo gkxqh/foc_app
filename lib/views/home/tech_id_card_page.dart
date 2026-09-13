@@ -24,6 +24,16 @@ class TechRepairStats {
   const TechRepairStats({required this.doneCount, required this.firstDate});
 }
 
+/// 证件二维码载荷：纯文本身份信息，任何扫码器可读，与卡面比对即可核验。
+/// 不用 focapp:// 深链——该 scheme 仅为桌面小组件的显式 intent 注册，
+/// 扫码器无法拉起；也没有可落地的服务端验证网页。
+@visibleForTesting
+String techIdQrPayload(UserModel user) =>
+    '云上飞扬技术员证\n'
+    '工号 ${user.uid}\n'
+    '姓名 ${user.nickname}\n'
+    '校区 ${user.campus}';
+
 /// 技术员证页：竖屏双面电子证件，深色拉丝金属 + 金色机甲风，
 /// 全部装饰由 CustomPaint 绘制（不用位图底图），点击整卡 3D 翻转。
 /// 维修履历实时统计自工单接口（不走年度总结的预计算接口），失败静默降级为寄语。
@@ -413,7 +423,9 @@ class TechIdCardBack extends StatelessWidget {
                         child: Column(
                           children: [
                             Container(
-                              padding: EdgeInsets.all(w * 0.016),
+                              // 白边即 QR 静区（quiet zone），需 ≥4 个模块宽，
+                              // 过窄时微信/系统相机经常拒识
+                              padding: EdgeInsets.all(w * 0.042),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(
@@ -421,8 +433,14 @@ class TechIdCardBack extends StatelessWidget {
                                 ),
                               ),
                               child: QrImageView(
-                                data: 'focapp://tech/${user.uid}',
+                                // 内容用纯文本身份信息：App 的 focapp:// scheme
+                                // 仅为桌面小组件的显式 intent 注册（无 manifest
+                                // intent-filter），扫码器拉不起深链，服务端也
+                                // 没有可落地的验证网页；纯文本任何扫码器可读，
+                                // 与卡面工号/姓名/校区比对即可核验
+                                data: techIdQrPayload(user),
                                 version: QrVersions.auto,
+                                errorCorrectionLevel: QrErrorCorrectLevel.Q,
                                 size: w * 0.34,
                                 backgroundColor: Colors.white,
                                 padding: EdgeInsets.zero,

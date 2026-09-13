@@ -54,6 +54,11 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1300));
 
     expect(find.byType(QrImageView), findsOneWidget);
+    // 二维码载荷为纯文本身份信息，任何扫码器可读、与卡面比对核验
+    expect(
+      techIdQrPayload(_demoUser),
+      '云上飞扬技术员证\n工号 T2024\n姓名 小飞\n校区 江安',
+    );
     expect(find.text('FEIYANG CLUB'), findsOneWidget);
     expect(find.text('扫码识别技术员身份'), findsOneWidget);
     expect(find.text('维修履历'), findsOneWidget);
