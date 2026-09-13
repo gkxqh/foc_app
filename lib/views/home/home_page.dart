@@ -5,6 +5,7 @@ import '../../core/layout/window_class.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/constants/service_texts.dart';
 import '../common/empty_state.dart';
+import '../common/floating_mascot.dart';
 import '../common/responsive_center.dart';
 import '../common/skeleton_list.dart';
 import '../common/rank_badge.dart';
@@ -232,11 +233,12 @@ class _HomePageState extends State<HomePage> {
         children: [
           const SizedBox(height: AppSpacing.xxxl),
           // 吉祥物迎宾：首次打开的第一眼即建立"社团服务"的亲近感
-          Center(
-            child: Image.asset(
-              'assets/illustrations/fy_q.png',
+          // （与已登录空态同一套 PopIn 入场 + 浮动待机动效）
+          const Center(
+            child: FloatingMascot(
+              asset: 'assets/illustrations/fy_q.png',
+              fallbackIcon: Icons.cloud_outlined,
               height: 150,
-              fit: BoxFit.contain,
             ),
           ),
           const SizedBox(height: AppSpacing.xl),
@@ -557,17 +559,21 @@ class _HomePageState extends State<HomePage> {
                 const Text('技术员英雄榜', style: AppText.title),
                 Row(
                   mainAxisSize: MainAxisSize.min,
-                  children: ['总榜', '江安', '望江'].map((tab) {
-                    final isSelected = config.selectedCampusTab == tab;
-                    return Padding(
-                      padding: const EdgeInsets.only(left: 6.0),
-                      child: ChoiceChip(
-                        label: Text(tab),
-                        selected: isSelected,
-                        onSelected: (_) => config.setCampusTab(tab),
-                      ),
-                    );
-                  }).toList(),
+              children: ['总榜', '江安', '望江'].map((tab) {
+                final isSelected = config.selectedCampusTab == tab;
+                return Padding(
+                  padding: const EdgeInsets.only(left: 6.0),
+                  child: ChoiceChip(
+                    label: Text(tab),
+                    selected: isSelected,
+                    // M3 默认选中带勾选标记（宽 20px+），切换时新旧标记动画
+                    // 不同步会让行宽中途回落：临界宽度下标题行在 1/2 排间
+                    // 反复翻转（榜单跳动闪烁），选中态由底色高亮已足够区分
+                    showCheckmark: false,
+                    onSelected: (_) => config.setCampusTab(tab),
+                  ),
+                );
+              }).toList(),
                 ),
               ],
             ),
@@ -590,8 +596,9 @@ class _HomePageState extends State<HomePage> {
   Widget _buildPodiumView(ConfigProvider config) {
     final list = config.topTechList;
 
-    if (config.isLoadingRank) {
-      // 与其他页面统一：加载占位用骨架屏而非转圈
+    // 仅首次加载（没有任何可展示的旧数据）才用骨架屏；切榜刷新时
+    // 旧榜单原地淡显、新数据到达后无缝替换，避免每次切换都闪一遍骨架
+    if (config.isLoadingRank && list.isEmpty) {
       return const SkeletonList(
         variant: SkeletonVariant.podium,
         itemCount: 1,
@@ -608,24 +615,29 @@ class _HomePageState extends State<HomePage> {
       );
     }
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          vertical: AppSpacing.xl,
-          horizontal: AppSpacing.md,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            // Flexible 让长昵称的省略号真正生效，也避免 3 列在宽卡上互挤溢出
-            if (list.length > 1)
-              Flexible(child: _buildPodiumColumn(context, list[1], 2, 110)),
-            if (list.isNotEmpty)
-              Flexible(child: _buildPodiumColumn(context, list[0], 1, 140)),
-            if (list.length > 2)
-              Flexible(child: _buildPodiumColumn(context, list[2], 3, 90)),
-          ],
+    // 刷新中旧榜单淡显提示"数据更新中"，请求返回后自动恢复
+    return AnimatedOpacity(
+      duration: const Duration(milliseconds: 200),
+      opacity: config.isLoadingRank ? 0.45 : 1.0,
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            vertical: AppSpacing.xl,
+            horizontal: AppSpacing.md,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              // Flexible 让长昵称的省略号真正生效，也避免 3 列在宽卡上互挤溢出
+              if (list.length > 1)
+                Flexible(child: _buildPodiumColumn(context, list[1], 2, 110)),
+              if (list.isNotEmpty)
+                Flexible(child: _buildPodiumColumn(context, list[0], 1, 140)),
+              if (list.length > 2)
+                Flexible(child: _buildPodiumColumn(context, list[2], 3, 90)),
+            ],
+          ),
         ),
       ),
     );
