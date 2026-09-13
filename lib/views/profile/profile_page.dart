@@ -31,117 +31,156 @@ class ProfilePage extends StatelessWidget {
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(AppSpacing.lg),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    CircleAvatar(
-                      radius: 36,
-                      // 底色随主题翻转，深色模式下不再是刺眼亮灰圆盘
-                      backgroundColor: Theme.of(context)
-                          .colorScheme
-                          .surfaceContainerHighest,
-                      // 无头像时显示本地图标兜底，不向第三方图床发起请求
-                      backgroundImage: (user?.avatarUrl.isNotEmpty ?? false)
-                          ? CachedNetworkImageProvider(user!.avatarUrl)
-                          : null,
-                      child: (user?.avatarUrl.isNotEmpty ?? false)
-                          ? null
-                          : Icon(
-                              Icons.person_rounded,
-                              size: 40,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
-                            ),
-                    ),
-                    const SizedBox(width: AppSpacing.lg),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            auth.isLoggedIn
-                                ? (user?.nickname.isNotEmpty == true
-                                      ? user!.nickname
-                                      : '同学')
-                                : '点击登录',
-                            style: AppText.heading,
-                          ),
-                          const SizedBox(height: 6),
-                          if (auth.isLoggedIn) ...[
-                            Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: AppSpacing.sm,
-                                    vertical: 2,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: user?.isTechnician == true
-                                        ? AppTheme.accentColor.withValues(
-                                            alpha: 0.15,
-                                          )
-                                        : AppTheme.primaryBlue.withValues(
-                                            alpha: 0.15,
-                                          ),
-                                    borderRadius: BorderRadius.circular(
-                                      AppRadius.badge,
-                                    ),
-                                  ),
-                                  child: Text(
-                                    user?.isTechnician == true
-                                        ? '技术员 ${user?.uid ?? ''}'
-                                        : '普通用户',
-                                    style: AppText.micro.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: user?.isTechnician == true
-                                          ? AppTheme.accentColor
-                                          : AppTheme.primaryBlue,
-                                    ),
-                                  ),
+                    Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 36,
+                          // 底色随主题翻转，深色模式下不再是刺眼亮灰圆盘
+                          backgroundColor: Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHighest,
+                          // 无头像时显示本地图标兜底，不向第三方图床发起请求
+                          backgroundImage: (user?.avatarUrl.isNotEmpty ?? false)
+                              ? CachedNetworkImageProvider(user!.avatarUrl)
+                              : null,
+                          child: (user?.avatarUrl.isNotEmpty ?? false)
+                              ? null
+                              : Icon(
+                                  Icons.person_rounded,
+                                  size: 40,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
                                 ),
-                                if (user?.campus.isNotEmpty == true) ...[
-                                  const SizedBox(width: 6),
-                                  // 长校区名折行省略而非内部溢出
-                                  Flexible(
-                                    child: Text(
-                                      user!.campus,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: AppText.captionSm.copyWith(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onSurfaceVariant,
+                        ),
+                        const SizedBox(width: AppSpacing.lg),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                auth.isLoggedIn
+                                    ? (user?.nickname.isNotEmpty == true
+                                          ? user!.nickname
+                                          : '同学')
+                                    : '点击登录',
+                                style: AppText.heading,
+                              ),
+                              const SizedBox(height: 6),
+                              if (auth.isLoggedIn) ...[
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: AppSpacing.sm,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: user?.isTechnician == true
+                                            ? AppTheme.accentColor.withValues(
+                                                alpha: 0.15,
+                                              )
+                                            : AppTheme.primaryBlue.withValues(
+                                                alpha: 0.15,
+                                              ),
+                                        borderRadius: BorderRadius.circular(
+                                          AppRadius.badge,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        user?.isTechnician == true
+                                            ? '技术员 ${user?.uid ?? ''}'
+                                            : '普通用户',
+                                        style: AppText.micro.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: user?.isTechnician == true
+                                              ? AppTheme.accentColor
+                                              : AppTheme.primaryBlue,
+                                        ),
                                       ),
                                     ),
+                                    if (user?.campus.isNotEmpty == true) ...[
+                                      const SizedBox(width: 6),
+                                      // 长校区名折行省略而非内部溢出
+                                      Flexible(
+                                        child: Text(
+                                          user!.campus,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: AppText.captionSm.copyWith(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onSurfaceVariant,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ] else ...[
+                                Text(
+                                  '登录后查看工单与个性化设置',
+                                  style: AppText.captionSm.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
                                   ),
-                                ],
+                                ),
                               ],
-                            ),
-                          ] else ...[
-                            Text(
-                              '登录后查看工单与个性化设置',
-                              style: AppText.captionSm.copyWith(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
+                            ],
+                          ),
+                        ),
+                        if (!auth.isLoggedIn)
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const LoginPage(),
+                                ),
+                              );
+                            },
+                            child: const Text('登录'),
+                          ),
+                      ],
                     ),
-                    if (!auth.isLoggedIn)
-                      ElevatedButton(
-                        onPressed: () {
+                    // 技术员专属：电子证件入口与身份信息同组，与下方功能列表分开
+                    if (user?.isTechnician == true) ...[
+                      const SizedBox(height: AppSpacing.md),
+                      const Divider(height: 1),
+                      InkWell(
+                        onTap: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => const LoginPage(),
+                              builder: (_) => const TechIdCardPage(),
                             ),
                           );
                         },
-                        child: const Text('登录'),
+                        child: Padding(
+                          // 分隔线到内容的上间距，与「下间距 8 + 卡片底边
+                          // 16」合计相等，按钮在分隔线与卡片底边之间居中
+                          padding: const EdgeInsets.only(
+                            top: AppSpacing.xxl,
+                            bottom: AppSpacing.sm,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.workspace_premium_rounded,
+                                color: AppTheme.rankGold,
+                              ),
+                              const SizedBox(width: AppSpacing.sm),
+                              const Text('技术员证'),
+                            ],
+                          ),
+                        ),
                       ),
+                    ],
                   ],
                 ),
               ),
@@ -189,27 +228,6 @@ class ProfilePage extends StatelessWidget {
                       );
                     },
                   ),
-                  // 技术员专属入口：电子证件（含分隔线一起条件化）
-                  if (auth.isTechnician) ...[
-                    const Divider(height: 1),
-                    ListTile(
-                      leading: const Icon(
-                        Icons.workspace_premium_rounded,
-                        color: AppTheme.rankGold,
-                      ),
-                      title: const Text('技术员证'),
-                      subtitle: const Text('我的电子证件', style: AppText.captionSm),
-                      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const TechIdCardPage(),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
                   const Divider(height: 1),
                   ListTile(
                     leading: const Icon(

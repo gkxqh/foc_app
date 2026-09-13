@@ -3,8 +3,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 /// 双面 3D 翻转卡：点击整卡绕 Y 轴翻转（透视投影 + rotateY 0→π，
-/// easeInOutCubic 500ms），转过半程切换显示 [back]，且背面自身预旋转 π
-/// 消除镜像，使翻至正对视角时内容朝向正确。
+/// easeInOutCubic 500ms），翻转中整卡按 sin 曲线轻微收缩（中点最小
+/// 0.96、落定回弹到 1）增强立体感；转过半程切换显示 [back]，且背面
+/// 自身预旋转 π 消除镜像，使翻至正对视角时内容朝向正确。
 ///
 /// [onFlip] 在当前应显示的面发生变化时回调，true 表示正在展示背面
 /// （含中途反向回翻的 crossing），供宿主同步页面级提示文案。
@@ -96,13 +97,17 @@ class _FlipCardState extends State<FlipCard>
         animation: _controller,
         builder: (context, _) {
           final angle = _curve.value * pi;
+          // 翻转中轻微收缩（半程最小 0.96），落定回弹，增强立体感
+          final scale = 1 - 0.04 * sin(angle);
           final showBack = _curve.value >= 0.5;
           final face = showBack ? widget.back : widget.front;
           return Transform(
             alignment: Alignment.center,
             transform: Matrix4.identity()
               ..setEntry(3, 2, 0.002)
-              ..rotateY(angle),
+              ..rotateY(angle)
+              // 卡面是平面（z=0），只缩放 x/y，不干扰透视投影
+              ..scaleByDouble(scale, scale, 1, 1),
             child: showBack
                 // 背面预旋转 π：与外层合成后恰好回正，消除镜像
                 ? Transform(

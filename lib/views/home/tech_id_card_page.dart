@@ -12,8 +12,11 @@ import '../../services/ticket_service.dart';
 import '../common/count_up_text.dart';
 import '../common/empty_state.dart';
 import '../common/flip_card.dart';
+import '../common/floating_mascot.dart';
 import '../common/page_insets.dart';
+import '../common/pop_in.dart';
 import '../common/responsive_center.dart';
+import '../common/staggered_in.dart';
 
 /// 技术员维修履历统计（证件背面展示），由工单数据实时计算。
 /// [firstDate] 取最早完成工单的日期部分（'YYYY-MM-DD'）。
@@ -35,7 +38,12 @@ String techIdQrPayload(UserModel user) =>
     '校区 ${user.campus}';
 
 /// 技术员证页：竖屏双面电子证件，深色拉丝金属 + 金色机甲风，
-/// 全部装饰由 CustomPaint 绘制（不用位图底图），点击整卡 3D 翻转。
+/// 全部装饰由 CustomPaint 绘制（不用位图底图），点击整卡 3D 翻转；
+/// 按住卡片向点击处下沉微缩、拖动带出轻微 3D 倾斜，松手回弹，
+/// 按住拖动期间由卡片接管手势、页面不滚动。
+/// 华丽化：烫金渐变字、大齿轮缓转、电路呼吸、飞扬娘待机浮动、
+/// 入场弹跳与内容交错浮现、整页深空氛围底 + 卡片金色外发光、
+/// 底部持证档案登记区；循环动效在系统"减弱动态"下全部静止。
 /// 维修履历实时统计自工单接口（不走年度总结的预计算接口），失败静默降级为寄语。
 class TechIdCardPage extends StatefulWidget {
   const TechIdCardPage({super.key});
@@ -60,9 +68,8 @@ class _TechIdCardPageState extends State<TechIdCardPage> {
     if (user == null) return;
     try {
       final tickets = await TicketService().getTickets(tid: user.uid);
-      final done =
-          tickets.where((t) => t.repairStatus == 'Done').toList()
-            ..sort((a, b) => a.createTime.compareTo(b.createTime));
+      final done = tickets.where((t) => t.repairStatus == 'Done').toList()
+        ..sort((a, b) => a.createTime.compareTo(b.createTime));
       if (!mounted || done.isEmpty) return;
       setState(
         () => _stats = TechRepairStats(
@@ -79,8 +86,18 @@ class _TechIdCardPageState extends State<TechIdCardPage> {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     final user = auth.user;
+    final dark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      appBar: AppBar(title: const Text('技术员证')),
+      // 深色氛围页把脚手架底色对齐到渐变顶端，透明 AppBar 处不出现色差断层
+      backgroundColor: user != null && user.isTechnician && dark
+          ? const Color(0xFF1A1D24)
+          : null,
+      appBar: AppBar(
+        title: const Text('技术员证'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+      ),
       body: user == null || !user.isTechnician
           ? const Center(
               child: EmptyState(
@@ -90,30 +107,296 @@ class _TechIdCardPageState extends State<TechIdCardPage> {
                 minHeight: 220,
               ),
             )
-          : SingleChildScrollView(
-              padding: pageListPadding(context, extraBottom: AppSpacing.xl),
-              child: ResponsiveCenter(
-                child: Column(
-                  children: [
-                    AspectRatio(
-                      aspectRatio: 0.615,
-                      child: FlipCard(
-                        front: TechIdCardFront(user: user),
-                        back: TechIdCardBack(user: user, stats: _stats),
-                        onFlip: (back) => setState(() => _showBack = back),
-                      ),
+          : Stack(
+              children: [
+                const Positioned.fill(child: _AmbientBackdrop()),
+                SingleChildScrollView(
+                  padding: pageListPadding(context, extraBottom: AppSpacing.xl),
+                  child: ResponsiveCenter(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        PopIn(
+                          fromScale: 0.86,
+                          child: _TouchTilt(
+                            child: _CardGlow(
+                              child: AspectRatio(
+                                aspectRatio: 0.615,
+                                child: FlipCard(
+                                  front: TechIdCardFront(user: user),
+                                  back: TechIdCardBack(
+                                    user: user,
+                                    stats: _stats,
+                                  ),
+                                  onFlip: (back) =>
+                                      setState(() => _showBack = back),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.lg),
+                        StaggeredIn(
+                          index: 2,
+                          child: Center(
+                            child: Text(
+                              _showBack ? '轻触卡片翻回正面' : '轻触卡片查看背面',
+                              style: AppText.captionSm.copyWith(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.xl),
+                        // 卡下方留白填充：登记簿式持证档案区
+                        StaggeredIn(
+                          index: 3,
+                          child: TechIdCardDocket(user: user, stats: _stats),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: AppSpacing.lg),
-                    Text(
-                      _showBack ? '轻触卡片翻回正面' : '轻触卡片查看背面',
-                      style: AppText.captionSm.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
+                  ),
+                ),
+              ],
+            ),
+    );
+  }
+}
+
+/// 页面氛围底：深色模式深空金属渐变，浅色模式维持原底色并轻微加深下缘；
+/// 卡片区域后方垫一圈淡金径向光晕聚焦视线（纯装饰，不挡交互）。
+class _AmbientBackdrop extends StatelessWidget {
+  const _AmbientBackdrop();
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    return IgnorePointer(
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: dark
+                    ? const [Color(0xFF1A1D24), Color(0xFF101216)]
+                    : const [Color(0xFFF7F8FA), Color(0xFFEEF0F4)],
+              ),
+            ),
+          ),
+          Align(
+            alignment: Alignment.topCenter,
+            child: Container(
+              height: 460,
+              margin: const EdgeInsets.only(top: 32),
+              decoration: BoxDecoration(
+                gradient: RadialGradient(
+                  radius: 0.9,
+                  colors: [
+                    AppTheme.rankGold.withValues(alpha: dark ? 0.10 : 0.16),
+                    AppTheme.rankGold.withValues(alpha: 0),
                   ],
                 ),
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// 卡片外发光：深色大投影 + 金色微光晕，让证件从页面背景中浮起
+class _CardGlow extends StatelessWidget {
+  final Widget child;
+
+  const _CardGlow({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(AppRadius.modal),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: dark ? 0.50 : 0.26),
+            blurRadius: 28,
+            offset: const Offset(0, 14),
+          ),
+          BoxShadow(
+            color: AppTheme.rankGold.withValues(alpha: dark ? 0.22 : 0.30),
+            blurRadius: 42,
+            offset: const Offset(0, 10),
+            spreadRadius: -8,
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
+}
+
+/// 卡片触摸把玩：按下向点击处下沉并微缩（实体按压感，触点一侧向卡
+/// 心收缩后退），按住拖动时卡片朝手指方向轻微 3D 倾斜并位移跟随
+/// （像推动桌面上一张实体卡），松手以 easeOutBack 弹性回弹归位。
+/// 刻意不用 onPan*（其手势容差为 kPanSlop=36px）：滚动容器的垂直拖拽
+/// 容差只有 kTouchSlop=18px，真机连续小步拖动时滚动会先赢竞技场。
+/// 这里改用垂直+水平双轴拖拽识别器（18px 容差与滚动容器同线），命中
+/// 测试顺序又先于滚动容器，按住卡片拖动（含上下滑动）必由卡片接管、
+/// 页面不滚动；轻点无位移时竞技场判给内层 FlipCard 的 tap，翻转照常，
+/// 此时拖拽侧收到 cancel 触发回弹，恰好形成一次按压反馈。
+/// 系统"减弱动态"时禁用整套把玩交互。
+class _TouchTilt extends StatefulWidget {
+  final Widget child;
+
+  const _TouchTilt({required this.child});
+
+  @override
+  State<_TouchTilt> createState() => _TouchTiltState();
+}
+
+class _TouchTiltState extends State<_TouchTilt> with TickerProviderStateMixin {
+  // 倾斜上限：rotateX/Y 最大 8°，位移跟随最大 8px，按压缩放 1.5%
+  static final double _maxTilt = 8 * pi / 180;
+  static const double _maxShift = 8;
+  static const double _pressScale = 0.015;
+
+  Offset _tilt = Offset.zero; // -1..1，指向按压点/拖动方向
+  bool _active = false; // 触点在卡上（按压反馈中）
+
+  late final AnimationController _press = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 150),
+  );
+
+  late final AnimationController _settle = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 380),
+  );
+
+  late final CurvedAnimation _settleCurve = CurvedAnimation(
+    parent: _settle,
+    curve: Curves.easeOutBack,
+  );
+
+  // 松手回弹的起点（松开那一刻的倾斜量），end 恒为归零
+  Tween<Offset> _settleTween = Tween<Offset>(
+    begin: Offset.zero,
+    end: Offset.zero,
+  );
+
+  bool _disabled = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _disabled = MediaQuery.disableAnimationsOf(context);
+  }
+
+  @override
+  void dispose() {
+    _press.dispose();
+    _settle.dispose();
+    _settleCurve.dispose();
+    super.dispose();
+  }
+
+  /// 指针相对卡心的位置映射到 -1..1（沿指向继续外推不放大）
+  Offset _tiltOf(Offset local) {
+    final box = context.findRenderObject()! as RenderBox;
+    final center = box.size.center(Offset.zero);
+    return Offset(
+      ((local.dx - center.dx) / (box.size.width / 2)).clamp(-1.0, 1.0),
+      ((local.dy - center.dy) / (box.size.height / 2)).clamp(-1.0, 1.0),
+    );
+  }
+
+  /// 触碰即下沉并朝触点倾斜（dragDown 在竞技场裁决前就会回调）
+  void _onDragDown(DragDownDetails d) {
+    if (_disabled) return;
+    _active = true;
+    _settle.stop();
+    setState(() => _tilt = _tiltOf(d.localPosition));
+    _press.forward();
+  }
+
+  void _onDragUpdate(DragUpdateDetails d) {
+    if (_disabled || !_active) return;
+    setState(() => _tilt = _tiltOf(d.localPosition));
+  }
+
+  /// 收尾统一走外层 Listener 的原始指针 up/cancel：双轴识别器里落败的
+  /// 一轴会在另一轴获胜瞬间收到 cancel（无法与"竞技场整体落败"区分），
+  /// 不能用它回弹；原始指针事件在任何裁决结果下都会到达。
+  void _onPointerUp(PointerEvent e) => _release();
+
+  void _onPointerCancel(PointerEvent e) => _release();
+
+  void _release() {
+    if (!_active) return;
+    _active = false;
+    _settleTween = Tween(begin: _tilt, end: Offset.zero);
+    _settle
+      ..reset()
+      ..forward();
+    _press.reverse();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_disabled) return widget.child;
+    return Listener(
+      onPointerUp: _onPointerUp,
+      onPointerCancel: _onPointerCancel,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        // 双轴同容差拖拽：垂直轴与滚动容器竞争（18px 同线、命中顺序靠前
+        // 必胜），水平轴让左右拖动也能驱动倾斜。只挂 down/update——
+        // end/cancel 一律交给外层 Listener 收尾（见上）。
+        onVerticalDragDown: _onDragDown,
+        onVerticalDragUpdate: _onDragUpdate,
+        onHorizontalDragDown: _onDragDown,
+        onHorizontalDragUpdate: _onDragUpdate,
+        child: AnimatedBuilder(
+          animation: Listenable.merge([_press, _settle]),
+          builder: (context, child) {
+            // 按住时跟随手指；松手后从松手值弹性衰减回零
+            final t = _active
+                ? _tilt
+                : Tween<Offset>(
+                    begin: _settleTween.begin,
+                    end: Offset.zero,
+                  ).transform(_settleCurve.value);
+            final press = _press.value;
+            final shift = _maxShift * (0.4 + 0.6 * press);
+            return Transform(
+              alignment: Alignment.center,
+              transform: Matrix4.identity()
+                ..setEntry(3, 2, 0.0015)
+                ..translateByDouble(t.dx * shift, t.dy * shift, 0, 1)
+                // 透视约定（setEntry(3,2)=正数）：z 越大投影越收缩、显得
+                // 越远。触点一侧要"被按下"（后退收缩），因此旋转方向与
+                // 触点方向相反：按左缘 → rotateY(+θ) 左缘后退；按上缘 →
+                // rotateX(-θ) 上缘后退。符号反了会变成对角下沉。
+                ..rotateY(-t.dx * _maxTilt)
+                ..rotateX(t.dy * _maxTilt)
+                ..scaleByDouble(
+                  1 - _pressScale * press,
+                  1 - _pressScale * press,
+                  1,
+                  1,
+                ),
+              child: child,
+            );
+          },
+          child: widget.child,
+        ),
+      ),
     );
   }
 }
@@ -122,6 +405,19 @@ class _TechIdCardPageState extends State<TechIdCardPage> {
 // 卡面正反面：所有内容按卡宽 W / 卡高 H 的比例布局，证件为固定比例画布，
 // 文字不随系统字号缩放（特大字号下仍保持版式不溢出）。
 // ============================================================================
+
+/// 烫金渐变：亮金→金→深金→亮金斜向过渡，模拟烫金工艺的反光层次
+const _goldFoil = LinearGradient(
+  begin: Alignment.topLeft,
+  end: Alignment.bottomRight,
+  colors: [
+    Color(0xFFF7E6B0),
+    AppTheme.rankGold,
+    Color(0xFFB0781C),
+    Color(0xFFF7E6B0),
+  ],
+  stops: [0.0, 0.42, 0.72, 1.0],
+);
 
 /// 卡面正面：徽章、俱乐部名、机甲头像框、姓名/校区信息栏与编号
 class TechIdCardFront extends StatelessWidget {
@@ -141,47 +437,37 @@ class TechIdCardFront extends StatelessWidget {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                const CustomPaint(painter: _MetalPainter(seed: 7)),
-                CustomPaint(painter: _FrontDecorPainter()),
+                // 静态层包 RepaintBoundary：与齿轮缓转/扫光的每帧重绘隔离
+                const RepaintBoundary(
+                  child: CustomPaint(painter: _MetalPainter(seed: 7)),
+                ),
+                const RepaintBoundary(
+                  child: CustomPaint(painter: _FrontStaticDecorPainter()),
+                ),
+                // 半出血大齿轮缓转
+                const _RotatingBigGears(),
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _logoBadge(w),
+                    StaggeredIn(index: 0, child: _logoBadge(w)),
                     SizedBox(height: h * 0.022),
-                    Text(
-                      '飞扬俱乐部',
-                      style: TextStyle(
-                        fontSize: w * 0.105,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.white,
-                        letterSpacing: w * 0.105 * 0.12,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black.withValues(alpha: 0.6),
-                            blurRadius: 12,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                    ),
+                    StaggeredIn(index: 1, child: _clubTitle(w)),
                     SizedBox(height: h * 0.014),
-                    _subtitle(w),
+                    StaggeredIn(index: 2, child: _subtitle(w)),
                     SizedBox(height: h * 0.050),
-                    _avatarFrame(w, h),
+                    StaggeredIn(index: 3, child: _avatarFrame(w, h)),
                     SizedBox(height: h * 0.045),
-                    _infoBar(w, h, '姓名', user.nickname),
-                    SizedBox(height: h * 0.020),
-                    _infoBar(w, h, '校区', user.campus),
-                    SizedBox(height: h * 0.048),
-                    Text(
-                      'No.${user.uid}',
-                      style: TextStyle(
-                        fontSize: w * 0.042,
-                        fontWeight: FontWeight.w700,
-                        color: AppTheme.rankGold,
-                        letterSpacing: 3,
-                      ),
+                    StaggeredIn(
+                      index: 4,
+                      child: _infoBar(w, h, '姓名', user.nickname),
                     ),
+                    SizedBox(height: h * 0.020),
+                    StaggeredIn(
+                      index: 5,
+                      child: _infoBar(w, h, '校区', user.campus),
+                    ),
+                    SizedBox(height: h * 0.048),
+                    StaggeredIn(index: 6, child: _serialNo(w)),
                   ],
                 ),
               ],
@@ -189,6 +475,34 @@ class TechIdCardFront extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  /// 俱乐部名：白→灰白金属渐变字（ShaderMask 上色；黑色投影 RGB 为 0，
+  /// 经 modulate 混合后保持深色，不会跟随渐变）
+  Widget _clubTitle(double w) {
+    return ShaderMask(
+      shaderCallback: (bounds) => const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [Colors.white, Color(0xFFD4DAE2)],
+      ).createShader(bounds),
+      child: Text(
+        '飞扬俱乐部',
+        style: TextStyle(
+          fontSize: w * 0.105,
+          fontWeight: FontWeight.w800,
+          color: Colors.white,
+          letterSpacing: w * 0.105 * 0.12,
+          shadows: [
+            Shadow(
+              color: Colors.black.withValues(alpha: 0.6),
+              blurRadius: 12,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -208,7 +522,7 @@ class TechIdCardFront extends StatelessWidget {
     );
   }
 
-  /// 「技 术 员」两侧金色短横：内端实、外端渐隐
+  /// 「技 术 员」烫金渐变字 + 两侧金色短横（内端实、外端渐隐）
   Widget _subtitle(double w) {
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -216,18 +530,48 @@ class TechIdCardFront extends StatelessWidget {
         _goldDash(w, fadeAtLeft: true),
         Padding(
           padding: EdgeInsets.symmetric(horizontal: w * 0.030),
-          child: Text(
-            '技 术 员',
-            style: TextStyle(
-              fontSize: w * 0.048,
-              fontWeight: FontWeight.w700,
-              color: AppTheme.rankGold,
-              letterSpacing: 2,
+          child: ShaderMask(
+            shaderCallback: (bounds) => _goldFoil.createShader(bounds),
+            child: Text(
+              '技 术 员',
+              style: TextStyle(
+                fontSize: w * 0.048,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+                letterSpacing: 2,
+              ),
             ),
           ),
         ),
         _goldDash(w, fadeAtLeft: false),
       ],
+    );
+  }
+
+  /// 编号：烫金渐变 + 金色微光晕（金 glow 会被渐变调制为烫金色泽）
+  Widget _serialNo(double w) {
+    return ShaderMask(
+      shaderCallback: (bounds) => _goldFoil.createShader(bounds),
+      child: Text(
+        'No.${user.uid}',
+        style: TextStyle(
+          fontSize: w * 0.042,
+          fontWeight: FontWeight.w700,
+          color: Colors.white,
+          letterSpacing: 3,
+          shadows: [
+            Shadow(
+              color: AppTheme.rankGold.withValues(alpha: 0.45),
+              blurRadius: 8,
+            ),
+            Shadow(
+              color: Colors.black.withValues(alpha: 0.5),
+              blurRadius: 2,
+              offset: const Offset(0, 1),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -243,7 +587,9 @@ class TechIdCardFront extends StatelessWidget {
           colors: [
             Colors.transparent,
             AppTheme.rankGold,
+            const Color(0xFFF7E6B0),
           ],
+          stops: const [0.0, 0.7, 1.0],
         ),
       ),
     );
@@ -265,10 +611,7 @@ class TechIdCardFront extends StatelessWidget {
             horizontal: frameW * 0.10,
             vertical: frameH * 0.075,
           ),
-          child: ClipPath(
-            clipper: _OctagonClipper(),
-            child: _avatarImage(),
-          ),
+          child: ClipPath(clipper: _OctagonClipper(), child: _avatarImage()),
         ),
       ),
     );
@@ -354,8 +697,14 @@ class TechIdCardBack extends StatelessWidget {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                const CustomPaint(painter: _MetalPainter(seed: 21)),
-                CustomPaint(painter: _BackDecorPainter()),
+                const RepaintBoundary(
+                  child: CustomPaint(painter: _MetalPainter(seed: 21)),
+                ),
+                const RepaintBoundary(
+                  child: CustomPaint(painter: _BackDecorPainter()),
+                ),
+                // 金色电路走线呼吸（白色走线在静态装饰层）
+                const _CircuitPulse(),
                 Align(
                   alignment: Alignment.topCenter,
                   child: Padding(
@@ -422,29 +771,42 @@ class TechIdCardBack extends StatelessWidget {
                       Center(
                         child: Column(
                           children: [
-                            Container(
-                              // 白边即 QR 静区（quiet zone），需 ≥4 个模块宽，
-                              // 过窄时微信/系统相机经常拒识
-                              padding: EdgeInsets.all(w * 0.042),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(
-                                  AppRadius.thumb + 2,
+                            CustomPaint(
+                              // 四角金色取景角标画在白盒外扩处，不侵入静区
+                              foregroundPainter: const _QrCornerPainter(),
+                              child: Container(
+                                // 白边即 QR 静区（quiet zone），需 ≥4 个模块宽，
+                                // 过窄时微信/系统相机经常拒识
+                                padding: EdgeInsets.all(w * 0.042),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(
+                                    AppRadius.thumb + 2,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: AppTheme.rankGold.withValues(
+                                        alpha: 0.30,
+                                      ),
+                                      blurRadius: 14,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                              child: QrImageView(
-                                // 内容用纯文本身份信息：App 的 focapp:// scheme
-                                // 仅为桌面小组件的显式 intent 注册（无 manifest
-                                // intent-filter），扫码器拉不起深链，服务端也
-                                // 没有可落地的验证网页；纯文本任何扫码器可读，
-                                // 与卡面工号/姓名/校区比对即可核验
-                                data: techIdQrPayload(user),
-                                version: QrVersions.auto,
-                                errorCorrectionLevel: QrErrorCorrectLevel.Q,
-                                size: w * 0.34,
-                                backgroundColor: Colors.white,
-                                padding: EdgeInsets.zero,
-                                gapless: true,
+                                child: QrImageView(
+                                  // 内容用纯文本身份信息：App 的 focapp:// scheme
+                                  // 仅为桌面小组件的显式 intent 注册（无 manifest
+                                  // intent-filter），扫码器拉不起深链，服务端也
+                                  // 没有可落地的验证网页；纯文本任何扫码器可读，
+                                  // 与卡面工号/姓名/校区比对即可核验
+                                  data: techIdQrPayload(user),
+                                  version: QrVersions.auto,
+                                  errorCorrectionLevel: QrErrorCorrectLevel.Q,
+                                  size: w * 0.34,
+                                  backgroundColor: Colors.white,
+                                  padding: EdgeInsets.zero,
+                                  gapless: true,
+                                ),
                               ),
                             ),
                             SizedBox(height: h * 0.014),
@@ -527,10 +889,11 @@ class TechIdCardBack extends StatelessWidget {
                 Positioned(
                   right: w * 0.05,
                   bottom: h * 0.035,
-                  child: Image.asset(
-                    'assets/illustrations/fy_q.png',
+                  // 飞扬娘待机浮动（含 PopIn 入场；减弱动态时静止）
+                  child: FloatingMascot(
+                    asset: 'assets/illustrations/fy_q.png',
+                    fallbackIcon: Icons.smart_toy_rounded,
                     height: h * 0.10,
-                    fit: BoxFit.contain,
                   ),
                 ),
               ],
@@ -558,6 +921,200 @@ class TechIdCardBack extends StatelessWidget {
       ],
     );
   }
+}
+
+/// 页面底部「持证档案」：登记簿式金属面板复述持证人信息，填充卡下方
+/// 的版面留白；条目复用卡面 [_InfoBarPainter] 斜切面板，视觉同语言。
+class TechIdCardDocket extends StatelessWidget {
+  final UserModel user;
+  final TechRepairStats? stats;
+
+  const TechIdCardDocket({super.key, required this.user, this.stats});
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      // 四角铆钉画在面板外缘（CustomPaint 无裁剪，可越界绘制）
+      foregroundPainter: const _DocketRivetsPainter(),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFF26292F), Color(0xFF1B1D22)],
+          ),
+          borderRadius: BorderRadius.circular(AppRadius.card),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.25),
+              blurRadius: 18,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 3.5,
+                  height: 16,
+                  decoration: BoxDecoration(
+                    color: AppTheme.rankGold,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '持证档案',
+                  style: AppText.titleSm.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  'TECHNICIAN FILE',
+                  style: AppText.micro.copyWith(
+                    color: AppTheme.rankGold.withValues(alpha: 0.85),
+                    letterSpacing: 2,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            _docketRow('姓名', user.nickname),
+            const SizedBox(height: 8),
+            _docketRow('工号', user.uid),
+            const SizedBox(height: 8),
+            _docketRow('校区', user.campus),
+            if (stats != null) ...[
+              const SizedBox(height: 8),
+              _docketRow('累计维修', '${stats!.doneCount} 台'),
+            ],
+            const SizedBox(height: 12),
+            // 黄金斜纹带：工业警示条纹的贵金属化变体
+            SizedBox(
+              height: 10,
+              child: CustomPaint(painter: _HazardStripePainter()),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'FEIYANG CLUB · CERTIFIED TECHNICIAN',
+              textAlign: TextAlign.center,
+              style: AppText.micro.copyWith(
+                color: Colors.white.withValues(alpha: 0.45),
+                letterSpacing: 1.5,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 登记条目：斜切金属面板 + 左标签右值
+  Widget _docketRow(String label, String value) {
+    return SizedBox(
+      height: 40,
+      width: double.infinity,
+      child: CustomPaint(
+        painter: const _InfoBarPainter(),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 18),
+          child: Row(
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.white.withValues(alpha: 0.65),
+                ),
+              ),
+              // Expanded 紧贴分配空间，值右对齐贴面板右缘
+              Expanded(
+                child: Text(
+                  value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.right,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 档案面板四角铆钉（复用卡面螺丝画法，尺寸略小）
+class _DocketRivetsPainter extends CustomPainter {
+  const _DocketRivetsPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const inset = 9.0;
+    const r = 3.5;
+    _drawScrew(canvas, Offset(inset, inset), r);
+    _drawScrew(canvas, Offset(size.width - inset, inset), r);
+    _drawScrew(canvas, Offset(inset, size.height - inset), r);
+    _drawScrew(canvas, Offset(size.width - inset, size.height - inset), r);
+  }
+
+  @override
+  bool shouldRepaint(_DocketRivetsPainter oldDelegate) => false;
+}
+
+/// 黄金斜纹带：45° 金色条纹压在深色底上，两端暗化收边
+class _HazardStripePainter extends CustomPainter {
+  const _HazardStripePainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+    canvas.clipRect(rect);
+    canvas.drawRect(rect, Paint()..color = const Color(0xFF17191D));
+    final gold = Paint()..color = AppTheme.rankGold.withValues(alpha: 0.80);
+    // 45° 条纹：周期为 2 倍带高，亮暗各占一半
+    final step = size.height * 2;
+    final path = Path();
+    for (var x = -size.height; x < size.width + size.height; x += step) {
+      path.moveTo(x, size.height);
+      path.lineTo(x + size.height, 0);
+      path.lineTo(x + size.height * 1.5, 0);
+      path.lineTo(x + size.height * 0.5, size.height);
+      path.close();
+    }
+    canvas.drawPath(path, gold);
+    // 上下渐隐收边，避免生硬切断
+    canvas.drawRect(
+      rect,
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            const Color(0xFF1B1D22).withValues(alpha: 0.8),
+            Colors.transparent,
+            Colors.transparent,
+            const Color(0xFF1B1D22).withValues(alpha: 0.8),
+          ],
+          stops: const [0, 0.25, 0.75, 1],
+        ).createShader(rect),
+    );
+  }
+
+  @override
+  bool shouldRepaint(_HazardStripePainter oldDelegate) => false;
 }
 
 // ============================================================================
@@ -603,10 +1160,7 @@ class _MetalPainter extends CustomPainter {
       Paint()
         ..shader = RadialGradient(
           radius: size.longestSide * 0.75,
-          colors: [
-            Colors.transparent,
-            Colors.black.withValues(alpha: 0.42),
-          ],
+          colors: [Colors.transparent, Colors.black.withValues(alpha: 0.42)],
           stops: const [0.55, 1.0],
         ).createShader(rect),
     );
@@ -616,33 +1170,15 @@ class _MetalPainter extends CustomPainter {
   bool shouldRepaint(_MetalPainter oldDelegate) => oldDelegate.seed != seed;
 }
 
-/// 正面装饰：左右半出血大齿轮、三处小齿轮、金色像素簇、小六边形、四角螺丝
-class _FrontDecorPainter extends CustomPainter {
-  const _FrontDecorPainter();
+/// 正面静态装饰：三处小齿轮、金色像素簇、小六边形、四角螺丝。
+/// （半出血大齿轮拆至 [_BigGearsPainter] 缓转，避免静态层跟着重绘）
+class _FrontStaticDecorPainter extends CustomPainter {
+  const _FrontStaticDecorPainter();
 
   @override
   void paint(Canvas canvas, Size size) {
     final w = size.width;
     final h = size.height;
-    // 半出血大齿轮：左灰白（挖空中孔）、右深灰
-    _drawGear(
-      canvas,
-      Offset(w * -0.01, h * 0.30),
-      w * 0.17,
-      12,
-      const Color(0xFFC9CDD3).withValues(alpha: 0.14),
-      holeR: w * 0.045,
-      punchHole: true,
-    );
-    _drawGear(
-      canvas,
-      Offset(w * 1.01, h * 0.66),
-      w * 0.17,
-      12,
-      const Color(0xFF6A7078).withValues(alpha: 0.35),
-      holeR: w * 0.045,
-      punchHole: true,
-    );
     // 小齿轮
     _drawGear(
       canvas,
@@ -669,12 +1205,23 @@ class _FrontDecorPainter extends CustomPainter {
       holeR: w * 0.011,
     );
     // 金色像素方块簇
-    _drawPixels(canvas, Offset(w * 0.060, h * 0.155), w * 0.017,
-        const [(0, 0), (1, 0), (1, 1), (2, 1)], 0.75);
-    _drawPixels(canvas, Offset(w * 0.885, h * 0.435), w * 0.015,
-        const [(0, 0), (0, 1), (1, 1)], 0.60);
-    _drawPixels(canvas, Offset(w * 0.075, h * 0.700), w * 0.016,
-        const [(0, 0), (1, 0), (2, 0), (0, 1)], 0.65);
+    _drawPixels(canvas, Offset(w * 0.060, h * 0.155), w * 0.017, const [
+      (0, 0),
+      (1, 0),
+      (1, 1),
+      (2, 1),
+    ], 0.75);
+    _drawPixels(canvas, Offset(w * 0.885, h * 0.435), w * 0.015, const [
+      (0, 0),
+      (0, 1),
+      (1, 1),
+    ], 0.60);
+    _drawPixels(canvas, Offset(w * 0.075, h * 0.700), w * 0.016, const [
+      (0, 0),
+      (1, 0),
+      (2, 0),
+      (0, 1),
+    ], 0.65);
     // 金描边小六边形
     _drawHexagon(canvas, Offset(w * 0.875, h * 0.145), w * 0.028, 0.65);
     _drawHexagon(canvas, Offset(w * 0.085, h * 0.555), w * 0.022, 0.55);
@@ -687,10 +1234,93 @@ class _FrontDecorPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_FrontDecorPainter oldDelegate) => false;
+  bool shouldRepaint(_FrontStaticDecorPainter oldDelegate) => false;
 }
 
-/// 背面装饰：左右对称电路走线（Manhattan 折线 + 节点圆点）+ 像素/六边形/螺丝
+/// 正面半出血大齿轮缓转：单控制器 24s/圈，左轮正转、右轮按 36s 反转；
+/// 系统开启"减弱动态"时不启动循环，静止在初始相位。
+class _RotatingBigGears extends StatefulWidget {
+  const _RotatingBigGears();
+
+  @override
+  State<_RotatingBigGears> createState() => _RotatingBigGearsState();
+}
+
+class _RotatingBigGearsState extends State<_RotatingBigGears>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 24000),
+  );
+
+  bool _checkedReduceMotion = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_checkedReduceMotion) return;
+    _checkedReduceMotion = true;
+    // dependOnInheritedWidget 只能在 build/didChangeDependencies 中调用
+    if (!MediaQuery.disableAnimationsOf(context)) _controller.repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, _) =>
+            CustomPaint(painter: _BigGearsPainter(_controller.value)),
+      ),
+    );
+  }
+}
+
+/// 缓转的两枚半出血大齿轮（左灰白挖孔、右深灰），progress 为 24s 相位
+class _BigGearsPainter extends CustomPainter {
+  final double progress;
+
+  const _BigGearsPainter(this.progress);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final h = size.height;
+    _drawGear(
+      canvas,
+      Offset(w * -0.01, h * 0.30),
+      w * 0.17,
+      12,
+      const Color(0xFFC9CDD3).withValues(alpha: 0.14),
+      holeR: w * 0.045,
+      punchHole: true,
+      rotation: progress * 2 * pi,
+    );
+    _drawGear(
+      canvas,
+      Offset(w * 1.01, h * 0.66),
+      w * 0.17,
+      12,
+      const Color(0xFF6A7078).withValues(alpha: 0.35),
+      holeR: w * 0.045,
+      punchHole: true,
+      rotation: -progress * 2 * pi * (24 / 36),
+    );
+  }
+
+  @override
+  bool shouldRepaint(_BigGearsPainter oldDelegate) =>
+      oldDelegate.progress != progress;
+}
+
+/// 背面静态装饰：左右对称白色电路走线（Manhattan 折线 + 节点圆点）+
+/// 像素/六边形/螺丝。（金色走线拆至 [_GoldTracesPainter] 做呼吸明暗）
 class _BackDecorPainter extends CustomPainter {
   const _BackDecorPainter();
 
@@ -698,46 +1328,75 @@ class _BackDecorPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final w = size.width;
     final white = Colors.white;
-    final gold = AppTheme.rankGold;
-    // 左右对称的电路走线，分数坐标（x, y）
+    // 左右对称的白色电路走线，分数坐标（x, y）
     const leftTraces = <(List<double>, double)>[
-      ([
-        0.012, 0.09, 0.044, 0.09, 0.044, 0.15, 0.024, 0.15,
-      ], 0.20),
-      ([0.012, 0.22, 0.036, 0.22, 0.036, 0.34], -1), // -1 表示金色
+      ([0.012, 0.09, 0.044, 0.09, 0.044, 0.15, 0.024, 0.15], 0.20),
       ([0.044, 0.47, 0.044, 0.60, 0.012, 0.60], 0.16),
-      ([0.024, 0.70, 0.024, 0.82, 0.052, 0.82], -1),
       ([0.012, 0.90, 0.044, 0.90, 0.044, 0.80], 0.14),
     ];
     for (final (xy, alpha) in leftTraces) {
-      final color = alpha < 0
-          ? gold.withValues(alpha: 0.55)
-          : white.withValues(alpha: alpha);
-      _drawTrace(canvas, size, xy, color, mirrorX: false);
+      _drawTrace(
+        canvas,
+        size,
+        xy,
+        white.withValues(alpha: alpha),
+        mirrorX: false,
+      );
     }
     const rightTraces = <(List<double>, double)>[
       ([0.988, 0.09, 0.956, 0.09, 0.956, 0.15, 0.976, 0.15], 0.20),
-      ([0.988, 0.22, 0.964, 0.22, 0.964, 0.34], -1),
       ([0.956, 0.47, 0.956, 0.60, 0.988, 0.60], 0.16),
-      ([0.976, 0.70, 0.976, 0.82, 0.948, 0.82], -1),
       ([0.988, 0.90, 0.956, 0.90, 0.956, 0.80], 0.14),
     ];
     for (final (xy, alpha) in rightTraces) {
-      final color = alpha < 0
-          ? gold.withValues(alpha: 0.55)
-          : white.withValues(alpha: alpha);
-      _drawTrace(canvas, size, xy, color, mirrorX: true);
+      _drawTrace(
+        canvas,
+        size,
+        xy,
+        white.withValues(alpha: alpha),
+        mirrorX: true,
+      );
     }
     // 像素块与六边形点缀
-    _drawPixels(canvas, Offset(w * 0.285, 0.075 * size.height), w * 0.015,
-        const [(0, 0), (1, 0), (1, 1)], 0.60);
-    _drawPixels(canvas, Offset(w * 0.100, 0.75 * size.height), w * 0.014,
-        const [(0, 0), (1, 0), (0, 1)], 0.55);
-    _drawPixels(canvas, Offset(w * 0.585, 0.845 * size.height), w * 0.015,
-        const [(0, 0), (1, 0), (0, 1), (2, 0)], 0.60);
-    _drawHexagon(canvas, Offset(w * 0.335, 0.205 * size.height), w * 0.022, 0.55);
-    _drawHexagon(canvas, Offset(w * 0.085, 0.085 * size.height), w * 0.020, 0.50);
-    _drawHexagon(canvas, Offset(w * 0.420, 0.885 * size.height), w * 0.024, 0.60);
+    _drawPixels(
+      canvas,
+      Offset(w * 0.285, 0.075 * size.height),
+      w * 0.015,
+      const [(0, 0), (1, 0), (1, 1)],
+      0.60,
+    );
+    _drawPixels(
+      canvas,
+      Offset(w * 0.100, 0.75 * size.height),
+      w * 0.014,
+      const [(0, 0), (1, 0), (0, 1)],
+      0.55,
+    );
+    _drawPixels(
+      canvas,
+      Offset(w * 0.585, 0.845 * size.height),
+      w * 0.015,
+      const [(0, 0), (1, 0), (0, 1), (2, 0)],
+      0.60,
+    );
+    _drawHexagon(
+      canvas,
+      Offset(w * 0.335, 0.205 * size.height),
+      w * 0.022,
+      0.55,
+    );
+    _drawHexagon(
+      canvas,
+      Offset(w * 0.085, 0.085 * size.height),
+      w * 0.020,
+      0.50,
+    );
+    _drawHexagon(
+      canvas,
+      Offset(w * 0.420, 0.885 * size.height),
+      w * 0.024,
+      0.60,
+    );
     // 四角螺丝
     _drawScrew(canvas, Offset(w * 0.052, 0.032 * size.height), w * 0.021);
     _drawScrew(canvas, Offset(w * 0.948, 0.032 * size.height), w * 0.021);
@@ -749,8 +1408,90 @@ class _BackDecorPainter extends CustomPainter {
   bool shouldRepaint(_BackDecorPainter oldDelegate) => false;
 }
 
+/// 背面金色电路走线呼吸：亮度 0.55→0.90→0.55 往复（2400ms），
+/// 系统开启"减弱动态"时不启动循环，静止在静态亮度。
+class _CircuitPulse extends StatefulWidget {
+  const _CircuitPulse();
+
+  @override
+  State<_CircuitPulse> createState() => _CircuitPulseState();
+}
+
+class _CircuitPulseState extends State<_CircuitPulse>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 2400),
+  );
+
+  late final Animation<double> _pulse = CurvedAnimation(
+    parent: _controller,
+    curve: Curves.easeInOut,
+  );
+
+  bool _checkedReduceMotion = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_checkedReduceMotion) return;
+    _checkedReduceMotion = true;
+    if (!MediaQuery.disableAnimationsOf(context)) {
+      _controller.repeat(reverse: true);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _pulse,
+        builder: (context, _) =>
+            CustomPaint(painter: _GoldTracesPainter(_pulse.value)),
+      ),
+    );
+  }
+}
+
+/// 背面金色电路走线（Manhattan 折线 + 节点圆点），v 控制呼吸亮度
+class _GoldTracesPainter extends CustomPainter {
+  final double v; // 0..1
+
+  const _GoldTracesPainter(this.v);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final gold = AppTheme.rankGold.withValues(alpha: 0.55 + 0.35 * v);
+    // 与静态白色走线同源的分数坐标，仅金色两条
+    const leftTraces = <List<double>>[
+      [0.012, 0.22, 0.036, 0.22, 0.036, 0.34],
+      [0.024, 0.70, 0.024, 0.82, 0.052, 0.82],
+    ];
+    for (final xy in leftTraces) {
+      _drawTrace(canvas, size, xy, gold, mirrorX: false);
+    }
+    const rightTraces = <List<double>>[
+      [0.988, 0.22, 0.964, 0.22, 0.964, 0.34],
+      [0.976, 0.70, 0.976, 0.82, 0.948, 0.82],
+    ];
+    for (final xy in rightTraces) {
+      _drawTrace(canvas, size, xy, gold, mirrorX: true);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_GoldTracesPainter oldDelegate) => oldDelegate.v != v;
+}
+
 /// 齿轮：矩形齿 + 圆盘 + 中孔。[punchHole] 时经 saveLayer 隔离后用
 /// BlendMode.clear 挖空（大齿轮半出血压在金属底上不能打穿背景）。
+/// [rotation] 为整体旋转角（缓转齿轮用；中孔是圆不受旋转影响）。
 void _drawGear(
   Canvas canvas,
   Offset center,
@@ -759,10 +1500,12 @@ void _drawGear(
   Color color, {
   required double holeR,
   bool punchHole = false,
+  double rotation = 0,
 }) {
   final paint = Paint()..color = color;
   canvas.save();
   canvas.translate(center.dx, center.dy);
+  if (rotation != 0) canvas.rotate(rotation);
   for (var i = 0; i < teeth; i++) {
     canvas.drawRect(
       Rect.fromCenter(
@@ -777,10 +1520,7 @@ void _drawGear(
   canvas.restore();
   canvas.drawCircle(center, radius * 0.78, paint);
   if (punchHole) {
-    canvas.saveLayer(
-      Rect.fromCircle(center: center, radius: radius),
-      Paint(),
-    );
+    canvas.saveLayer(Rect.fromCircle(center: center, radius: radius), Paint());
     canvas.drawCircle(center, holeR, Paint()..blendMode = BlendMode.clear);
     canvas.restore();
   } else {
@@ -815,10 +1555,7 @@ void _drawHexagon(Canvas canvas, Offset center, double r, double alpha) {
   final path = Path();
   for (var i = 0; i < 6; i++) {
     final angle = -pi / 2 + i * pi / 3;
-    final p = Offset(
-      center.dx + r * cos(angle),
-      center.dy + r * sin(angle),
-    );
+    final p = Offset(center.dx + r * cos(angle), center.dy + r * sin(angle));
     i == 0 ? path.moveTo(p.dx, p.dy) : path.lineTo(p.dx, p.dy);
   }
   path.close();
@@ -841,7 +1578,10 @@ void _drawScrew(Canvas canvas, Offset c, double r) {
         colors: [Color(0xFFD8DBDF), Color(0xFF9AA0A7)],
       ).createShader(Rect.fromCircle(center: c, radius: r)),
   );
-  canvas.drawPath(_hexPath(c, r * 0.5), Paint()..color = const Color(0xFF17191C));
+  canvas.drawPath(
+    _hexPath(c, r * 0.5),
+    Paint()..color = const Color(0xFF17191C),
+  );
   canvas.drawArc(
     Rect.fromCircle(center: c, radius: r * 0.72),
     pi * 1.05,
@@ -889,10 +1629,7 @@ Path _hexPath(Offset center, double r) {
   final path = Path();
   for (var i = 0; i < 6; i++) {
     final angle = i * pi / 3;
-    final p = Offset(
-      center.dx + r * cos(angle),
-      center.dy + r * sin(angle),
-    );
+    final p = Offset(center.dx + r * cos(angle), center.dy + r * sin(angle));
     i == 0 ? path.moveTo(p.dx, p.dy) : path.lineTo(p.dx, p.dy);
   }
   path.close();
@@ -921,10 +1658,7 @@ class _AvatarFramePainter extends CustomPainter {
       ..shader = LinearGradient(
         begin: Alignment.centerLeft,
         end: Alignment.centerRight,
-        colors: [
-          AppTheme.rankGold.withValues(alpha: 0.55),
-          AppTheme.rankGold,
-        ],
+        colors: [AppTheme.rankGold.withValues(alpha: 0.55), AppTheme.rankGold],
       ).createShader(panel);
     canvas.drawPath(
       Path()
@@ -975,13 +1709,12 @@ class _InfoBarPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final cut = size.height * 0.55;
-    final panel =
-        Path()
-          ..moveTo(0, 0)
-          ..lineTo(size.width, 0)
-          ..lineTo(size.width - cut, size.height)
-          ..lineTo(cut, size.height)
-          ..close();
+    final panel = Path()
+      ..moveTo(0, 0)
+      ..lineTo(size.width, 0)
+      ..lineTo(size.width - cut, size.height)
+      ..lineTo(cut, size.height)
+      ..close();
     canvas.drawPath(
       panel,
       Paint()
@@ -1023,6 +1756,53 @@ class _InfoBarPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_InfoBarPainter oldDelegate) => false;
+}
+
+/// 二维码白盒四角的金色取景角标：画在白盒外扩 [gap] 处（不侵入静区），
+/// 先垫一道宽笔触淡金光晕、再描细金线，呈现扫描仪式感。
+class _QrCornerPainter extends CustomPainter {
+  const _QrCornerPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final outer = (Offset.zero & size).inflate(5);
+    final len = size.width * 0.09;
+    Path corner(Alignment a) {
+      final cx = a.x > 0 ? outer.right : outer.left;
+      final cy = a.y > 0 ? outer.bottom : outer.top;
+      final dx = a.x > 0 ? -1.0 : 1.0;
+      final dy = a.y > 0 ? -1.0 : 1.0;
+      return Path()
+        ..moveTo(cx + dx * len, cy)
+        ..lineTo(cx, cy)
+        ..lineTo(cx, cy + dy * len);
+    }
+
+    final corners = Path()
+      ..addPath(corner(const Alignment(-1, -1)), Offset.zero)
+      ..addPath(corner(const Alignment(1, -1)), Offset.zero)
+      ..addPath(corner(const Alignment(-1, 1)), Offset.zero)
+      ..addPath(corner(const Alignment(1, 1)), Offset.zero);
+    canvas.drawPath(
+      corners,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 6
+        ..strokeCap = StrokeCap.round
+        ..color = AppTheme.rankGold.withValues(alpha: 0.22),
+    );
+    canvas.drawPath(
+      corners,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.5
+        ..strokeCap = StrokeCap.round
+        ..color = AppTheme.rankGold,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_QrCornerPainter oldDelegate) => false;
 }
 
 /// 切角八边形路径（头像框与内容裁剪共用形状）

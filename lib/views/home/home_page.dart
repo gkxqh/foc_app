@@ -175,7 +175,25 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('云上飞扬'),
+        // 首页品牌位靠左，与右侧工具区分工（其余页面保持居中标题）
+        centerTitle: false,
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset(
+              // 深浅模式用不同单色 logo：浅色 AppBar 配深色图形，反之白色。
+              // 鸟形原始宽高比 1.69，按比例给 36×22 盒避免压扁
+              Theme.of(context).brightness == Brightness.dark
+                  ? 'assets/preview/fy_logo_dark.png'
+                  : 'assets/preview/fy_logo_light.png',
+              width: 36,
+              height: 22,
+              fit: BoxFit.contain,
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            const Text('云上飞扬'),
+          ],
+        ),
         actions: [
           if (auth.isTechnician) ...[
             IconButton(
@@ -191,25 +209,55 @@ class _HomePageState extends State<HomePage> {
                 }
               },
             ),
-            IconButton(
-              icon: const Icon(Icons.workspace_premium_rounded),
-              tooltip: '技术员证',
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const TechIdCardPage()),
-                );
+            // 低频入口收纳：避免顶栏右侧图标拥挤（技术员证在个人中心也有入口）
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.more_vert_rounded),
+              tooltip: '更多',
+              onSelected: (value) {
+                if (value == 'tech_id') {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const TechIdCardPage()),
+                  );
+                } else if (value == 'annual') {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const AnnualSummaryPage(),
+                    ),
+                  );
+                }
               },
-            ),
-            IconButton(
-              icon: const Icon(Icons.insights_rounded),
-              tooltip: '年度总结',
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const AnnualSummaryPage()),
-                );
-              },
+              itemBuilder: (_) => const [
+                PopupMenuItem(
+                  value: 'tech_id',
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.workspace_premium_rounded,
+                        size: 20,
+                        color: AppTheme.rankGold,
+                      ),
+                      SizedBox(width: 12),
+                      Text('技术员证'),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'annual',
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.insights_rounded,
+                        size: 20,
+                        color: AppTheme.primaryBlue,
+                      ),
+                      SizedBox(width: 12),
+                      Text('年度总结'),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ],
         ],
@@ -570,21 +618,21 @@ class _HomePageState extends State<HomePage> {
                 const Text('技术员英雄榜', style: AppText.title),
                 Row(
                   mainAxisSize: MainAxisSize.min,
-              children: ['总榜', '江安', '望江'].map((tab) {
-                final isSelected = config.selectedCampusTab == tab;
-                return Padding(
-                  padding: const EdgeInsets.only(left: 6.0),
-                  child: ChoiceChip(
-                    label: Text(tab),
-                    selected: isSelected,
-                    // M3 默认选中带勾选标记（宽 20px+），切换时新旧标记动画
-                    // 不同步会让行宽中途回落：临界宽度下标题行在 1/2 排间
-                    // 反复翻转（榜单跳动闪烁），选中态由底色高亮已足够区分
-                    showCheckmark: false,
-                    onSelected: (_) => config.setCampusTab(tab),
-                  ),
-                );
-              }).toList(),
+                  children: ['总榜', '江安', '望江'].map((tab) {
+                    final isSelected = config.selectedCampusTab == tab;
+                    return Padding(
+                      padding: const EdgeInsets.only(left: 6.0),
+                      child: ChoiceChip(
+                        label: Text(tab),
+                        selected: isSelected,
+                        // M3 默认选中带勾选标记（宽 20px+），切换时新旧标记动画
+                        // 不同步会让行宽中途回落：临界宽度下标题行在 1/2 排间
+                        // 反复翻转（榜单跳动闪烁），选中态由底色高亮已足够区分
+                        showCheckmark: false,
+                        onSelected: (_) => config.setCampusTab(tab),
+                      ),
+                    );
+                  }).toList(),
                 ),
               ],
             ),
