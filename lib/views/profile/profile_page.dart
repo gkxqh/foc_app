@@ -12,6 +12,7 @@ import 'app_settings_page.dart';
 import 'feedback_page.dart';
 import 'history_page.dart';
 import 'settings_page.dart';
+import '../home/tech_id_card_page.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -188,6 +189,27 @@ class ProfilePage extends StatelessWidget {
                       );
                     },
                   ),
+                  // 技术员专属入口：电子证件（含分隔线一起条件化）
+                  if (auth.isTechnician) ...[
+                    const Divider(height: 1),
+                    ListTile(
+                      leading: const Icon(
+                        Icons.workspace_premium_rounded,
+                        color: AppTheme.rankGold,
+                      ),
+                      title: const Text('技术员证'),
+                      subtitle: const Text('我的电子证件', style: AppText.captionSm),
+                      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const TechIdCardPage(),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
                   const Divider(height: 1),
                   ListTile(
                     leading: const Icon(

@@ -22,6 +22,7 @@ import 'annual_summary_page.dart';
 import 'announcement_page.dart';
 import 'repair_terms_page.dart';
 import 'scan_give_page.dart';
+import 'tech_id_card_page.dart';
 import 'ticket_detail_page.dart';
 import 'ticket_detail_view.dart';
 
@@ -188,6 +189,16 @@ class _HomePageState extends State<HomePage> {
                 if (changed == true && mounted) {
                   _refreshData();
                 }
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.workspace_premium_rounded),
+              tooltip: '技术员证',
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const TechIdCardPage()),
+                );
               },
             ),
             IconButton(
