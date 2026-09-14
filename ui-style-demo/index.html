@@ -1,0 +1,1516 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>明日方舟 × 终末地 · UI 风格解析示例</title>
+<meta name="description" content="《明日方舟》与《明日方舟：终末地》平面 UI 风格学习演示页：设计要点、组件样例与两块仿游戏界面。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* ---- 全局 ---- */
+    --sans: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+    --tech: "Chakra Petch", "Noto Sans SC", sans-serif;
+    --mono: "IBM Plex Mono", "Chakra Petch", monospace;
+
+    /* ---- 明日方舟 tokens ---- */
+    --ak-bg: #141418;
+    --ak-bg2: #101014;
+    --ak-panel: #1f1f25;
+    --ak-panel2: #26262d;
+    --ak-line: rgba(255, 255, 255, 0.14);
+    --ak-line2: rgba(255, 255, 255, 0.07);
+    --ak-white: #f2f2f4;
+    --ak-gray: #9a9aa2;
+    --ak-dim: #66666e;
+    --ak-blue: #43b8ff;
+    --ak-blue2: #7ccfff;
+    --ak-orange: #ff9d1f;
+    --ak-gold: #ffbf1e;
+    --ak-red: #ff4d3a;
+
+    /* ---- 终末地 tokens ---- */
+    --ef-paper: #e9e6de;
+    --ef-paper2: #f4f2ea;
+    --ef-ink: #17181a;
+    --ef-ink2: #2a2b2e;
+    --ef-gray: #a9a79d;
+    --ef-gray2: #6f6e66;
+    --ef-yellow: #ffd800;
+    --ef-orange: #ff7a1a;
+    --ef-white: #ffffff;
+
+    --cut-tr: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%);
+    --cut-br: polygon(0 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%);
+    --cut-sm-tr: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
+    --cut-para: polygon(12px 0, 100% 0, calc(100% - 12px) 100%, 0 100%);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: #0e0e11;
+    color: var(--ak-white);
+    font-family: var(--sans);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  ::selection { background: var(--ef-yellow); color: var(--ef-ink); }
+  a { color: inherit; }
+  .mono { font-family: var(--mono); }
+  .tech { font-family: var(--tech); }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 28px; }
+
+  /* ============================================================
+     顶部状态条 & 导航
+  ============================================================ */
+  .statusbar {
+    border-bottom: 1px solid var(--ak-line2);
+    background: #0b0b0e;
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 2px;
+    color: var(--ak-dim);
+    display: flex; justify-content: space-between; padding: 6px 28px;
+  }
+  .statusbar .dot {
+    display: inline-block; width: 7px; height: 7px; background: var(--ak-blue);
+    margin-right: 8px; vertical-align: 0;
+    animation: blink 2.4s steps(2) infinite;
+  }
+  @keyframes blink { 50% { opacity: .25; } }
+
+  .topnav {
+    position: sticky; top: 0; z-index: 60;
+    background: rgba(14, 14, 17, 0.86);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--ak-line2);
+  }
+  .topnav .bar { display: flex; align-items: center; gap: 22px; height: 52px; }
+  .topnav .logo {
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--tech); font-weight: 700; font-size: 14px; letter-spacing: 2px;
+  }
+  .topnav .logo svg { display: block; }
+  .topnav .links { margin-left: auto; display: flex; gap: 4px; }
+  .topnav .links a {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 1.5px;
+    color: var(--ak-gray); text-decoration: none; padding: 6px 12px;
+    clip-path: var(--cut-sm-tr);
+    transition: color .15s, background .15s;
+  }
+  .topnav .links a:hover { color: var(--ak-white); background: rgba(255, 255, 255, 0.08); }
+  .topnav .links a b { color: var(--ak-blue); font-weight: 600; margin-right: 6px; }
+  @media (max-width: 860px) { .topnav .links { display: none; } }
+
+  /* ============================================================
+     Hero
+  ============================================================ */
+  .hero {
+    position: relative; overflow: hidden;
+    padding: 84px 0 66px;
+    background:
+      radial-gradient(900px 380px at 82% -10%, rgba(67, 184, 255, 0.10), transparent 60%),
+      radial-gradient(700px 320px at 8% 110%, rgba(255, 216, 0, 0.05), transparent 60%),
+      linear-gradient(rgba(255, 255, 255, 0.030) 1px, transparent 1px) 0 0 / 36px 36px,
+      linear-gradient(90deg, rgba(255, 255, 255, 0.030) 1px, transparent 1px) 0 0 / 36px 36px,
+      #0e0e11;
+  }
+  .hero .kicker {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 3px;
+    color: var(--ak-blue); margin-bottom: 18px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .hero .kicker::after { content: ""; height: 1px; width: 72px; background: var(--ak-blue); opacity: .6; }
+  .hero h1 {
+    font-weight: 900; font-size: clamp(34px, 5.2vw, 58px);
+    line-height: 1.18; letter-spacing: 1px;
+  }
+  .hero h1 .thin { color: var(--ak-dim); font-weight: 400; }
+  .hero h1 .ak { color: var(--ak-blue2); }
+  .hero h1 .ef { color: var(--ef-yellow); }
+  .hero p.lead { margin-top: 22px; max-width: 640px; color: var(--ak-gray); font-size: 15px; }
+  .hero .tags { margin-top: 26px; display: flex; flex-wrap: wrap; gap: 10px; }
+  .hero .heronote {
+    margin-top: 34px; font-family: var(--mono); font-size: 10.5px;
+    letter-spacing: 1.5px; color: var(--ak-dim);
+  }
+  .hero .deco-bar {
+    position: absolute; right: -40px; top: 60px; width: 200px; height: 14px;
+    background: repeating-linear-gradient(-45deg, var(--ef-yellow) 0 12px, var(--ef-ink) 12px 24px);
+    opacity: .8; transform: rotate(-3deg);
+  }
+  .hero .deco-cross { position: absolute; left: 46%; top: 40px; color: rgba(255,255,255,.2); font-family: var(--mono); font-size: 18px; }
+
+  /* 斜切小标签（hero / 通用） */
+  .skewtag {
+    display: inline-block; transform: skewX(-12deg);
+    font-family: var(--tech); font-size: 11.5px; letter-spacing: 1.5px;
+    padding: 4px 14px; border: 1px solid var(--ak-line);
+    background: rgba(255, 255, 255, 0.04); color: var(--ak-gray);
+  }
+  .skewtag > span { display: inline-block; transform: skewX(12deg); }
+  .skewtag.blue { border-color: rgba(67, 184, 255, 0.5); background: rgba(67, 184, 255, 0.10); color: var(--ak-blue2); }
+  .skewtag.yellow { border-color: rgba(255, 216, 0, 0.5); background: rgba(255, 216, 0, 0.08); color: var(--ef-yellow); }
+  .skewtag.orange { border-color: rgba(255, 157, 31, 0.5); background: rgba(255, 157, 31, 0.10); color: var(--ak-orange); }
+
+  /* ============================================================
+     区块通用
+  ============================================================ */
+  section.sec { padding: 72px 0 84px; position: relative; }
+  .sec-head { margin-bottom: 40px; }
+  .sec-head .no {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 3px;
+    display: flex; align-items: center; gap: 12px; margin-bottom: 14px;
+  }
+  .sec-head .no::after { content: ""; height: 1px; flex: 0 0 64px; }
+  .sec-head h2 { font-weight: 900; font-size: clamp(26px, 3.4vw, 38px); letter-spacing: 1px; line-height: 1.25; }
+  .sec-head p.sub { margin-top: 12px; max-width: 720px; font-size: 14.5px; }
+
+  /* ---- 明日方舟 深色区块 ---- */
+  .sec-ak {
+    background:
+      radial-gradient(1000px 420px at 90% 0%, rgba(67, 184, 255, 0.06), transparent 55%),
+      linear-gradient(rgba(255, 255, 255, 0.028) 1px, transparent 1px) 0 0 / 36px 36px,
+      linear-gradient(90deg, rgba(255, 255, 255, 0.028) 1px, transparent 1px) 0 0 / 36px 36px,
+      var(--ak-bg);
+    color: var(--ak-white);
+  }
+  .sec-ak .no { color: var(--ak-blue); } .sec-ak .no::after { background: var(--ak-blue); }
+  .sec-ak .sub { color: var(--ak-gray); }
+
+  /* ---- 终末地 纸感浅色区块 ---- */
+  .sec-ef {
+    background:
+      linear-gradient(rgba(23, 24, 26, 0.045) 1px, transparent 1px) 0 0 / 28px 28px,
+      linear-gradient(90deg, rgba(23, 24, 26, 0.045) 1px, transparent 1px) 0 0 / 28px 28px,
+      var(--ef-paper);
+    color: var(--ef-ink);
+  }
+  .sec-ef .no { color: var(--ef-ink); } .sec-ef .no::after { background: var(--ef-yellow); box-shadow: 0 0 0 1px var(--ef-ink); }
+  .sec-ef .sub { color: #4a4b46; }
+
+  /* ---- 对比区（深色中性） ---- */
+  .sec-vs {
+    background:
+      linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px) 0 0 / 36px 36px,
+      linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px) 0 0 / 36px 36px,
+      #0e0e11;
+  }
+  .sec-vs .no { color: var(--ef-yellow); } .sec-vs .no::after { background: var(--ef-yellow); }
+  .sec-vs .sub { color: var(--ak-gray); }
+
+  /* ============================================================
+     组件样例网格
+  ============================================================ */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+  @media (max-width: 900px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+
+  .tile {
+    border: 1px solid var(--ak-line);
+    background: var(--ak-panel);
+    clip-path: var(--cut-tr);
+    padding: 22px 22px 24px;
+  }
+  .tile .tile-label {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 2.5px;
+    color: var(--ak-dim); margin-bottom: 16px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .tile .tile-label i { font-style: normal; color: var(--ak-blue); }
+  .tile .demo { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+
+  /* 终末地 tile（纸感） */
+  .sec-ef .tile {
+    background: var(--ef-paper2);
+    border: 1.5px solid var(--ef-ink);
+    clip-path: var(--cut-br);
+    box-shadow: 4px 4px 0 rgba(23, 24, 26, 0.16);
+  }
+  .sec-ef .tile .tile-label { color: var(--ef-gray2); }
+  .sec-ef .tile .tile-label i { color: var(--ef-ink); background: var(--ef-yellow); padding: 0 6px; }
+
+  /* ============================================================
+     明日方舟组件
+  ============================================================ */
+  /* 色卡 */
+  .swatches { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+  @media (max-width: 720px) { .swatches { grid-template-columns: repeat(3, 1fr); } }
+  .sw { border: 1px solid var(--ak-line2); }
+  .sw .c { height: 52px; }
+  .sw .t { padding: 7px 9px; font-family: var(--mono); font-size: 10px; letter-spacing: .5px; color: var(--ak-gray); background: #191920; }
+  .sw .t b { display: block; color: var(--ak-white); font-weight: 600; font-size: 10.5px; }
+
+  .sec-ef .sw { border-color: var(--ef-ink); }
+  .sec-ef .sw .t { background: var(--ef-white); color: var(--ef-gray2); border-top: 1.5px solid var(--ef-ink); }
+  .sec-ef .sw .t b { color: var(--ef-ink); }
+
+  /* 字体样张 */
+  .type-ak .big { font-weight: 900; font-size: 40px; line-height: 1.2; letter-spacing: 2px; }
+  .type-ak .en { font-family: var(--tech); font-weight: 600; font-size: 15px; letter-spacing: 6px; color: var(--ak-blue2); margin-top: 4px; }
+  .type-ak .note { margin-top: 14px; font-size: 12.5px; color: var(--ak-gray); }
+  .type-ak .note em { color: var(--ak-white); font-style: normal; border-bottom: 1px solid var(--ak-blue); }
+
+  /* 按钮 */
+  .btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: var(--tech); font-weight: 700; font-size: 13.5px; letter-spacing: 2px;
+    padding: 12px 26px; cursor: pointer; user-select: none;
+    clip-path: var(--cut-sm-tr);
+    transition: transform .16s ease, filter .16s ease, background .16s;
+    border: 0;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn .arr { transition: transform .16s; font-family: var(--mono); }
+  .btn:hover .arr { transform: translateX(4px); }
+  .btn-ak-primary { background: var(--ak-blue); color: #06121c; }
+  .btn-ak-primary:hover { transform: translate(-2px, -2px); filter: brightness(1.12); }
+  .btn-ak-ghost { background: rgba(255, 255, 255, 0.05); color: var(--ak-white); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4); }
+  .btn-ak-ghost:hover { transform: translate(-2px, -2px); box-shadow: inset 0 0 0 1px var(--ak-white); }
+  .btn-ak-warn { background: var(--ak-orange); color: #1c0e00; }
+  .btn-ak-warn:hover { transform: translate(-2px, -2px); filter: brightness(1.1); }
+  .btn-ak-dis { background: #2b2b32; color: #62626a; cursor: not-allowed; }
+
+  /* 标签 */
+  .tags-demo { display: flex; flex-wrap: wrap; gap: 10px; }
+
+  /* 进度条 */
+  .pbar-stack { width: 100%; display: grid; gap: 14px; }
+  .pbar-row { display: grid; gap: 6px; }
+  .pbar-row .lab { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 10.5px; letter-spacing: 1.5px; color: var(--ak-gray); }
+  .pbar {
+    height: 10px; background: rgba(255, 255, 255, 0.08);
+    clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 100%, 0 100%);
+    position: relative; overflow: hidden;
+  }
+  .pbar > i {
+    display: block; height: 100%;
+    background: repeating-linear-gradient(-55deg, transparent 0 6px, rgba(255, 255, 255, 0.14) 6px 8px),
+      linear-gradient(90deg, var(--ak-blue), var(--ak-blue2));
+  }
+  .pbar.orange > i { background: repeating-linear-gradient(-55deg, transparent 0 6px, rgba(0, 0, 0, 0.14) 6px 8px), linear-gradient(90deg, #ff8a00, var(--ak-orange)); }
+  .pbar::after {
+    content: ""; position: absolute; inset: 0;
+    background: repeating-linear-gradient(90deg, transparent 0 24px, rgba(0, 0, 0, 0.45) 24px 25px);
+  }
+
+  /* 干员卡片 */
+  .op-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; width: 100%; }
+  @media (max-width: 560px) { .op-cards { grid-template-columns: 1fr; } }
+  .op {
+    border: 1px solid var(--op-color, rgba(255, 191, 30, 0.55));
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 40%), var(--ak-panel2);
+    clip-path: var(--cut-br); padding: 14px 16px 16px; position: relative;
+    transition: transform .16s, box-shadow .16s;
+  }
+  .op:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45); }
+  .op .strip { position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--op-color, var(--ak-gold)); }
+  .op .head { display: flex; gap: 14px; align-items: center; }
+  .op .ava {
+    width: 62px; height: 62px; flex: 0 0 62px;
+    background: radial-gradient(circle at 50% 34%, #3a3a44 0 26%, #232329 62%);
+    border: 1px solid var(--op-color, var(--ak-gold));
+    display: flex; align-items: center; justify-content: center;
+    clip-path: var(--cut-sm-tr);
+  }
+  .op .ava svg { width: 40px; height: 40px; opacity: .9; }
+  .op .who .nm { font-weight: 900; font-size: 19px; letter-spacing: 1px; line-height: 1.3; }
+  .op .who .cls { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--ak-gray); }
+  .op .stars { margin-top: 2px; font-size: 11px; letter-spacing: 2px; color: var(--op-color, var(--ak-gold)); }
+  .op .meta { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .op .chip {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1px;
+    border: 1px solid var(--ak-line); color: var(--ak-gray); padding: 2px 8px;
+  }
+  .op .chip.elite { border-color: var(--op-color, var(--ak-gold)); color: var(--op-color, var(--ak-gold)); }
+  .op .trust { margin-top: 12px; }
+  .op .trust .lab { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 9.5px; letter-spacing: 1.5px; color: var(--ak-dim); margin-bottom: 4px; }
+  .op .trust .bar { height: 5px; background: rgba(255, 255, 255, 0.08); }
+  .op .trust .bar i { display: block; height: 100%; background: var(--op-color, var(--ak-gold)); }
+  .op .sk { display: flex; gap: 6px; margin-top: 12px; align-items: center; }
+  .op .sk .ic {
+    width: 24px; height: 24px; border: 1px solid var(--ak-line); background: #1a1a20;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 11px; color: var(--ak-blue2);
+  }
+  .op .sk .rk { font-family: var(--mono); font-size: 9px; color: var(--ak-dim); letter-spacing: 1px; }
+
+  /* 装饰样例：条码 / 序列号 / 警戒纹 / 十字 */
+  .deco-demo { display: grid; gap: 14px; width: 100%; }
+  .deco-demo .row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .serial { font-family: var(--mono); font-size: 10.5px; letter-spacing: 2px; color: var(--ak-dim); }
+  .hazard-ak {
+    height: 12px; flex: 1 1 120px; min-width: 90px;
+    background: repeating-linear-gradient(-45deg, var(--ak-orange) 0 9px, #17171b 9px 18px);
+    clip-path: var(--cut-para);
+  }
+  .cross { position: relative; width: 18px; height: 18px; opacity: .7; }
+  .cross::before, .cross::after { content: ""; position: absolute; background: var(--ak-blue); }
+  .cross::before { left: 50%; top: 0; bottom: 0; width: 1px; }
+  .cross::after { top: 50%; left: 0; right: 0; height: 1px; }
+  .barcode text { font-family: var(--mono); }
+
+  /* ---- 背景大字水印（方舟式美化） ---- */
+  .bg-stage {
+    position: relative; width: 100%; height: 260px; overflow: hidden;
+    background: linear-gradient(180deg, #191920, #121217);
+    border: 1px solid var(--ak-line2);
+  }
+  .bg-stage::before {
+    content: ""; position: absolute; inset: 0;
+    background:
+      linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px) 0 0 / 30px 30px,
+      linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px) 0 0 / 30px 30px;
+  }
+  .bword { position: absolute; pointer-events: none; user-select: none; white-space: nowrap; }
+  .bw-outline {
+    left: 34px; top: 2px; font-family: var(--tech); font-weight: 700;
+    font-size: 124px; line-height: 1; letter-spacing: 8px;
+    color: rgba(67, 184, 255, 0.05);
+    -webkit-text-stroke: 1px rgba(67, 184, 255, 0.22);
+    animation: bw-drift 28s ease-in-out infinite alternate;
+  }
+  @keyframes bw-drift { from { transform: translateX(-3%); } to { transform: translateX(7%); } }
+  .bw-cn {
+    right: 18px; bottom: -14px; font-family: var(--sans); font-weight: 900;
+    font-size: 148px; line-height: 1; color: rgba(255, 255, 255, 0.055);
+    letter-spacing: 18px; opacity: 0;
+  }
+  .play .bw-cn { animation: bw-cn-in 2.4s cubic-bezier(.2, .85, .25, 1) 0.15s forwards; }
+  @keyframes bw-cn-in {
+    from { opacity: 0; letter-spacing: 72px; }
+    to { opacity: 1; letter-spacing: 18px; }
+  }
+  .bw-serial {
+    left: 26px; bottom: 12px; font-family: var(--mono); font-size: 10px;
+    letter-spacing: 2.5px; color: var(--ak-dim); opacity: 0;
+  }
+  .play .bw-serial { animation: bw-fade 1.2s ease 1.6s forwards; }
+  @keyframes bw-fade { to { opacity: 1; } }
+  .bg-fg {
+    position: relative; z-index: 2; display: flex; align-items: center;
+    gap: 20px; padding: 40px 34px; flex-wrap: wrap;
+  }
+  .bg-fg .fg-ava {
+    width: 86px; height: 86px; flex: 0 0 86px;
+    border: 1px solid rgba(255, 191, 30, 0.6);
+    background: radial-gradient(circle at 50% 32%, #3a3a44 0 26%, #232329 62%);
+    clip-path: var(--cut-sm-tr);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .bg-fg .fg-ava svg { width: 54px; height: 54px; }
+  .bg-fg .fg-nm { font-weight: 900; font-size: 34px; line-height: 1.25; letter-spacing: 2px; }
+  .bg-fg .fg-nm small {
+    display: block; font-family: var(--tech); font-weight: 600; font-size: 12px;
+    letter-spacing: 5px; color: var(--ak-blue2); margin-top: 2px;
+  }
+  .bg-fg .fg-meta { display: flex; flex-direction: column; gap: 8px; margin-left: auto; }
+  .mini-btn {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 2px;
+    color: var(--ak-gray); background: transparent; cursor: pointer;
+    border: 1px solid var(--ak-line); padding: 4px 12px;
+    clip-path: var(--cut-sm-tr); transition: color .15s, border-color .15s;
+  }
+  .mini-btn:hover { color: var(--ak-blue2); border-color: rgba(67, 184, 255, 0.55); }
+
+  /* 仿终端看板的背景水印 */
+  .d-bgword {
+    position: absolute; left: 12px; top: 34%; z-index: 0;
+    font-family: var(--tech); font-weight: 700; font-size: 104px; line-height: 1;
+    letter-spacing: 10px; white-space: nowrap; pointer-events: none; user-select: none;
+    color: rgba(255, 255, 255, 0.028);
+    -webkit-text-stroke: 1px rgba(255, 255, 255, 0.10);
+    animation: bw-drift 36s ease-in-out infinite alternate;
+  }
+  .d-main > h3, .d-main > .d-event, .d-main > .go { position: relative; z-index: 2; }
+  .d-main > .clock { z-index: 2; }
+  .d-main > .scan, .d-main > .sweep, .d-main > .d-bgword { z-index: 0; }
+
+  /* ============================================================
+     仿·罗德岛主终端（Mock A）
+  ============================================================ */
+  .mock-shell { position: relative; }
+  .mock-shell .cap {
+    margin-top: 18px; display: flex; flex-wrap: wrap; gap: 8px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1.5px; color: var(--ak-dim);
+  }
+  .mock-shell .cap span { border: 1px solid var(--ak-line2); padding: 3px 10px; }
+  .device-wrap { overflow-x: auto; padding: 26px; background: #0a0a0d; border: 1px solid var(--ak-line2); clip-path: var(--cut-tr); }
+  .device {
+    min-width: 880px; background: var(--ak-bg2);
+    border: 1px solid var(--ak-line);
+    clip-path: var(--cut-tr);
+    display: flex; flex-direction: column; height: 560px;
+    position: relative;
+  }
+  /* 顶栏 */
+  .d-top {
+    height: 54px; flex: 0 0 54px; display: flex; align-items: center; gap: 18px;
+    padding: 0 18px; border-bottom: 1px solid var(--ak-line);
+    background: linear-gradient(180deg, #1b1b21, #17171c);
+  }
+  .d-logo { display: flex; align-items: center; gap: 10px; font-family: var(--tech); font-weight: 700; font-size: 12.5px; letter-spacing: 2px; }
+  .d-logo small { display: block; font-family: var(--mono); font-weight: 400; font-size: 8.5px; letter-spacing: 2.5px; color: var(--ak-dim); }
+  .d-res { margin-left: auto; display: flex; gap: 10px; }
+  .d-res .r {
+    display: flex; align-items: center; gap: 7px;
+    background: #202027; border: 1px solid var(--ak-line2);
+    clip-path: var(--cut-sm-tr); padding: 5px 12px;
+    font-family: var(--mono); font-size: 11px; color: var(--ak-gray);
+  }
+  .d-res .r b { color: var(--ak-white); font-weight: 600; }
+  .d-res .ic { width: 12px; height: 12px; display: inline-block; transform: rotate(45deg); }
+  .d-res .r1 .ic { background: linear-gradient(135deg, var(--ak-blue2), var(--ak-blue)); }
+  .d-res .r2 .ic { background: linear-gradient(135deg, #d8f4ff, #9adfff); border-radius: 2px; }
+  .d-res .r3 .ic { background: linear-gradient(135deg, #ffe08a, var(--ak-gold)); border-radius: 50%; }
+  .d-res .r4 .ic { background: linear-gradient(135deg, #b8f0d0, #59c990); border-radius: 1px; }
+
+  .d-body { flex: 1; display: grid; grid-template-columns: 74px 1fr 250px; min-height: 0; }
+  /* 左导航 */
+  .d-nav {
+    border-right: 1px solid var(--ak-line); background: #121217;
+    display: flex; flex-direction: column; align-items: stretch;
+    padding-top: 10px;
+  }
+  .d-nav .it {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    padding: 12px 0; color: var(--ak-dim); cursor: pointer; position: relative;
+    font-family: var(--mono); font-size: 9px; letter-spacing: 1px;
+    transition: color .15s, background .15s;
+  }
+  .d-nav .it .g { font-size: 15px; line-height: 1; }
+  .d-nav .it:hover { color: var(--ak-gray); background: rgba(255, 255, 255, 0.04); }
+  .d-nav .it.on { color: var(--ak-blue2); background: linear-gradient(90deg, rgba(67, 184, 255, 0.14), transparent); }
+  .d-nav .it.on::before { content: ""; position: absolute; left: 0; top: 8px; bottom: 8px; width: 3px; background: var(--ak-blue); clip-path: polygon(0 0, 100% 4px, 100% calc(100% - 4px), 0 100%); }
+
+  /* 中央屏幕 */
+  .d-main { position: relative; padding: 26px 28px; overflow: hidden; display: flex; flex-direction: column; }
+  .d-main .scan {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.026) 0 1px, transparent 1px 3px);
+  }
+  .d-main .sweep {
+    position: absolute; left: 0; right: 0; height: 110px; pointer-events: none;
+    background: linear-gradient(180deg, transparent, rgba(67, 184, 255, 0.09), transparent);
+    animation: sweep 5.2s linear infinite;
+  }
+  @keyframes sweep { 0% { top: -18%; } 100% { top: 112%; } }
+  .d-main .clock { position: absolute; top: 18px; right: 22px; font-family: var(--mono); font-size: 11px; letter-spacing: 2px; color: var(--ak-dim); }
+  .d-main .clock b { color: var(--ak-blue2); font-weight: 400; }
+  .d-main h3 { font-weight: 900; font-size: 30px; letter-spacing: 1px; line-height: 1.3; margin-top: 14px; }
+  .d-main h3 small { display: block; font-family: var(--mono); font-weight: 400; font-size: 10.5px; letter-spacing: 3px; color: var(--ak-dim); margin-top: 8px; }
+  .d-event {
+    margin-top: 22px; border: 1px solid rgba(255, 157, 31, 0.45);
+    background: linear-gradient(90deg, rgba(255, 157, 31, 0.10), transparent 65%);
+    clip-path: var(--cut-br); padding: 14px 18px; position: relative;
+  }
+  .d-event .et { display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--ak-orange); }
+  .d-event .et::before { content: ""; width: 22px; height: 8px; background: repeating-linear-gradient(-45deg, var(--ak-orange) 0 5px, transparent 5px 10px); }
+  .d-event .ename { font-weight: 700; font-size: 15px; margin-top: 5px; letter-spacing: 1px; }
+  .d-event .ebar { margin-top: 10px; height: 5px; background: rgba(255, 255, 255, 0.09); position: relative; }
+  .d-event .ebar i { position: absolute; inset: 0 32% 0 0; background: linear-gradient(90deg, #ff8a00, var(--ak-orange)); }
+  .d-event .ep { position: absolute; right: 14px; bottom: 12px; font-family: var(--mono); font-size: 10px; color: var(--ak-orange); letter-spacing: 1px; }
+  .d-main .go { margin-top: auto; display: flex; align-items: center; gap: 16px; }
+  .d-go {
+    font-family: var(--tech); font-weight: 700; letter-spacing: 3px; font-size: 15px;
+    background: var(--ak-blue); color: #06121c; padding: 14px 34px; cursor: pointer;
+    clip-path: var(--cut-sm-tr); transition: transform .16s, filter .16s; border: 0;
+  }
+  .d-go:hover { transform: translate(-2px, -2px); filter: brightness(1.12); }
+  .d-main .go .serial { line-height: 1.5; }
+
+  /* 右侧栏 */
+  .d-side { border-left: 1px solid var(--ak-line); background: #131318; display: flex; flex-direction: column; min-height: 0; }
+  .d-side .pane { padding: 14px 16px; border-bottom: 1px solid var(--ak-line2); }
+  .d-side .pane h4 {
+    font-family: var(--mono); font-weight: 400; font-size: 10px; letter-spacing: 2.5px;
+    color: var(--ak-dim); display: flex; justify-content: space-between; margin-bottom: 10px;
+  }
+  .d-side .pane h4 i { font-style: normal; color: var(--ak-blue); }
+  .d-task { display: grid; gap: 8px; }
+  .d-task .t {
+    display: flex; align-items: center; gap: 9px; padding: 8px 10px;
+    background: #1a1a21; border: 1px solid var(--ak-line2); font-size: 12px; color: var(--ak-gray);
+    transition: border-color .15s, color .15s;
+  }
+  .d-task .t:hover { border-color: rgba(67, 184, 255, 0.5); color: var(--ak-white); }
+  .d-task .t .tg { margin-left: auto; font-family: var(--mono); font-size: 8.5px; letter-spacing: 1px; padding: 1px 7px; clip-path: var(--cut-para); }
+  .d-task .t .tg.b { background: rgba(67, 184, 255, 0.16); color: var(--ak-blue2); }
+  .d-task .t .tg.o { background: rgba(255, 157, 31, 0.16); color: var(--ak-orange); }
+  .d-task .t .tg.g { background: rgba(255, 255, 255, 0.10); color: var(--ak-gray); }
+  .d-task .t .dot2 { width: 6px; height: 6px; background: var(--ak-blue); transform: rotate(45deg); flex: 0 0 6px; }
+  .d-notice { font-size: 12px; color: var(--ak-gray); display: grid; gap: 9px; }
+  .d-notice .n { display: flex; gap: 8px; align-items: baseline; }
+  .d-notice .n time { font-family: var(--mono); font-size: 9px; color: var(--ak-dim); letter-spacing: 1px; }
+  .d-notice .n:hover { color: var(--ak-white); }
+
+  /* 底部 dock */
+  .d-dock {
+    flex: 0 0 74px; border-top: 1px solid var(--ak-line);
+    background: linear-gradient(180deg, #17171c, #121216);
+    display: flex; align-items: center; gap: 12px; padding: 0 18px;
+  }
+  .d-dock .btn-i {
+    flex: 0 0 auto; width: 96px; padding: 9px 0; text-align: center; cursor: pointer;
+    background: #202027; border: 1px solid var(--ak-line);
+    clip-path: var(--cut-sm-tr);
+    font-family: var(--tech); font-weight: 600; font-size: 12.5px; letter-spacing: 2px; color: var(--ak-gray);
+    transition: color .15s, background .15s, transform .15s;
+  }
+  .d-dock .btn-i small { display: block; font-family: var(--mono); font-weight: 400; font-size: 7.5px; letter-spacing: 2px; color: var(--ak-dim); margin-top: 1px; }
+  .d-dock .btn-i:hover { color: var(--ak-white); background: #26262e; transform: translateY(-2px); }
+  .d-dock .btn-i.hot { background: linear-gradient(180deg, #ffab3d, #ff8d0a); color: #1c0e00; border-color: transparent; }
+  .d-dock .btn-i.hot small { color: rgba(28, 14, 0, 0.7); }
+  .d-dock .fill { flex: 1; }
+  .d-dock .badge { position: relative; }
+  .d-dock .badge::after {
+    content: "2"; position: absolute; top: -5px; right: -5px;
+    background: var(--ak-red); color: #fff; font-family: var(--mono); font-size: 8.5px;
+    width: 14px; height: 14px; line-height: 14px; text-align: center;
+    clip-path: polygon(0 0, 100% 0, 100% 70%, 70% 100%, 0 100%);
+  }
+
+  /* ============================================================
+     明日方舟 弹窗（毛玻璃）
+  ============================================================ */
+  .modal {
+    position: fixed; inset: 0; z-index: 100;
+    display: none; align-items: center; justify-content: center; padding: 24px;
+    background: rgba(6, 7, 10, 0.55);
+    backdrop-filter: blur(10px) saturate(1.1);
+    -webkit-backdrop-filter: blur(10px) saturate(1.1);
+  }
+  .modal.open { display: flex; }
+  .dlg {
+    width: min(520px, 100%);
+    background: linear-gradient(180deg, #26262e, #1d1d23);
+    clip-path: var(--cut-tr);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+    overflow: hidden;
+  }
+  .dlg .dtop {
+    display: flex; align-items: center; gap: 12px; padding: 14px 20px;
+    border-bottom: 1px solid var(--ak-line2); background: rgba(255, 255, 255, 0.03);
+  }
+  .dlg .dtop::before { content: ""; width: 4px; height: 16px; background: var(--ak-blue); clip-path: polygon(0 0, 100% 3px, 100% calc(100% - 3px), 0 100%); }
+  .dlg .dtop b { font-weight: 700; letter-spacing: 2px; font-size: 14.5px; }
+  .dlg .dtop .serial { margin-left: auto; }
+  .dlg .dtop .x { cursor: pointer; color: var(--ak-dim); font-family: var(--mono); font-size: 14px; padding: 2px 8px; transition: color .15s; }
+  .dlg .dtop .x:hover { color: var(--ak-white); }
+  .dlg .dbody { padding: 20px; display: grid; gap: 14px; font-size: 13.5px; color: var(--ak-gray); }
+  .dlg .dbody .row { display: flex; justify-content: space-between; border-bottom: 1px dashed rgba(255, 255, 255, 0.12); padding-bottom: 10px; }
+  .dlg .dbody .row b { color: var(--ak-white); font-weight: 500; }
+  .dlg .dbody .row .hl { color: var(--ak-gold); font-family: var(--mono); }
+  .dlg .dfoot { display: flex; justify-content: flex-end; gap: 12px; padding: 0 20px 22px; }
+  .dlg .dfoot .btn { padding: 10px 22px; font-size: 12.5px; }
+
+  /* ============================================================
+     终末地组件
+  ============================================================ */
+  .type-ef .big { font-weight: 900; font-size: 40px; line-height: 1.2; letter-spacing: 2px; color: var(--ef-ink); }
+  .type-ef .en { font-family: var(--mono); font-weight: 600; font-size: 13px; letter-spacing: 5px; color: var(--ef-ink); margin-top: 6px; }
+  .type-ef .en b { background: var(--ef-yellow); padding: 1px 8px; }
+  .type-ef .anno { font-family: var(--mono); font-size: 10.5px; letter-spacing: 1px; color: var(--ef-gray2); margin-top: 14px; line-height: 2; }
+  .type-ef .anno i { font-style: normal; color: var(--ef-ink); }
+
+  .btn-ef { border-radius: 0; }
+  .btn-ef-primary {
+    background: var(--ef-yellow); color: var(--ef-ink);
+    box-shadow: inset 0 0 0 1.5px var(--ef-ink), 4px 4px 0 rgba(23, 24, 26, 0.85);
+    clip-path: var(--cut-sm-tr);
+  }
+  .btn-ef-primary:hover { transform: translate(-2px, -2px); box-shadow: inset 0 0 0 1.5px var(--ef-ink), 6px 6px 0 rgba(23, 24, 26, 0.85); }
+  .btn-ef-dark {
+    background: var(--ef-ink); color: var(--ef-yellow);
+    box-shadow: inset 0 0 0 1.5px var(--ef-ink), 4px 4px 0 rgba(23, 24, 26, 0.3);
+    clip-path: var(--cut-sm-tr);
+  }
+  .btn-ef-dark:hover { transform: translate(-2px, -2px); }
+  .btn-ef-line {
+    background: transparent; color: var(--ef-ink);
+    box-shadow: inset 0 0 0 1.5px var(--ef-ink);
+    clip-path: var(--cut-sm-tr);
+  }
+  .btn-ef-line:hover { background: rgba(23, 24, 26, 0.07); }
+
+  .hazard-ef { height: 16px; width: 100%; background: repeating-linear-gradient(-45deg, var(--ef-yellow) 0 14px, var(--ef-ink) 14px 28px); border: 1.5px solid var(--ef-ink); }
+
+  .cmyk { display: flex; gap: 5px; align-items: flex-end; }
+  .cmyk i { width: 16px; height: 22px; display: inline-block; border: 1.5px solid var(--ef-ink); }
+  .cmyk i:nth-child(1) { background: #29b8c5; }
+  .cmyk i:nth-child(2) { background: #e85a8a; }
+  .cmyk i:nth-child(3) { background: var(--ef-yellow); }
+  .cmyk i:nth-child(4) { background: var(--ef-ink); }
+
+  /* 工程标注面板：角标 + 十字 + 尺寸线 */
+  .eng-panel {
+    position: relative; background: var(--ef-white);
+    border: 1.5px solid var(--ef-ink);
+    padding: 22px; width: 100%;
+    clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 0 100%);
+    filter: drop-shadow(4px 4px 0 rgba(23, 24, 26, 0.18));
+  }
+  .ck { position: absolute; width: 14px; height: 14px; border: 0 solid var(--ef-ink); pointer-events: none; }
+  .ck.tl { left: 5px; top: 5px; border-left-width: 2px; border-top-width: 2px; }
+  .ck.bl { left: 5px; bottom: 5px; border-left-width: 2px; border-bottom-width: 2px; }
+  .ck.tr { right: 5px; top: 5px; border-right-width: 2px; border-top-width: 2px; }
+  .ck.br { right: 5px; bottom: 5px; border-right-width: 2px; border-bottom-width: 2px; }
+  .eng-panel .pt { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--ef-gray2); display: flex; justify-content: space-between; }
+  .eng-panel .pt i { font-style: normal; background: var(--ef-yellow); color: var(--ef-ink); padding: 0 7px; border: 1.5px solid var(--ef-ink); }
+  .dim { margin-top: 20px; position: relative; height: 22px; }
+  .dim .line { position: absolute; left: 0; right: 0; top: 50%; height: 1.5px; background: var(--ef-ink); }
+  .dim .line::before, .dim .line::after { content: ""; position: absolute; top: -6px; bottom: -6px; width: 1.5px; background: var(--ef-ink); }
+  .dim .line::before { left: 0; } .dim .line::after { right: 0; }
+  .dim .lab {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    background: var(--ef-white); padding: 0 10px;
+    font-family: var(--mono); font-size: 9.5px; letter-spacing: 1.5px; color: var(--ef-ink);
+  }
+  .cross-ef { position: relative; width: 18px; height: 18px; }
+  .cross-ef::before, .cross-ef::after { content: ""; position: absolute; background: var(--ef-ink); }
+  .cross-ef::before { left: 50%; top: 0; bottom: 0; width: 1.5px; }
+  .cross-ef::after { top: 50%; left: 0; right: 0; height: 1.5px; }
+
+  /* 复选任务列表（终末地） */
+  .ef-tasks { display: grid; gap: 10px; width: 100%; }
+  .ef-task {
+    display: flex; align-items: center; gap: 12px;
+    border: 1.5px solid var(--ef-ink); background: var(--ef-white);
+    padding: 10px 14px; font-size: 13.5px; font-weight: 500;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%);
+    transition: transform .15s;
+  }
+  .ef-task:hover { transform: translateX(4px); }
+  .ef-task .box { width: 16px; height: 16px; border: 1.5px solid var(--ef-ink); flex: 0 0 16px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+  .ef-task.done .box { background: var(--ef-yellow); }
+  .ef-task.done { color: var(--ef-gray2); text-decoration: line-through; text-decoration-thickness: 1.5px; }
+  .ef-task .st { margin-left: auto; font-family: var(--mono); font-size: 9px; letter-spacing: 1.5px; padding: 2px 8px; border: 1.5px solid var(--ef-ink); }
+  .ef-task .st.y { background: var(--ef-yellow); }
+  .ef-task .st.g { background: var(--ef-ink); color: var(--ef-yellow); border-color: var(--ef-ink); }
+
+  .efpbar { border: 1.5px solid var(--ef-ink); height: 16px; background: repeating-linear-gradient(-55deg, rgba(23, 24, 26, 0.14) 0 6px, transparent 6px 12px), #fff; position: relative; }
+  .efpbar i { position: absolute; inset: 0 30% 0 0; background: var(--ef-yellow); border-right: 1.5px solid var(--ef-ink); }
+  .efpbar + .lab { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 9.5px; letter-spacing: 1.5px; color: var(--ef-gray2); margin-top: 5px; }
+
+  /* 等高线样例 */
+  .contour-demo { width: 100%; background: var(--ef-white); border: 1.5px solid var(--ef-ink); position: relative; overflow: hidden; clip-path: var(--cut-br); }
+  .contour-demo svg { display: block; width: 100%; height: 190px; }
+  .contour-demo .cd-lab { position: absolute; left: 12px; bottom: 10px; font-family: var(--mono); font-size: 9.5px; letter-spacing: 1.5px; color: var(--ef-ink); background: rgba(255, 255, 255, 0.85); padding: 2px 8px; border: 1px solid var(--ef-ink); }
+
+  /* ============================================================
+     仿·终末地工程控制台（Mock B）
+  ============================================================ */
+  .console-wrap { overflow-x: auto; padding: 26px; background: rgba(23, 24, 26, 0.06); border: 1.5px solid var(--ef-ink); clip-path: var(--cut-br); }
+  .console {
+    min-width: 880px; position: relative;
+    background:
+      linear-gradient(rgba(23, 24, 26, 0.035) 1px, transparent 1px) 0 0 / 26px 26px,
+      linear-gradient(90deg, rgba(23, 24, 26, 0.035) 1px, transparent 1px) 0 0 / 26px 26px,
+      var(--ef-paper);
+    border: 1.5px solid var(--ef-ink);
+    box-shadow: 6px 6px 0 rgba(23, 24, 26, 0.2);
+    display: flex; flex-direction: column; height: 560px;
+  }
+  .console .fx { position: absolute; inset: 14px; pointer-events: none; }
+  .console .fx .ck { width: 16px; height: 16px; }
+  .c-top {
+    flex: 0 0 50px; background: var(--ef-ink); color: #fff;
+    display: flex; align-items: center; gap: 14px; padding: 0 18px;
+    clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%);
+  }
+  .c-top .lg { width: 22px; height: 22px; background: var(--ef-yellow); flex: 0 0 22px; clip-path: polygon(0 0, 100% 0, 100% 70%, 70% 100%, 0 100%); }
+  .c-top .tt { font-family: var(--mono); font-size: 11px; letter-spacing: 2px; }
+  .c-top .tt small { display: block; font-size: 8px; color: rgba(255, 255, 255, 0.55); letter-spacing: 3px; }
+  .c-top .rt { margin-left: auto; display: flex; align-items: center; gap: 16px; font-family: var(--mono); font-size: 10px; letter-spacing: 1.5px; color: rgba(255, 255, 255, 0.75); }
+  .c-top .rt .sig { color: var(--ef-yellow); }
+  .c-body { flex: 1; display: grid; grid-template-columns: 240px 1fr 250px; gap: 16px; padding: 18px; min-height: 0; }
+  .c-card { background: var(--ef-paper2); border: 1.5px solid var(--ef-ink); position: relative; clip-path: var(--cut-br); display: flex; flex-direction: column; min-height: 0; }
+  .c-card .hd {
+    padding: 9px 14px; border-bottom: 1.5px solid var(--ef-ink);
+    font-weight: 900; font-size: 13.5px; letter-spacing: 1px;
+    display: flex; align-items: center; justify-content: space-between; background: var(--ef-paper2);
+  }
+  .c-card .hd .en { font-family: var(--mono); font-weight: 400; font-size: 8.5px; letter-spacing: 2px; color: var(--ef-gray2); }
+  .c-card .hd.y { background: var(--ef-yellow); }
+  .c-card .hd.y .en { color: rgba(23, 24, 26, 0.6); }
+  .c-card .bd { padding: 14px; display: grid; gap: 12px; overflow: auto; align-content: start; }
+
+  /* 管理员卡 */
+  .mgr { display: flex; gap: 12px; align-items: center; }
+  .mgr .ava {
+    width: 58px; height: 58px; flex: 0 0 58px; background: var(--ef-yellow);
+    border: 1.5px solid var(--ef-ink);
+    display: flex; align-items: center; justify-content: center;
+    clip-path: var(--cut-sm-tr);
+  }
+  .mgr .who .nm { font-weight: 900; font-size: 18px; letter-spacing: 1px; }
+  .mgr .who .id { font-family: var(--mono); font-size: 9.5px; letter-spacing: 1.5px; color: var(--ef-gray2); }
+  .c-stat { display: grid; gap: 9px; }
+  .c-stat .s .l { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 9.5px; letter-spacing: 1.5px; color: var(--ef-gray2); margin-bottom: 3px; }
+  .c-stat .s .l b { color: var(--ef-ink); }
+  .c-stat .s .b { height: 8px; border: 1.5px solid var(--ef-ink); background: repeating-linear-gradient(-55deg, rgba(23, 24, 26, 0.1) 0 5px, transparent 5px 10px), #fff; position: relative; }
+  .c-stat .s .b i { position: absolute; inset: 0; right: var(--r, 40%); background: var(--ef-yellow); border-right: 1.5px solid var(--ef-ink); }
+  .res-line { display: flex; justify-content: space-between; font-size: 12.5px; border-bottom: 1px dashed rgba(23, 24, 26, 0.35); padding-bottom: 8px; }
+  .res-line b { font-family: var(--mono); font-weight: 600; }
+
+  /* 产线 */
+  .prod { display: grid; gap: 10px; }
+  .prod .p { border: 1.5px solid var(--ef-ink); background: #fff; padding: 10px 12px; clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%); }
+  .prod .p .t { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 500; }
+  .prod .p .t .lamp { width: 9px; height: 9px; background: var(--ef-yellow); border: 1.5px solid var(--ef-ink); animation: blink 1.6s steps(2) infinite; }
+  .prod .p.off .lamp { background: transparent; animation: none; }
+  .prod .p .t .st { margin-left: auto; font-family: var(--mono); font-size: 8.5px; letter-spacing: 1.5px; }
+  .prod .p .t .st.run { background: var(--ef-yellow); border: 1.5px solid var(--ef-ink); padding: 1px 6px; }
+  .prod .p .t .st.idle { color: var(--ef-gray2); }
+  .prod .p .meter { margin-top: 8px; height: 5px; background: rgba(23, 24, 26, 0.14); position: relative; }
+  .prod .p .meter i { position: absolute; inset: 0 62% 0 0; background: var(--ef-ink); }
+  .prod .p.off .meter i { background: var(--ef-gray); }
+
+  /* 底栏 */
+  .c-foot {
+    flex: 0 0 66px; border-top: 1.5px solid var(--ef-ink);
+    display: flex; align-items: center; gap: 18px; padding: 0 18px;
+    background: var(--ef-paper2);
+  }
+  .c-cta {
+    font-family: var(--sans); font-weight: 900; font-size: 16px; letter-spacing: 2px;
+    background: var(--ef-yellow); color: var(--ef-ink);
+    box-shadow: inset 0 0 0 1.5px var(--ef-ink), 4px 4px 0 rgba(23, 24, 26, 0.85);
+    clip-path: var(--cut-sm-tr); padding: 12px 30px; cursor: pointer; border: 0;
+    transition: transform .16s;
+  }
+  .c-cta:hover { transform: translate(-2px, -2px); }
+  .c-cta small { display: block; font-family: var(--mono); font-weight: 400; font-size: 8.5px; letter-spacing: 3px; margin-top: 1px; }
+  .c-foot .hz { flex: 1; height: 15px; background: repeating-linear-gradient(-45deg, var(--ef-yellow) 0 12px, var(--ef-ink) 12px 24px); border: 1.5px solid var(--ef-ink); position: relative; }
+  .c-foot .hz span {
+    position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+    background: var(--ef-paper2); border: 1.5px solid var(--ef-ink);
+    font-family: var(--mono); font-size: 8.5px; letter-spacing: 2px; padding: 1px 8px;
+  }
+  .console-wrap .cap {
+    margin: 18px 4px 0; display: flex; flex-wrap: wrap; gap: 8px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1.5px; color: #4a4b46;
+  }
+  .console-wrap .cap span { border: 1.5px solid var(--ef-ink); background: var(--ef-paper2); padding: 3px 10px; }
+
+  /* ============================================================
+     对比区
+  ============================================================ */
+  .vs-table { width: 100%; border-collapse: collapse; background: #15151a; border: 1px solid var(--ak-line); }
+  .vs-table th, .vs-table td { padding: 14px 18px; text-align: left; font-size: 13.5px; border: 1px solid var(--ak-line2); vertical-align: top; }
+  .vs-table th {
+    font-family: var(--mono); font-weight: 600; font-size: 11px; letter-spacing: 2px;
+    color: var(--ak-white); background: #1d1d24; white-space: nowrap;
+  }
+  .vs-table td:first-child { font-family: var(--mono); font-size: 11px; letter-spacing: 1.5px; color: var(--ak-dim); white-space: nowrap; }
+  .vs-table td.ak-col { color: var(--ak-gray); }
+  .vs-table td.ef-col { color: #b9b8ae; }
+  .vs-table tr:hover td { background: rgba(255, 255, 255, 0.02); }
+  .vs-table th.ak-h { color: var(--ak-blue2); }
+  .vs-table th.ef-h { color: var(--ef-yellow); }
+
+  .shared { margin-top: 26px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .shared .t { font-family: var(--mono); font-size: 11px; letter-spacing: 2px; color: var(--ak-dim); margin-right: 8px; }
+  .shared .s {
+    font-family: var(--tech); font-size: 12.5px; letter-spacing: 1.5px;
+    border: 1px solid rgba(255, 216, 0, 0.4); color: var(--ef-yellow);
+    background: rgba(255, 216, 0, 0.06); padding: 5px 14px; clip-path: var(--cut-sm-tr);
+  }
+  .refs { margin-top: 40px; border-top: 1px solid var(--ak-line2); padding-top: 22px; }
+  .refs h4 { font-family: var(--mono); font-size: 11px; letter-spacing: 2.5px; color: var(--ak-dim); margin-bottom: 14px; }
+  .refs ol { list-style: none; display: grid; gap: 8px; }
+  .refs li { font-size: 13px; color: var(--ak-gray); }
+  .refs li i { font-style: normal; font-family: var(--mono); font-size: 10px; color: var(--ak-blue); margin-right: 10px; }
+  .refs a { color: var(--ak-gray); text-decoration: none; border-bottom: 1px dashed rgba(255, 255, 255, 0.25); transition: color .15s, border-color .15s; }
+  .refs a:hover { color: var(--ak-white); border-color: var(--ak-blue); }
+
+  footer {
+    border-top: 1px solid var(--ak-line2); background: #0b0b0e;
+    padding: 26px 28px; display: flex; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1.5px; color: var(--ak-dim);
+  }
+</style>
+</head>
+<body>
+
+<div class="statusbar">
+  <span><span class="dot"></span>UI STYLE STUDY // HYPERGRYPH DESIGN LANGUAGE</span>
+  <span>DOC. RI-EF-2026 · FAN-MADE DEMO · 非官方</span>
+</div>
+
+<nav class="topnav">
+  <div class="wrap bar">
+    <span class="logo">
+      <svg width="20" height="20" viewBox="0 0 20 20"><path d="M2 2h10l6 6v10H8l-6-6V2z" fill="none" stroke="#43b8ff" stroke-width="1.6"/><path d="M7 7h6v6H7z" fill="#ffd800"/></svg>
+      明日方舟 × 终末地
+    </span>
+    <span class="links">
+      <a href="#ak"><b>01</b>明日方舟风格</a>
+      <a href="#ak-mock"><b>02</b>仿·主终端</a>
+      <a href="#ef"><b>03</b>终末地风格</a>
+      <a href="#ef-mock"><b>04</b>仿·工程控制台</a>
+      <a href="#vs"><b>05</b>对比总结</a>
+    </span>
+  </div>
+</nav>
+
+<header class="hero">
+  <span class="deco-bar"></span>
+  <span class="deco-cross">+</span>
+  <div class="wrap">
+    <div class="kicker">FLAT UI DESIGN LANGUAGE ANALYSIS</div>
+    <h1>
+      <span class="ak">明日方舟</span> <span class="thin">×</span> <span class="ef">终末地</span><br>
+      平面 UI 风格解析与示例
+    </h1>
+    <p class="lead">
+      同一世界观下，两款游戏演化出两条鲜明的平面设计路线：<b>方舟</b>以近黑底色、高层级对比与警戒亮色构建"深空终端"质感；
+      <b>终末地</b>转向黑白灰基底、工程图纸标注与等高线母题，呈现"开拓勘探"的控制台气质。本页拆解两者要点，并各给出一块仿游戏界面。
+    </p>
+    <div class="tags">
+      <span class="skewtag blue"><span>深色工业 TERMINAL</span></span>
+      <span class="skewtag yellow"><span>工程图纸 BLUEPRINT</span></span>
+      <span class="skewtag orange"><span>警戒亮色 WARNING</span></span>
+      <span class="skewtag"><span>切角形状 CHAMFER</span></span>
+      <span class="skewtag"><span>画内界面 DIEGETIC UI</span></span>
+    </div>
+    <div class="heronote">SCROLL TO EXPLORE ↓ · 本页为风格学习演示，与鹰角网络无关</div>
+  </div>
+</header>
+
+<!-- ============================================================
+     01 明日方舟 风格解析
+============================================================ -->
+<section class="sec sec-ak" id="ak">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="no">SECTION 01 // ARKNIGHTS</div>
+      <h2>明日方舟 · 深空终端风格</h2>
+      <p class="sub">
+        核心是「极高的层级对比」：近黑深灰底 + 纯白文字 + 大量背景模糊，再以符合世界观的<b>警戒亮色</b>（青蓝、橙、稀有度金）做视觉引导；
+        形状上偏爱单侧斜切角、平行四边形斜切块与细白描边，配合条形码、序列号与英文微标签营造工业感。
+        背景图层还常压着<b>巨型水印字</b>——描边英文或大号无衬线中文，以缓慢平移、字距收缩的方式动画入场。
+      </p>
+    </div>
+
+    <div class="grid2">
+      <div class="tile">
+        <div class="tile-label"><span>COLOR TOKENS <i>配色</i></span><span>SWATCH</span></div>
+        <div class="swatches">
+          <div class="sw"><div class="c" style="background:#141418"></div><div class="t"><b>#141418</b>深空底</div></div>
+          <div class="sw"><div class="c" style="background:#f2f2f4"></div><div class="t"><b>#F2F2F4</b>主文字</div></div>
+          <div class="sw"><div class="c" style="background:#43b8ff"></div><div class="t"><b>#43B8FF</b>青蓝·主操作</div></div>
+          <div class="sw"><div class="c" style="background:#ff9d1f"></div><div class="t"><b>#FF9D1F</b>警戒橙</div></div>
+          <div class="sw"><div class="c" style="background:#ffbf1e"></div><div class="t"><b>#FFBF1E</b>稀有度金</div></div>
+          <div class="sw"><div class="c" style="background:#26262d"></div><div class="t"><b>#26262D</b>面板灰</div></div>
+        </div>
+      </div>
+
+      <div class="tile type-ak">
+        <div class="tile-label"><span>TYPOGRAPHY <i>字体</i></span><span>SPECIMEN</span></div>
+        <div class="big">明日方舟</div>
+        <div class="en">ARKNIGHTS</div>
+        <p class="note">
+          标题使用思源黑体 <em>Heavy 大字重</em>，中英文混排；英文用 Chakra Petch 类科技字体，微标签<em>大字距</em>（2~3px）压低字号，
+          形成"终端注释"感。
+        </p>
+      </div>
+    </div>
+
+    <div class="grid2" style="margin-top:22px">
+      <div class="tile">
+        <div class="tile-label"><span>BUTTONS <i>切角按钮</i></span><span>HOVER ME</span></div>
+        <div class="demo">
+          <button class="btn btn-ak-primary">开始行动 <span class="arr">»</span></button>
+          <button class="btn btn-ak-ghost">详情情报</button>
+          <button class="btn btn-ak-warn">危机合约 <span class="arr">»</span></button>
+          <button class="btn btn-ak-dis">已锁定</button>
+        </div>
+        <div class="tile-label" style="margin:18px 0 12px"><span>TAGS <i>斜切标签</i></span></div>
+        <div class="tags-demo">
+          <span class="skewtag blue"><span>公开招募</span></span>
+          <span class="skewtag orange"><span>限定寻访</span></span>
+          <span class="skewtag"><span>芯片搜索</span></span>
+          <span class="skewtag yellow"><span>生息演算</span></span>
+        </div>
+      </div>
+
+      <div class="tile">
+        <div class="tile-label"><span>PROGRESS <i>进度指示</i></span><span>0.84</span></div>
+        <div class="pbar-stack">
+          <div class="pbar-row">
+            <span class="lab"><span>理智 SANITY</span><span>84 / 130</span></span>
+            <div class="pbar"><i style="width:64%"></i></div>
+          </div>
+          <div class="pbar-row">
+            <span class="lab"><span>主线进度 MAIN THEME</span><span>CH.14 · 68%</span></span>
+            <div class="pbar orange"><i style="width:68%"></i></div>
+          </div>
+          <div class="pbar-row">
+            <span class="lab"><span>数据盘 DATA STACK</span><span>MAX</span></span>
+            <div class="pbar"><i style="width:100%"></i></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid2" style="margin-top:22px">
+      <div class="tile">
+        <div class="tile-label"><span>OPERATOR CARD <i>干员卡片</i></span><span>RARITY FRAME</span></div>
+        <div class="op-cards">
+          <div class="op" style="--op-color:#ffbf1e">
+            <span class="strip"></span>
+            <div class="head">
+              <div class="ava">
+                <svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="14" r="7" stroke="#ffbf1e" stroke-width="1.8"/><path d="M6 34c2-8 8-11 14-11s12 3 14 11" stroke="#ffbf1e" stroke-width="1.8"/></svg>
+              </div>
+              <div class="who">
+                <div class="nm">阿米娅</div>
+                <div class="cls">CASTER · 术师 // R.I.</div>
+                <div class="stars">★★★★★</div>
+              </div>
+            </div>
+            <div class="meta">
+              <span class="chip elite">精2 ELITE</span>
+              <span class="chip">Lv.60</span>
+              <span class="chip">潜能 5</span>
+            </div>
+            <div class="trust">
+              <div class="lab"><span>信赖 TRUST</span><span>200 / 200</span></div>
+              <div class="bar"><i style="width:100%"></i></div>
+            </div>
+            <div class="sk">
+              <span class="ic">✦</span><span class="ic">◈</span><span class="ic">▲</span>
+              <span class="rk">SKILL RANK 7/7/7</span>
+            </div>
+          </div>
+          <div class="op" style="--op-color:#7ccfff">
+            <span class="strip"></span>
+            <div class="head">
+              <div class="ava">
+                <svg viewBox="0 0 40 40" fill="none"><rect x="11" y="8" width="18" height="24" stroke="#7ccfff" stroke-width="1.8"/><path d="M15 14h10M15 20h10M15 26h6" stroke="#7ccfff" stroke-width="1.6"/></svg>
+              </div>
+              <div class="who">
+                <div class="nm">Lancet-2</div>
+                <div class="cls">MEDIC · 医疗 // R.I.</div>
+                <div class="stars">★★</div>
+              </div>
+            </div>
+            <div class="meta">
+              <span class="chip elite">精0 ELITE</span>
+              <span class="chip">Lv.30</span>
+              <span class="chip">机械</span>
+            </div>
+            <div class="trust">
+              <div class="lab"><span>信赖 TRUST</span><span>50 / 100</span></div>
+              <div class="bar"><i style="width:50%"></i></div>
+            </div>
+            <div class="sk">
+              <span class="ic">✚</span>
+              <span class="rk">SKILL RANK 1</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tile">
+        <div class="tile-label"><span>DECORATIONS <i>装饰母题</i></span><span>DETAILS</span></div>
+        <div class="deco-demo">
+          <div class="row">
+            <span class="cross"></span>
+            <span class="serial">RI-OPERATION // SEC.07 · 0091-A</span>
+            <svg class="barcode" width="96" height="22" viewBox="0 0 96 22" fill="#9a9aa2">
+              <rect x="0" width="2" height="18"/><rect x="4" width="1" height="18"/><rect x="7" width="3" height="18"/><rect x="12" width="1" height="18"/><rect x="15" width="2" height="18"/><rect x="19" width="4" height="18"/><rect x="25" width="1" height="18"/><rect x="28" width="2" height="18"/><rect x="33" width="1" height="18"/><rect x="36" width="3" height="18"/><rect x="41" width="1" height="18"/><rect x="44" width="2" height="18"/><rect x="48" width="4" height="18"/><rect x="54" width="1" height="18"/><rect x="57" width="2" height="18"/><rect x="62" width="1" height="18"/><rect x="65" width="3" height="18"/><rect x="70" width="1" height="18"/><rect x="73" width="2" height="18"/><rect x="78" width="4" height="18"/><rect x="84" width="1" height="18"/><rect x="87" width="2" height="18"/><rect x="92" width="3" height="18"/>
+            </svg>
+          </div>
+          <div class="row">
+            <div class="hazard-ak"></div>
+          </div>
+          <div class="row">
+            <span class="serial" style="color:#ff9d1f">▲ WARNING // 请留意干员理智值</span>
+            <span class="serial">TICK. 1093-δ · Terra</span>
+          </div>
+          <div class="row" style="margin-top:6px">
+            <button class="btn btn-ak-ghost" data-open-modal style="padding:10px 20px;font-size:12.5px">打开弹窗（背景模糊）</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tile play" id="bgStage" style="margin-top:22px">
+      <div class="tile-label">
+        <span>BACKGROUND TYPE <i>背景大字水印</i></span>
+        <button class="mini-btn" data-replay>REPLAY // 重播入场动画</button>
+      </div>
+      <div class="bg-stage">
+        <span class="bword bw-outline">GUARD</span>
+        <span class="bword bw-cn">近卫干员</span>
+        <span class="bword bw-serial">OPERATOR FILE // BG-TYPE-03 · 水印层位于内容层之下，随视差缓慢平移</span>
+        <div class="bg-fg">
+          <span class="fg-ava">
+            <svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="14" r="7" stroke="#ffbf1e" stroke-width="1.8"/><path d="M6 34c2-8 8-11 14-11s12 3 14 11" stroke="#ffbf1e" stroke-width="1.8"/><path d="M28 20l6-3M28 24l6 1" stroke="#ffbf1e" stroke-width="1.6"/></svg>
+          </span>
+          <span class="fg-nm">断霜<small>FROSTBREAK · FRONTLINE</small></span>
+          <span class="skewtag orange" style="align-self:center"><span>近卫 GUARD</span></span>
+          <span class="chip elite" style="align-self:center;font-family:var(--mono);font-size:10px;letter-spacing:1px;border:1px solid rgba(255,191,30,.6);color:var(--ak-gold);padding:3px 10px">精2 ELITE</span>
+          <span class="fg-meta">
+            <span class="serial">LV. 60 · 信赖 200</span>
+            <div class="pbar" style="width:190px"><i style="width:82%"></i></div>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     02 仿·罗德岛主终端
+============================================================ -->
+<section class="sec sec-ak" id="ak-mock" style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="no">SECTION 02 // MOCK TERMINAL</div>
+      <h2>仿 · 罗德岛主终端</h2>
+      <p class="sub">按方舟的设计语言重排的一块"主界面"：资源顶栏、竖排导航、扫描线看板、任务侧栏与切角功能坞。悬停可感受层级反馈。</p>
+    </div>
+
+    <div class="mock-shell">
+      <div class="device-wrap">
+        <div class="device">
+          <div class="d-top">
+            <div class="d-logo">
+              <svg width="26" height="26" viewBox="0 0 26 26"><path d="M3 3h12l8 8v12H11l-8-8V3z" fill="none" stroke="#43b8ff" stroke-width="1.6"/><path d="M9 9h8v8H9z" fill="#f2f2f4" opacity=".9"/></svg>
+              <span>罗德岛终端<small>RHODES ISLAND // OPERATIONAL TERMINAL</small></span>
+            </div>
+            <div class="d-res">
+              <span class="r r1"><i class="ic"></i>理智 <b>84/130</b></span>
+              <span class="r r2"><i class="ic"></i>源石 <b>12</b></span>
+              <span class="r r3"><i class="ic"></i>龙门币 <b>128,540</b></span>
+              <span class="r r4"><i class="ic"></i>合成玉 <b>2,340</b></span>
+            </div>
+          </div>
+
+          <div class="d-body">
+            <div class="d-nav">
+              <span class="it on"><span class="g">◉</span>终端</span>
+              <span class="it"><span class="g">▤</span>干员</span>
+              <span class="it badge"><span class="g">✚</span>招募</span>
+              <span class="it"><span class="g">⬢</span>基建</span>
+              <span class="it"><span class="g">▦</span>仓库</span>
+              <span class="it"><span class="g">⚙</span>设置</span>
+            </div>
+
+            <div class="d-main">
+              <span class="scan"></span><span class="sweep"></span>
+              <span class="d-bgword">RHODES ISLAND</span>
+              <span class="clock">SYS.TIME <b id="akClock">00:00:00</b></span>
+              <h3>
+                博士，欢迎回到罗德岛。
+                <small>WELCOME BACK, DOCTOR — TODAY'S OPERATIONS // 3 PENDING</small>
+              </h3>
+              <div class="d-event">
+                <div class="et">MAIN THEME // 主线章节</div>
+                <div class="ename">第十四章 · 慈悲灯塔</div>
+                <div class="ebar"><i></i></div>
+                <span class="ep">68%</span>
+              </div>
+              <div class="go">
+                <button class="d-go">开始作战 »</button>
+                <span class="serial">OP-COMBAT // 0091<br>若水 · 龙门近卫局协同</span>
+              </div>
+            </div>
+
+            <div class="d-side">
+              <div class="pane">
+                <h4><span>待办任务</span><i>×3</i></h4>
+                <div class="d-task">
+                  <div class="t"><span class="dot2"></span>完成任意作战 3 次<span class="tg b">每日</span></div>
+                  <div class="t"><span class="dot2"></span>公开招募 1 次<span class="tg g">日常</span></div>
+                  <div class="t"><span class="dot2"></span>收集委任凭证<span class="tg o">活动</span></div>
+                </div>
+              </div>
+              <div class="pane" style="flex:1">
+                <h4><span>公告</span><i>NEW</i></h4>
+                <div class="d-notice">
+                  <span class="n"><time>09-12</time>sidestory 限时活动开启</span>
+                  <span class="n"><time>09-10</time>新干员情报公开</span>
+                  <span class="n"><time>09-08</time>基建系统维护完成</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-dock">
+            <span class="btn-i hot">作战<small>OPERATION</small></span>
+            <span class="btn-i badge">招募<small>RECRUIT</small></span>
+            <span class="btn-i">基建<small>BASE</small></span>
+            <span class="btn-i">采购<small>STORE</small></span>
+            <span class="btn-i">任务<small>MISSION</small></span>
+            <span class="fill"></span>
+            <svg class="barcode" width="110" height="20" viewBox="0 0 110 20" fill="#55555e">
+              <rect x="0" width="2" height="16"/><rect x="4" width="1" height="16"/><rect x="8" width="3" height="16"/><rect x="13" width="1" height="16"/><rect x="16" width="2" height="16"/><rect x="21" width="4" height="16"/><rect x="27" width="1" height="16"/><rect x="31" width="2" height="16"/><rect x="36" width="1" height="16"/><rect x="40" width="3" height="16"/><rect x="46" width="1" height="16"/><rect x="50" width="2" height="16"/><rect x="55" width="4" height="16"/><rect x="62" width="1" height="16"/><rect x="66" width="2" height="16"/><rect x="71" width="1" height="16"/><rect x="75" width="3" height="16"/><rect x="81" width="1" height="16"/><rect x="85" width="2" height="16"/><rect x="90" width="4" height="16"/><rect x="97" width="1" height="16"/><rect x="101" width="2" height="16"/><rect x="106" width="3" height="16"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="cap">
+        <span>① 资源顶栏 · 斜切 chip</span>
+        <span>② 竖排导航 · 选中高亮条</span>
+        <span>③ 看板扫描线 + 渐显扫描光</span>
+        <span>④ 背景大字水印 · 缓慢平移</span>
+        <span>⑤ 切角功能坞 · 角标红点</span>
+        <span>⑥ 条形码 / 序列号装饰</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     03 终末地 风格解析
+============================================================ -->
+<section class="sec sec-ef" id="ef">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="no">SECTION 03 // ENDFIELD</div>
+      <h2>终末地 · 工程图纸风格</h2>
+      <p class="sub">
+        大面积<b>黑白灰</b>打底，<b>警戒黄</b>一色独大做点缀与引导——工程机械气质；等高线地形图、尺寸标注线、注册十字与切割虚线
+        把界面变成一份"勘探工程文件"。更扁平、更内敛，去装饰化。
+      </p>
+    </div>
+
+    <div class="grid2">
+      <div class="tile">
+        <div class="tile-label"><span>COLOR TOKENS <i>配色</i></span><span>SWATCH</span></div>
+        <div class="swatches">
+          <div class="sw"><div class="c" style="background:#e9e6de"></div><div class="t"><b>#E9E6DE</b>纸感底</div></div>
+          <div class="sw"><div class="c" style="background:#17181a"></div><div class="t"><b>#17181A</b>墨黑</div></div>
+          <div class="sw"><div class="c" style="background:#ffd800"></div><div class="t"><b>#FFD800</b>警戒黄</div></div>
+          <div class="sw"><div class="c" style="background:#ff7a1a"></div><div class="t"><b>#FF7A1A</b>作业橙</div></div>
+          <div class="sw"><div class="c" style="background:#a9a79d"></div><div class="t"><b>#A9A79D</b>中灰</div></div>
+          <div class="sw"><div class="c" style="background:#ffffff;outline:1px solid #17181a;outline-offset:-3px"></div><div class="t"><b>#FFFFFF</b>面板白</div></div>
+        </div>
+      </div>
+
+      <div class="tile type-ef">
+        <div class="tile-label"><span>TYPOGRAPHY <i>字体</i></span><span>SPECIMEN</span></div>
+        <div class="big">终末地</div>
+        <div class="en"><b>ENDFIELD</b> INDUSTRIES</div>
+        <div class="anno">
+          SURVEY // TALOS-II · SECTOR 07 · SCALE 1:2400<br>
+          <i>特粗黑体</i>大标题 + <i>等宽字体</i>工程标注；坐标、编号、比例尺入注，像图纸角注。
+        </div>
+      </div>
+    </div>
+
+    <div class="grid2" style="margin-top:22px">
+      <div class="tile">
+        <div class="tile-label"><span>BUTTONS <i>工程按钮</i></span><span>HOVER ME</span></div>
+        <div class="demo">
+          <button class="btn btn-ef btn-ef-primary">开始作业 »</button>
+          <button class="btn btn-ef btn-ef-dark">调度面板</button>
+          <button class="btn btn-ef btn-ef-line">查看图纸</button>
+        </div>
+        <div class="tile-label" style="margin:18px 0 12px"><span>TAGS <i>状态标签</i></span></div>
+        <div class="tags-demo">
+          <span class="ef-task" style="padding:6px 14px;display:inline-flex"><span class="box" style="background:var(--ef-yellow)">✓</span>作业中</span>
+          <span class="ef-task" style="padding:6px 14px;display:inline-flex"><span class="box"></span>待勘察</span>
+          <span class="ef-task done" style="padding:6px 14px;display:inline-flex"><span class="box">✓</span>已归档</span>
+        </div>
+      </div>
+
+      <div class="tile">
+        <div class="tile-label"><span>PROGRESS <i>工程进度</i></span><span>0.72</span></div>
+        <div class="pbar-stack" style="gap:16px">
+          <div>
+            <div class="efpbar"><i></i></div>
+            <div class="lab"><span>开拓进度 EXPLOIT</span><span>72%</span></div>
+          </div>
+          <div>
+            <div class="efpbar"><i style="right:12%"></i></div>
+            <div class="lab"><span>能源输出 POWER</span><span>88%</span></div>
+          </div>
+          <div class="hazard-ef"></div>
+          <div style="display:flex;align-items:center;gap:14px">
+            <span class="cmyk"><i></i><i></i><i></i><i></i></span>
+            <span class="mono" style="font-size:9.5px;letter-spacing:2px;color:var(--ef-gray2)">COLOR CALIBRATION BAR</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid2" style="margin-top:22px">
+      <div class="tile">
+        <div class="tile-label"><span>ENGINEERING MARKS <i>工程标注</i></span><span>BLUEPRINT</span></div>
+        <div class="eng-panel">
+          <i class="ck tl"></i><i class="ck tr"></i><i class="ck bl"></i><i class="ck br"></i>
+          <div class="pt"><span>DWG-EF-0091 // 开拓区段示意</span><i>REV.2</i></div>
+          <div style="margin-top:16px;display:flex;align-items:center;gap:14px">
+            <span class="cross-ef"></span>
+            <div style="flex:1;height:52px;border:1.5px solid var(--ef-ink);background:repeating-linear-gradient(45deg,rgba(23,24,26,.07) 0 8px,transparent 8px 16px);position:relative">
+              <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;letter-spacing:3px">TARGET AREA · 目标区段</span>
+            </div>
+            <span class="cross-ef"></span>
+          </div>
+          <div class="dim">
+            <span class="line"></span>
+            <span class="lab">SECTION LENGTH 240.0 m</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;letter-spacing:1.5px;color:var(--ef-gray2)">
+            <span>N 34°02′ E 107°33′</span><span>SCALE 1:2400</span><span>— — 切割线 CUT — —</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="tile">
+        <div class="tile-label"><span>MISSION LIST <i>任务清单</i></span><span>CHECKLIST</span></div>
+        <div class="ef-tasks">
+          <div class="ef-task done"><span class="box">✓</span>建立前哨站补给线<span class="st g">DONE</span></div>
+          <div class="ef-task"><span class="box"></span>勘察峘形山北麓矿脉<span class="st y">进行中</span></div>
+          <div class="ef-task"><span class="box"></span>部署自动化产线 × 2<span class="st">排队</span></div>
+          <div class="contour-demo" style="margin-top:4px">
+            <svg viewBox="0 0 420 190" preserveAspectRatio="xMidYMid slice">
+              <g fill="none" stroke="#17181a" stroke-opacity=".38" stroke-width="1.2" transform="translate(210,95)">
+                <path transform="scale(1.55)" d="M-40,-20 C-120,-80 -60,-160 30,-140 C130,-118 190,-60 150,10 C120,66 40,60 10,120 C-20,180 -110,120 -140,60 C-170,0 -120,20 -40,-20 Z"/>
+                <path transform="scale(1.28)" d="M-40,-20 C-120,-80 -60,-160 30,-140 C130,-118 190,-60 150,10 C120,66 40,60 10,120 C-20,180 -110,120 -140,60 C-170,0 -120,20 -40,-20 Z"/>
+                <path transform="scale(1.02)" d="M-40,-20 C-120,-80 -60,-160 30,-140 C130,-118 190,-60 150,10 C120,66 40,60 10,120 C-20,180 -110,120 -140,60 C-170,0 -120,20 -40,-20 Z"/>
+                <path transform="scale(.78)" stroke-dasharray="5 5" d="M-40,-20 C-120,-80 -60,-160 30,-140 C130,-118 190,-60 150,10 C120,66 40,60 10,120 C-20,180 -110,120 -140,60 C-170,0 -120,20 -40,-20 Z"/>
+                <path transform="scale(.54)" d="M-40,-20 C-120,-80 -60,-160 30,-140 C130,-118 190,-60 150,10 C120,66 40,60 10,120 C-20,180 -110,120 -140,60 C-170,0 -120,20 -40,-20 Z"/>
+                <path transform="scale(.3)" fill="#ffd800" fill-opacity=".9" stroke="#17181a" stroke-width="1.5" d="M-40,-20 C-120,-80 -60,-160 30,-140 C130,-118 190,-60 150,10 C120,66 40,60 10,120 C-20,180 -110,120 -140,60 C-170,0 -120,20 -40,-20 Z"/>
+                <path d="M-180,120 L-60,40 L30,0 L150,-60" stroke="#17181a" stroke-width="1.4" stroke-dasharray="2 6"/>
+                <circle cx="30" cy="0" r="3.5" fill="#17181a"/>
+                <path d="M30,-14 L30,14 M16,0 L44,0" stroke="#17181a" stroke-width="1.4"/>
+                <text x="40" y="-10" font-family="IBM Plex Mono, monospace" font-size="10" letter-spacing="2" fill="#17181a">PEAK 1216 m</text>
+              </g>
+            </svg>
+            <span class="cd-lab">TOPOGRAPHIC CONTOUR // 等高线母题</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     04 仿·终末地工程控制台
+============================================================ -->
+<section class="sec sec-ef" id="ef-mock" style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="no">SECTION 04 // MOCK CONSOLE</div>
+      <h2>仿 · 终末地工程控制台</h2>
+      <p class="sub">以终末地的语言重排的"管理终端"：图纸底、角标卡片、工程标注与警戒黄操作区。注意它与上方方舟终端的骨架相似、气质迥异。</p>
+    </div>
+
+    <div class="console-wrap">
+      <div class="console">
+        <div class="fx">
+          <i class="ck tl"></i><i class="ck tr"></i><i class="ck bl"></i><i class="ck br"></i>
+        </div>
+
+        <div class="c-top">
+          <span class="lg"></span>
+          <span class="tt">管理部终端<small>ENDFIELD IND. ADMIN CONSOLE v2.4</small></span>
+          <span class="rt">
+            <span>N 34°02′ E 107°33′</span>
+            <span>SYS.TIME 14:32:07</span>
+            <span class="sig">● 信号良好</span>
+            <span>天候 · 晴</span>
+          </span>
+        </div>
+
+        <div class="c-body">
+          <!-- 左：管理员 -->
+          <div class="c-card">
+            <div class="hd y">管理员 <span class="en">MANAGER</span></div>
+            <div class="bd">
+              <div class="mgr">
+                <span class="ava">
+                  <svg width="34" height="34" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="14" r="7" stroke="#17181a" stroke-width="2.4"/><path d="M6 34c2-8 8-11 14-11s12 3 14 11" stroke="#17181a" stroke-width="2.4"/></svg>
+                </span>
+                <span class="who">
+                  <span class="nm">管理员</span><br>
+                  <span class="id">MGR-0001 · TALOS-II</span>
+                </span>
+              </div>
+              <div class="c-stat">
+                <div class="s"><div class="l"><span>信心 CONF.</span><b>Lv.42</b></div><div class="b"><i style="--r:28%"></i></div></div>
+                <div class="s"><div class="l"><span>开拓值 EXPLOIT</span><b>72%</b></div><div class="b"><i style="--r:28%"></i></div></div>
+              </div>
+              <div class="res-line"><span>预制构件</span><b>×12,480</b></div>
+              <div class="res-line"><span>能源电池</span><b>×3,205</b></div>
+              <div class="res-line" style="border-bottom:0"><span>勘察数据</span><b>×882</b></div>
+            </div>
+          </div>
+
+          <!-- 中：任务 -->
+          <div class="c-card">
+            <div class="hd">开拓任务 // MISSION BOARD <span class="en">PRIORITY: HIGH</span></div>
+            <div class="bd">
+              <div class="ef-task done"><span class="box">✓</span>扩建一号工业产线<span class="st g">DONE</span></div>
+              <div class="ef-task"><span class="box"></span>勘察队抵达二号区段<span class="st y">进行中</span></div>
+              <div class="ef-task"><span class="box"></span>为前哨站接通电网<span class="st">排队</span></div>
+              <div>
+                <div class="efpbar"><i></i></div>
+                <div class="lab"><span>区段开拓进度 SECTION 02</span><span>72 / 100</span></div>
+              </div>
+              <div class="dim" style="margin-top:6px">
+                <span class="line"></span>
+                <span class="lab">NEXT MILESTONE · 距下一阶段 28 单位</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 右：产线 -->
+          <div class="c-card">
+            <div class="hd">产线状态 <span class="en">PRODUCTION</span></div>
+            <div class="bd">
+              <div style="display:flex;justify-content:flex-end"><span class="cmyk"><i></i><i></i><i></i><i></i></span></div>
+              <div class="prod">
+                <div class="p">
+                  <div class="t"><span class="lamp"></span>传送带 A<span class="st run">运转中</span></div>
+                  <div class="meter"><i style="right:34%"></i></div>
+                </div>
+                <div class="p">
+                  <div class="t"><span class="lamp"></span>采掘单元 B<span class="st run">运转中</span></div>
+                  <div class="meter"><i style="right:48%"></i></div>
+                </div>
+                <div class="p off">
+                  <div class="t"><span class="lamp"></span>组装单元 C<span class="st idle">待机</span></div>
+                  <div class="meter"><i style="right:88%"></i></div>
+                </div>
+              </div>
+              <div class="eng-panel" style="padding:14px;filter:none;clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%)">
+                <div class="pt" style="justify-content:flex-start;gap:8px"><span class="cross-ef" style="width:12px;height:12px"></span><span>产能输出 84% // 输出稳定</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="c-foot">
+          <button class="c-cta">开始作业<small>START WORK ORDER</small></button>
+          <span class="hz"><span>CAUTION — 自动化作业区域 AUTOMATED AREA</span></span>
+        </div>
+      </div>
+
+      <div class="cap">
+        <span>① 图纸网格底 + 角标括号</span>
+        <span>② 警戒黄仅用于高优先信息</span>
+        <span>③ 尺寸线 / 坐标 / 编号标注</span>
+        <span>④ 硬投影切角卡片</span>
+        <span>⑤ 黄黑斜纹警戒条</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     05 对比总结
+============================================================ -->
+<section class="sec sec-vs" id="vs">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="no">SECTION 05 // SIDE BY SIDE</div>
+      <h2>对比总结 · 一套骨架，两种气质</h2>
+      <p class="sub">两款游戏共享同一套工业设计基因，只在"底色、点缀色与制图语言"上分岔。</p>
+    </div>
+
+    <table class="vs-table">
+      <tr><th>维度 DIM</th><th class="ak-h">明日方舟 ARKNIGHTS</th><th class="ef-h">终末地 ENDFIELD</th></tr>
+      <tr><td>基底色调</td><td class="ak-col">近黑深灰（#141418 系），白字高层级对比，弹窗普遍背景模糊</td><td class="ef-col">黑白灰大面基底；另有"图纸纸感"亮色主题，扁平少投影</td></tr>
+      <tr><td>点缀色</td><td class="ak-col">青蓝 #43B8FF（主操作）、警戒橙、稀有度金，多色但克制</td><td class="ef-col">警戒黄 #FFD800 一色独大，兼作背景色块与视觉引导</td></tr>
+      <tr><td>形状语言</td><td class="ak-col">单侧斜切角矩形、平行四边形斜切标签、细白描边</td><td class="ef-col">切角 + 1.5px 粗描边 + 角标括号，硬投影"贴纸"卡片</td></tr>
+      <tr><td>装饰母题</td><td class="ak-col">条形码、序列号、警戒斜纹、十字标、背景巨型水印字（描边英文/大号中文，带平移与字距入场动画）</td><td class="ef-col">等高线地形图、尺寸标注线、注册十字、切割虚线、色标条</td></tr>
+      <tr><td>字体气质</td><td class="ak-col">思源黑体 Heavy + Chakra Petch 科技体，大字距微标签</td><td class="ef-col">特粗黑体大标题 + 等宽工程标注（坐标/编号/比例尺）</td></tr>
+      <tr><td>界面隐喻</td><td class="ak-col">深空观瞄终端（Diegetic：看板投影）</td><td class="ef-col">工程机械控制台 + 画内 HUD（产线可视化、勘探 HUD）</td></tr>
+    </table>
+
+    <div class="shared">
+      <span class="t">SHARED DNA //</span>
+      <span class="s">切角形状语言</span>
+      <span class="s">警戒亮色点缀</span>
+      <span class="s">工业 / 工程制图感</span>
+      <span class="s">中英混排微标签</span>
+      <span class="s">条码与序列号</span>
+      <span class="s">高信息密度 · 浅层级</span>
+    </div>
+
+    <div class="refs">
+      <h4>REFERENCES // 参考资料来源</h4>
+      <ol>
+        <li><i>[1]</i><a href="http://gameinstitute.qq.com/article/10027" target="_blank" rel="noopener">《明日方舟》UI/UX 分析——藏在「好看」背后的先进性 · 腾讯游戏学堂</a></li>
+        <li><i>[2]</i><a href="https://zhuanlan.zhihu.com/p/570566718" target="_blank" rel="noopener">从 TA 的视角看 UI#1——明日方舟美术设计分析 · 知乎专栏</a></li>
+        <li><i>[3]</i><a href="https://www.bilibili.com/opus/1012354732615794692" target="_blank" rel="noopener">浅谈明日方舟：终末地的设计 Vol.01——色彩运用 · 哔哩哔哩专栏</a></li>
+        <li><i>[4]</i><a href="https://user.guancha.cn/main/content?id=1367572" target="_blank" rel="noopener">提前玩了十几个小时终末地，我被它的设计美学"击中"了 · 观察者网</a></li>
+        <li><i>[5]</i><a href="https://www.bilibili.com/video/BV1Hw411x7pH/" target="_blank" rel="noopener">「明日方舟：终末地」UI 和 UX 设计展示（等高线风格） · 哔哩哔哩</a></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>UI STYLE STUDY // 明日方舟 × 终末地 · 平面风格学习演示（非官方）</span>
+  <span>《明日方舟》《明日方舟：终末地》© 鹰角网络 / HYPERGRYPH</span>
+</footer>
+
+<!-- 明日方舟风格弹窗 -->
+<div class="modal" id="akModal">
+  <div class="dlg">
+    <div class="dtop">
+      <b>作战确认</b>
+      <span class="serial">OP-0091 // CONFIRM</span>
+      <span class="x" data-close>✕</span>
+    </div>
+    <div class="dbody">
+      <div class="row"><span>行动目标</span><b>龙门市区 · 剿灭作战</b></div>
+      <div class="row"><span>消耗理智</span><span class="hl">-25 / 84</span></div>
+      <div class="row"><span>推荐阵容</span><b>先锋 ×2 · 医疗 ×2 · 重装 ×1</b></div>
+      <div class="row" style="border-bottom:0;padding-bottom:0"><span>⚠ 演习券不足，本次将以理智结算</span></div>
+    </div>
+    <div class="dfoot">
+      <button class="btn btn-ak-ghost" data-close>取消</button>
+      <button class="btn btn-ak-primary" data-close>开始行动 »</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // 弹窗开关
+  var modal = document.getElementById('akModal');
+  document.querySelectorAll('[data-open-modal]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    });
+  });
+  function closeModal() {
+    modal.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
+  modal.querySelectorAll('[data-close]').forEach(function (b) { b.addEventListener('click', closeModal); });
+  window.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
+
+  // 背景大字水印：重播入场动画
+  var bgStage = document.getElementById('bgStage');
+  document.querySelectorAll('[data-replay]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      bgStage.classList.remove('play');
+      void bgStage.offsetWidth; /* 强制重排以重启动画 */
+      bgStage.classList.add('play');
+    });
+  });
+
+  // 终端时钟
+  function tick() {
+    var el = document.getElementById('akClock');
+    if (el) el.textContent = new Date().toTimeString().slice(0, 8);
+  }
+  tick();
+  setInterval(tick, 1000);
+</script>
+</body>
+</html>
