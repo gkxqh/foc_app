@@ -11,6 +11,7 @@ class TicketModel {
   final String campus;
   final String? qqNumber;
   final String? phone;
+  final String? ownerNickname; // 机主昵称（fy_workorders.user_nick，报修时快照）
   final String? model;
   final String? warrantyStatus; // expired, under, unknown
   final String? purchaseDate;
@@ -31,6 +32,7 @@ class TicketModel {
     required this.campus,
     this.qqNumber,
     this.phone,
+    this.ownerNickname,
     this.model,
     this.warrantyStatus,
     this.purchaseDate,
@@ -62,6 +64,7 @@ class TicketModel {
       campus: json['campus']?.toString() ?? '',
       qqNumber: json['qq_number']?.toString(),
       phone: (json['user_phone'] ?? json['phone'])?.toString(),
+      ownerNickname: json['user_nick']?.toString(),
       model: json['model']?.toString(),
       warrantyStatus: json['warranty_status']?.toString(),
       purchaseDate: (json['machine_purchase_date'] ?? json['purchase_date'])
@@ -86,6 +89,7 @@ class TicketModel {
       'campus': campus,
       'qq_number': qqNumber,
       'user_phone': phone,
+      'user_nick': ownerNickname,
       'model': model,
       'warranty_status': warrantyStatus,
       'machine_purchase_date': purchaseDate,
@@ -108,6 +112,7 @@ class TicketModel {
     String? campus,
     String? qqNumber,
     String? phone,
+    String? ownerNickname,
     String? model,
     String? warrantyStatus,
     String? purchaseDate,
@@ -128,6 +133,7 @@ class TicketModel {
       campus: campus ?? this.campus,
       qqNumber: qqNumber ?? this.qqNumber,
       phone: phone ?? this.phone,
+      ownerNickname: ownerNickname ?? this.ownerNickname,
       model: model ?? this.model,
       warrantyStatus: warrantyStatus ?? this.warrantyStatus,
       purchaseDate: purchaseDate ?? this.purchaseDate,

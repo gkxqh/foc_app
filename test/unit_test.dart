@@ -110,6 +110,7 @@ void main() {
           'machine_purchase_date': '2024-06-01',
           'qq_number': 'QQ号|123456',
           'transcode': '483920',
+          'user_nick': '王小明',
           'assigned_technician_id': '张三 - 13900000000',
           'assigned_technician_nickname': '张三',
         });
@@ -118,6 +119,11 @@ void main() {
         expect(ticket.purchaseDate, '2024-06-01');
         expect(ticket.technicianName, '张三');
         expect(ticket.qqNumber, 'QQ号|123456');
+        expect(ticket.ownerNickname, '王小明');
+
+        // copyWith 未传昵称时保留原值
+        final updated = ticket.copyWith(repairStatus: 'Done');
+        expect(updated.ownerNickname, '王小明');
       },
     );
   });

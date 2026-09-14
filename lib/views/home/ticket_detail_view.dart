@@ -556,6 +556,7 @@ class _TicketDetailViewState extends State<TicketDetailView> {
               children: [
                 Text('联系信息', style: AppText.title),
                 const SizedBox(height: AppSpacing.sm),
+                _buildContactRow('机主昵称', _ticket.ownerNickname),
                 _buildContactRow('联系电话', _plainPhone),
                 _buildContactRow('QQ号', _plainQq),
               ],
