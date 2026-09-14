@@ -7,6 +7,8 @@ class ApiConstants {
 
   // Auth & User（路径已于 2026-09-11 逐一对照服务器 PHP 文件名核实，注意大小写）
   static const String userLogin = '/v1/user/login';
+  // 小程序注册/验证端点（App 不可直接调用：需 wx.login 会话 token）；
+  // 2026-09-14 服务端补丁：verify 支持 App 注册账号（app_ openid）合并绑定微信 openid
   static const String userRegister = '/v1/user/register';
   static const String userVerify = '/v1/user/verify';
   static const String userMigration = '/v1/user/migration';
@@ -17,6 +19,9 @@ class ApiConstants {
   // App 端短信登录（2026-09-10 新增，服务端 phonesend.php / phonelogin.php）
   static const String phoneSend = '/v1/user/phonesend';
   static const String phoneLogin = '/v1/user/phonelogin';
+  // App/网页端手机号注册（2026-09-14 新增，服务端 phoneregsend.php / phoneregister.php）
+  static const String phoneRegSend = '/v1/user/phoneregsend';
+  static const String phoneRegister = '/v1/user/phoneregister';
   static const String userDelete = '/v1/user/delete';
   static const String newPhone = '/v1/user/newphone';
   static const String phoneVerify = '/v1/user/phonechange_verify';

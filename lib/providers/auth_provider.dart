@@ -188,6 +188,17 @@ class AuthProvider extends ChangeNotifier {
     return res;
   }
 
+  // 发送注册验证码（App 端走 phoneregsend 免鉴权接口，带 60s/小时频控）
+  Future<ApiResponse<Map<String, dynamic>>> sendRegisterSmsCode(
+    String phone,
+  ) async {
+    final res = await _authService.sendRegisterSms(phone);
+    if (res.success) {
+      startCountdown();
+    }
+    return res;
+  }
+
   void startCountdown() {
     _countdown = 60;
     _timer?.cancel();
@@ -219,38 +230,59 @@ class AuthProvider extends ChangeNotifier {
     }
 
     if (res.success) {
-      final userInfo = await _authService.getUserInfo();
-      _user = userInfo ?? UserModel(phone: phone);
-      _isLoggedIn = true;
-      // 无论能否拉到完整资料都落缓存，保证冷启动后登录态与资料一致
-      await _saveUserToCache(_user!);
-      // 「记住此设备」开启时保存账号到本机列表，退出后可在登录页一键切换
-      final prefs = await SharedPreferences.getInstance();
-      if (prefs.getBool(_kRememberEnabled) ?? true) {
-        final token = _client.accessToken;
-        if (token != null && token.isNotEmpty) {
-          await upsertSavedAccount(
-            SavedAccount(
-              phone: phone,
-              token: token,
-              nickname: _user?.nickname ?? '',
-              avatarUrl: _user?.avatarUrl ?? '',
-              role: _user?.role ?? 'user',
-              savedAt: DateTime.now().millisecondsSinceEpoch,
-            ),
-          );
-        }
-      }
-      _isLoading = false;
-      notifyListeners();
-      // 新登录会话：丢弃快照中可能残留的旧账号工单
-      unawaited(WidgetSnapshotService.refreshUser(resetTickets: true));
-      return true;
+      await _finishLogin(phone);
     }
 
     _isLoading = false;
     notifyListeners();
-    return false;
+    return res.success;
+  }
+
+  // 手机号注册（App 端走 phoneregister 30 天 token，注册即登录）。
+  // 返回原始响应：调用方据 raw['status'] 区分 already_registered 等服务端分支。
+  Future<ApiResponse<Map<String, dynamic>>> registerAndLogin(
+    String phone,
+    String code,
+  ) async {
+    _isLoading = true;
+    notifyListeners();
+
+    final res = await _authService.registerWithCode(phone, code);
+    if (res.success) {
+      await _finishLogin(phone);
+    }
+
+    _isLoading = false;
+    notifyListeners();
+    return res;
+  }
+
+  // 登录/注册成功后的公共收尾：拉取资料、落缓存、按需保存账号、刷新小组件
+  Future<void> _finishLogin(String phone) async {
+    final userInfo = await _authService.getUserInfo();
+    _user = userInfo ?? UserModel(phone: phone);
+    _isLoggedIn = true;
+    // 无论能否拉到完整资料都落缓存，保证冷启动后登录态与资料一致
+    await _saveUserToCache(_user!);
+    // 「记住此设备」开启时保存账号到本机列表，退出后可在登录页一键切换
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.getBool(_kRememberEnabled) ?? true) {
+      final token = _client.accessToken;
+      if (token != null && token.isNotEmpty) {
+        await upsertSavedAccount(
+          SavedAccount(
+            phone: phone,
+            token: token,
+            nickname: _user?.nickname ?? '',
+            avatarUrl: _user?.avatarUrl ?? '',
+            role: _user?.role ?? 'user',
+            savedAt: DateTime.now().millisecondsSinceEpoch,
+          ),
+        );
+      }
+    }
+    // 新登录会话：丢弃快照中可能残留的旧账号工单
+    unawaited(WidgetSnapshotService.refreshUser(resetTickets: true));
   }
 
   // 「记住此设备」开关：关闭时清空本机保存的账号列表

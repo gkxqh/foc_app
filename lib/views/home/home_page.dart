@@ -17,6 +17,7 @@ import '../../providers/config_provider.dart';
 import '../../providers/ticket_provider.dart';
 import '../../providers/update_provider.dart';
 import '../auth/login_page.dart';
+import '../auth/register_page.dart';
 import '../common/update_dialog.dart';
 import 'annual_summary_page.dart';
 import 'announcement_page.dart';
@@ -326,13 +327,30 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
           const SizedBox(height: AppSpacing.md),
-          Center(
-            child: Text(
-              '未注册用户请先前往微信小程序「云上飞扬」完成注册',
-              style: AppText.captionSm.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+          // 注册入口：App 内直接手机号注册（2026-09-14 起不再跳转小程序）
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                '还没有账号？',
+                style: AppText.captionSm.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
-            ),
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const RegisterPage()),
+                  );
+                },
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  minimumSize: const Size(0, 36),
+                ),
+                child: const Text('手机号注册'),
+              ),
+            ],
           ),
         ],
       ),

@@ -20,16 +20,6 @@ class AuthService {
     return res;
   }
 
-  // 发送手机注册/登录短信验证码
-  Future<ApiResponse<Map<String, dynamic>>> sendRegisterCode(
-    String phone,
-  ) async {
-    return await _client.post<Map<String, dynamic>>(
-      ApiConstants.userRegister,
-      data: {'phone': phone},
-    );
-  }
-
   // App 端短信登录：发送验证码（对应服务端 phonesend.php，免鉴权、带频控）
   Future<ApiResponse<Map<String, dynamic>>> sendLoginCode(String phone) async {
     return await _client.post<Map<String, dynamic>>(
@@ -56,13 +46,21 @@ class AuthService {
     return res;
   }
 
-  // 手机号+验证码验证
-  Future<ApiResponse<Map<String, dynamic>>> verifyCode(
+  // App/网页端手机号注册：发送验证码（对应服务端 phoneregsend.php，免鉴权、带频控）
+  Future<ApiResponse<Map<String, dynamic>>> sendRegisterSms(String phone) async {
+    return await _client.post<Map<String, dynamic>>(
+      ApiConstants.phoneRegSend,
+      data: {'phone': phone},
+    );
+  }
+
+  // App/网页端手机号注册：验证码激活并换取 30 天长效 token（对应服务端 phoneregister.php）
+  Future<ApiResponse<Map<String, dynamic>>> registerWithCode(
     String phone,
     String code,
   ) async {
     final res = await _client.post<Map<String, dynamic>>(
-      ApiConstants.userVerify,
+      ApiConstants.phoneRegister,
       data: {'phone': phone, 'code': code},
     );
     if (res.success && res.raw != null && res.raw is Map) {
