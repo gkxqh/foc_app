@@ -97,7 +97,7 @@ class _SubmitTicketPageState extends State<SubmitTicketPage> {
       _isUploadingImage = true;
     });
 
-    final res = await ApiClient().uploadImage(pickedFile.path);
+    final res = await ApiClient().uploadImage(pickedFile);
 
     if (!mounted) return;
 

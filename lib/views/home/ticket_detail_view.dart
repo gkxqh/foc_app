@@ -201,7 +201,7 @@ class _TicketDetailViewState extends State<TicketDetailView> {
     if (file == null) return;
 
     setState(() => _isUploadingCompleteImg = true);
-    final res = await ApiClient().uploadImage(file.path);
+    final res = await ApiClient().uploadImage(file);
 
     if (!mounted) return;
 

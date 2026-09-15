@@ -123,7 +123,7 @@ class _SettingsPageState extends State<SettingsPage> {
     if (picked == null) return;
 
     setState(() => _isUploadingAvatar = true);
-    final res = await ApiClient().uploadImage(picked.path);
+    final res = await ApiClient().uploadImage(picked);
 
     if (!mounted) return;
     setState(() => _isUploadingAvatar = false);

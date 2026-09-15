@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:cross_file/cross_file.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
@@ -128,12 +129,23 @@ class ApiClient {
     }
   }
 
-  Future<ApiResponse<String>> uploadImage(String filePath) async {
+  // 图片上传统一收 XFile 并按字节读取：MultipartFile.fromFile 依赖 dart:io，
+  // web 端会抛 "MultipartFile is only supported where dart:io is available"
+  Future<ApiResponse<String>> uploadImage(XFile file) async {
     try {
       final String uuid = const Uuid().v4();
+      final bytes = await file.readAsBytes();
+      // web 端文件名可能是 blob URL 派生的空名，兜底扩展名保证服务端/七牛可识别类型
+      final filename = _uploadFileName(file.name, uuid);
       final formData = FormData.fromMap({
         'key': 'fyMiniprogam/$uuid',
-        'file': await MultipartFile.fromFile(filePath),
+        'file': MultipartFile.fromBytes(
+          bytes,
+          filename: filename,
+          contentType:
+              MultipartFile.lookupMediaType(filename) ??
+              DioMediaType('image', 'jpeg'),
+        ),
       });
 
       final response = await _dio.post(
@@ -171,6 +183,16 @@ class ApiClient {
         message: e.toString(),
       );
     }
+  }
+
+  /// 从 XFile 文件名生成上传文件名；无扩展名（web blob 场景）时兜底 .jpg
+  static String _uploadFileName(String name, String uuid) {
+    final trimmed = name.trim();
+    final dot = trimmed.lastIndexOf('.');
+    if (trimmed.isNotEmpty && dot > 0 && dot < trimmed.length - 1) {
+      return trimmed;
+    }
+    return '$uuid.jpg';
   }
 
   ApiResponse<T> _handleResponse<T>(Response response) {
