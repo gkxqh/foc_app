@@ -11,12 +11,14 @@ import 'package:provider/provider.dart';
 import '../../core/constants/api_constants.dart';
 import '../../core/network/api_client.dart';
 import '../../core/theme/app_theme.dart';
+import '../../models/ticket_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/ticket_provider.dart';
 import '../common/app_snackbar.dart';
 import '../common/confirm_dialog.dart';
 import '../common/image_preview.dart';
 import '../common/page_insets.dart';
+import 'ticket_detail_page.dart';
 
 class SubmitTicketPage extends StatefulWidget {
   const SubmitTicketPage({super.key});
@@ -162,7 +164,31 @@ class _SubmitTicketPageState extends State<SubmitTicketPage> {
       HapticFeedback.mediumImpact();
       showAppSnackBar(context, '报修工单提交成功！', type: SnackBarType.success);
       if (auth.user != null) {
-        ticketProvider.fetchTickets(role: auth.user!.role, uid: auth.user!.uid);
+        if (_isOffline) {
+          // 线下维修：用户现场就要出示接单二维码，等列表刷新后直达新工单详情；
+          // 定位失败（网络异常等）时退回普通流程，可稍后在工单列表打开
+          await ticketProvider.fetchTickets(
+            role: auth.user!.role,
+            uid: auth.user!.uid,
+          );
+          if (!mounted) return;
+          final newTicket = _newestPendingOfflineTicket(ticketProvider);
+          if (!mounted) return;
+          if (newTicket != null) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (_) => TicketDetailPage(ticket: newTicket),
+              ),
+            );
+            return;
+          }
+        } else {
+          ticketProvider.fetchTickets(
+            role: auth.user!.role,
+            uid: auth.user!.uid,
+          );
+        }
       }
       Navigator.pop(context);
     } else {
@@ -170,6 +196,18 @@ class _SubmitTicketPageState extends State<SubmitTicketPage> {
         SnackBar(content: Text(ticketProvider.lastActionError ?? '提交失败，请稍后重试')),
       );
     }
+  }
+
+  /// 刷新后的工单列表按单号倒序，取最近一张待接单的线下工单即本次新提交的单
+  TicketModel? _newestPendingOfflineTicket(TicketProvider provider) {
+    for (final t in provider.activeTickets) {
+      if (t.campus == '线下' &&
+          t.repairStatus == 'Pending' &&
+          t.claimQrPayload != null) {
+        return t;
+      }
+    }
+    return null;
   }
 
   @override
@@ -270,7 +308,7 @@ class _SubmitTicketPageState extends State<SubmitTicketPage> {
                       const SizedBox(height: AppSpacing.md),
                       SwitchListTile(
                         title: const Text('是否线下接单'),
-                        subtitle: const Text('参加社团大型线下集中维修时勾选'),
+                        subtitle: const Text('参加社团大型线下集中维修时勾选，提交后可出示现场接单二维码'),
                         value: _isOffline,
                         onChanged: (v) => setState(() => _isOffline = v),
                         contentPadding: EdgeInsets.zero,

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../core/network/api_client.dart';
 import '../../core/theme/app_theme.dart';
@@ -449,6 +450,14 @@ class _TicketDetailViewState extends State<TicketDetailView> {
           ),
         ),
         const SizedBox(height: AppSpacing.md),
+        // 线下集中维修：待接单时用户出示二维码，技术员「扫码接单」扫描即可接单
+        if (!isTech &&
+            _ticket.campus == '线下' &&
+            _ticket.repairStatus == 'Pending' &&
+            _ticket.claimQrPayload != null) ...[
+          _buildOfflineClaimQrCard(),
+          const SizedBox(height: AppSpacing.md),
+        ],
         // 故障详情卡片
         Card(
           child: Padding(
@@ -651,6 +660,74 @@ class _TicketDetailViewState extends State<TicketDetailView> {
         ],
         const SizedBox(height: AppSpacing.xxxl),
       ],
+    );
+  }
+
+  /// 线下集中维修的现场接单二维码：内容与技术员「扫码接单」识别的
+  /// 服务端 qrcode_url 同构（[give];单号;order_hash），接单后凭据轮换自动失效
+  Widget _buildOfflineClaimQrCard() {
+    final payload = _ticket.claimQrPayload!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final qrColor = isDark ? Colors.white : Colors.black87;
+    final qrEyeColor = isDark ? Colors.white : AppTheme.primaryBlue;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.qr_code_rounded,
+                  size: 20,
+                  color: AppTheme.primaryBlue,
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                Text('现场接单二维码', style: AppText.title),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              '向现场技术员出示此码，扫码即可接单；工单被接单后二维码自动失效',
+              textAlign: TextAlign.center,
+              style: AppText.caption.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            // 扫码失败时的兜底：复制接单码发给技术员，走「手动输码」同样可接单
+            QrImageView(
+              data: payload,
+              version: QrVersions.auto,
+              size: 200.0,
+              eyeStyle: QrEyeStyle(
+                eyeShape: QrEyeShape.square,
+                color: qrEyeColor,
+              ),
+              dataModuleStyle: QrDataModuleStyle(
+                dataModuleShape: QrDataModuleShape.square,
+                color: qrColor,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            TextButton.icon(
+              onPressed: () {
+                Clipboard.setData(ClipboardData(text: payload));
+                HapticFeedback.selectionClick();
+                showAppSnackBar(
+                  context,
+                  '接单码已复制，可发给技术员手动输码',
+                  type: SnackBarType.success,
+                );
+              },
+              icon: const Icon(Icons.copy_rounded, size: 18),
+              label: const Text('复制接单码'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

@@ -18,6 +18,7 @@ class TicketModel {
   final String? technicianId;
   final String? technicianName;
   final String? transcode; // 服务端下发的 6 位转单验证码
+  final String? orderHash; // 服务端接单凭据哈希（getTicket SELECT * 随响应下发）
 
   TicketModel({
     required this.id,
@@ -39,7 +40,20 @@ class TicketModel {
     this.technicianId,
     this.technicianName,
     this.transcode,
+    this.orderHash,
   });
+
+  /// 技术员「扫码接单」凭证，与服务端 getTicket 下发的 qrcode_url 内容同构：
+  /// `[give];单号;order_hash`（服务端优先校验 order_hash），缺失时退回
+  /// 「单号+6位transcode」文本码。两种凭据都会在接单/转单后轮换，
+  /// 因此仅在工单待接单（Pending）期间有效。
+  String? get claimQrPayload {
+    final hash = orderHash;
+    if (hash != null && hash.isNotEmpty) return '[give];$id;$hash';
+    final code = transcode;
+    if (code != null && code.isNotEmpty) return '$id$code';
+    return null;
+  }
 
   bool get isFinished {
     final s = repairStatus.trim().toLowerCase();
@@ -72,6 +86,7 @@ class TicketModel {
       technicianId: json['assigned_technician_id']?.toString(),
       technicianName: json['assigned_technician_nickname']?.toString(),
       transcode: json['transcode']?.toString(),
+      orderHash: json['order_hash']?.toString(),
     );
   }
 
@@ -96,6 +111,7 @@ class TicketModel {
       'assigned_technician_id': technicianId,
       'assigned_technician_nickname': technicianName,
       'transcode': transcode,
+      'order_hash': orderHash,
     };
   }
 
@@ -119,6 +135,7 @@ class TicketModel {
     String? technicianId,
     String? technicianName,
     String? transcode,
+    String? orderHash,
   }) {
     return TicketModel(
       id: id ?? this.id,
@@ -140,6 +157,7 @@ class TicketModel {
       technicianId: technicianId ?? this.technicianId,
       technicianName: technicianName ?? this.technicianName,
       transcode: transcode ?? this.transcode,
+      orderHash: orderHash ?? this.orderHash,
     );
   }
 }

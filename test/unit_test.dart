@@ -126,6 +126,39 @@ void main() {
         expect(updated.ownerNickname, '王小明');
       },
     );
+
+    test('线下接单二维码凭证：order_hash 优先，缺失时退回单号+transcode', () {
+      // 服务端 getTicket 为 SELECT *，order_hash / transcode 随响应下发
+      final withHash = TicketModel.fromJson({
+        'id': '3301',
+        'repair_status': 'Pending',
+        'campus': '线下',
+        'order_hash': '9f86d081884c7d65',
+        'transcode': '483920',
+      });
+      // 与服务端 qrcode_url 同构，技术员扫码接单走 order_hash 校验
+      expect(withHash.claimQrPayload, '[give];3301;9f86d081884c7d65');
+
+      // 无 order_hash 的旧数据退回「单号+6位tvcode」文本码，手动输码同样可接单
+      final withCode = TicketModel.fromJson({
+        'id': '3301',
+        'repair_status': 'Pending',
+        'transcode': '483920',
+      });
+      expect(withCode.claimQrPayload, '3301483920');
+
+      // 两者皆缺时不出示二维码，避免生成无效凭证
+      final bare = TicketModel.fromJson({
+        'id': '3301',
+        'repair_status': 'Pending',
+      });
+      expect(bare.claimQrPayload, isNull);
+
+      // copyWith 保留接单凭据
+      final updated = withHash.copyWith(repairStatus: 'Repairing');
+      expect(updated.orderHash, '9f86d081884c7d65');
+      expect(updated.claimQrPayload, '[give];3301;9f86d081884c7d65');
+    });
   });
 
   group('EventModel tests', () {
@@ -279,7 +312,8 @@ void main() {
       {
         'name': 'app-armeabi-v7a-release.apk',
         'size': 18000000,
-        'browser_download_url': 'https://example.com/app-armeabi-v7a-release.apk',
+        'browser_download_url':
+            'https://example.com/app-armeabi-v7a-release.apk',
       },
       {
         'name': 'app-arm64-v8a-release.apk',
@@ -337,17 +371,20 @@ void main() {
         {
           'name': 'foc_app_v1.0.1_arm32.apk',
           'size': 32905976,
-          'browser_download_url': 'https://example.com/foc_app_v1.0.1_arm32.apk',
+          'browser_download_url':
+              'https://example.com/foc_app_v1.0.1_arm32.apk',
         },
         {
           'name': 'foc_app_v1.0.1_arm64.apk',
           'size': 36763462,
-          'browser_download_url': 'https://example.com/foc_app_v1.0.1_arm64.apk',
+          'browser_download_url':
+              'https://example.com/foc_app_v1.0.1_arm64.apk',
         },
         {
           'name': 'foc_app_v1.0.1_x86_64.apk',
           'size': 39484063,
-          'browser_download_url': 'https://example.com/foc_app_v1.0.1_x86_64.apk',
+          'browser_download_url':
+              'https://example.com/foc_app_v1.0.1_x86_64.apk',
         },
       ];
       expect(
@@ -382,16 +419,20 @@ void main() {
 
   group('AppUpdateInfo 解析', () {
     test('剥离 tag 的 v 前缀，按所选资产填充下载信息', () {
-      final info = AppUpdateInfo.fromGitHubJson({
-        'tag_name': 'v1.0.2',
-        'name': '云上飞扬 v1.0.2',
-        'body': '## 更新内容\n- 修复若干问题',
-        'html_url': 'https://github.com/gkxqh/foc_app/releases/tag/v1.0.2',
-      }, {
-        'name': 'app-arm64-v8a-release.apk',
-        'size': 20000000,
-        'browser_download_url': 'https://example.com/app-arm64-v8a-release.apk',
-      });
+      final info = AppUpdateInfo.fromGitHubJson(
+        {
+          'tag_name': 'v1.0.2',
+          'name': '云上飞扬 v1.0.2',
+          'body': '## 更新内容\n- 修复若干问题',
+          'html_url': 'https://github.com/gkxqh/foc_app/releases/tag/v1.0.2',
+        },
+        {
+          'name': 'app-arm64-v8a-release.apk',
+          'size': 20000000,
+          'browser_download_url':
+              'https://example.com/app-arm64-v8a-release.apk',
+        },
+      );
 
       expect(info.version, '1.0.2');
       expect(info.hasApk, true);
