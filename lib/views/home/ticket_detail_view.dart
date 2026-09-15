@@ -229,33 +229,39 @@ class _TicketDetailViewState extends State<TicketDetailView> {
     if (mounted) setState(() => _isUploadingCompleteImg = false);
   }
 
-  void _confirmTicket(bool isTech) async {
-    if (isTech &&
-        (_ticket.completeImageUrl == null ||
-            _ticket.completeImageUrl!.isEmpty)) {
-      // 未上传凭证：仅弹出提示要求上传，不自动进入拍照
-      final goUpload = await showDialog<bool>(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: const Text('请先上传维修凭证'),
-          content: const Text('请求用户确认完成前，需要先上传维修完成凭证图片。'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('我知道了'),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('去上传'),
-            ),
-          ],
-        ),
-      );
-      if (goUpload == true) {
-        _uploadCompleteImage();
-      }
-      return;
+  /// 技术员未上传维修凭证时弹窗引导上传；返回 false 表示不具备继续确认的条件
+  Future<bool> _ensureCompleteImageUploaded() async {
+    if (_ticket.completeImageUrl != null &&
+        _ticket.completeImageUrl!.isNotEmpty) {
+      return true;
     }
+    // 未上传凭证：仅弹出提示要求上传，不自动进入拍照
+    final goUpload = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('请先上传维修凭证'),
+        content: const Text('确认完成前，需要先上传维修完成凭证图片。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('我知道了'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('去上传'),
+          ),
+        ],
+      ),
+    );
+    if (goUpload == true) {
+      _uploadCompleteImage();
+    }
+    return false;
+  }
+
+  void _confirmTicket(bool isTech) async {
+    if (isTech && !await _ensureCompleteImageUploaded()) return;
+    if (!mounted) return;
 
     final newStatus = isTech ? 'UserConfirming' : 'TechConfirming';
 
@@ -303,6 +309,32 @@ class _TicketDetailViewState extends State<TicketDetailView> {
     setState(() => _isActionBusy = false);
     if (okDone) {
       showAppSnackBar(context, '工单已结束', type: SnackBarType.success);
+      _finish();
+    } else {
+      showAppSnackBar(context, '操作失败，请稍后重试', type: SnackBarType.error);
+    }
+  }
+
+  // 技术员在「等待技术员确认」(TechConfirming) 的最终确认，对齐小程序 completeTheTicket
+  Future<void> _completeTicket() async {
+    if (_isActionBusy) return;
+    if (!await _ensureCompleteImageUploaded()) return;
+    if (!mounted) return;
+    final ok = await showConfirmDialog(
+      context,
+      title: '确认维修完成？',
+      content: '用户已确认维修完成，确认后工单将正式结束。',
+      confirmText: '确认完成',
+    );
+    if (!ok || !mounted || _isActionBusy) return;
+    setState(() => _isActionBusy = true);
+
+    final ticketProvider = context.read<TicketProvider>();
+    final okDone = await ticketProvider.completeTicket(_ticket.id);
+    if (!mounted) return;
+    setState(() => _isActionBusy = false);
+    if (okDone) {
+      showAppSnackBar(context, '工单已完成', type: SnackBarType.success);
       _finish();
     } else {
       showAppSnackBar(context, '操作失败，请稍后重试', type: SnackBarType.error);
@@ -599,7 +631,7 @@ class _TicketDetailViewState extends State<TicketDetailView> {
             ),
           ),
         const SizedBox(height: AppSpacing.xxl),
-        // 底部操作区（双向确认/直接结束仅在维修中状态开放，防止绕过状态机）
+        // 底部操作区：各操作按钮按工单状态开放，防止绕过状态机
         if (!_ticket.isFinished) ...[
           if (isTech) ...[
             OutlinedButton.icon(
@@ -630,6 +662,22 @@ class _TicketDetailViewState extends State<TicketDetailView> {
                 ),
               ),
             ],
+            if (_ticket.repairStatus == 'TechConfirming') ...[
+              const SizedBox(height: AppSpacing.sm),
+              ElevatedButton.icon(
+                onPressed: _completeTicket,
+                icon: const Icon(Icons.check_circle_outline),
+                label: const Text('确认维修完成'),
+              ),
+            ],
+            if (_ticket.repairStatus == 'UserConfirming') ...[
+              const SizedBox(height: AppSpacing.sm),
+              ElevatedButton.icon(
+                onPressed: null,
+                icon: const Icon(Icons.hourglass_top),
+                label: const Text('等待用户确认'),
+              ),
+            ],
             const SizedBox(height: AppSpacing.sm),
             TextButton.icon(
               onPressed: _forceCloseTicket,
@@ -640,11 +688,19 @@ class _TicketDetailViewState extends State<TicketDetailView> {
               ),
             ),
           ] else ...[
-            if (_ticket.repairStatus == 'Repairing')
+            // 用户在「维修中」或「等待用户确认」时均可发起确认，置为等待技术员确认
+            if (_ticket.repairStatus == 'Repairing' ||
+                _ticket.repairStatus == 'UserConfirming')
               ElevatedButton.icon(
                 onPressed: () => _confirmTicket(false),
                 icon: const Icon(Icons.verified_outlined),
                 label: const Text('确认电脑维修完成'),
+              ),
+            if (_ticket.repairStatus == 'TechConfirming')
+              ElevatedButton.icon(
+                onPressed: null,
+                icon: const Icon(Icons.hourglass_top),
+                label: const Text('等待技术员确认'),
               ),
             if (_ticket.repairStatus == 'Pending') ...[
               const SizedBox(height: AppSpacing.sm),
