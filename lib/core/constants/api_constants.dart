@@ -30,6 +30,8 @@ class ApiConstants {
 
   // Tickets
   static const String getTicket = '/v1/status/getTicket';
+  // 接单广场：全部待接单工单列表（2026-09-18 新增，仅 technician/admin）
+  static const String plazaTickets = '/v1/ticket/plaza';
   static const String addTicket = '/v1/ticket/create';
   static const String giveTicket = '/v1/ticket/give';
   static const String completeTicket = '/v1/ticket/complete';

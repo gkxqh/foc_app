@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'core/theme/app_theme.dart';
 import 'providers/auth_provider.dart';
 import 'providers/config_provider.dart';
+import 'providers/plaza_provider.dart';
 import 'providers/ticket_provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/update_provider.dart';
@@ -73,6 +74,7 @@ class _FeiyangAppState extends State<FeiyangApp> {
         ),
         ChangeNotifierProvider(create: (_) => ConfigProvider()),
         ChangeNotifierProvider(create: (_) => TicketProvider()),
+        ChangeNotifierProvider(create: (_) => PlazaProvider()),
         ChangeNotifierProvider(create: (_) => UpdateProvider()),
       ],
       // Consumer 必须位于 MultiProvider 内部：订阅主题偏好变化，

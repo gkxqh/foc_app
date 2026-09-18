@@ -21,6 +21,7 @@ import '../auth/register_page.dart';
 import '../common/update_dialog.dart';
 import 'annual_summary_page.dart';
 import 'announcement_page.dart';
+import 'claim_plaza_page.dart';
 import 'repair_terms_page.dart';
 import 'scan_give_page.dart';
 import 'tech_id_card_page.dart';
@@ -197,6 +198,19 @@ class _HomePageState extends State<HomePage> {
         ),
         actions: [
           if (auth.isTechnician) ...[
+            IconButton(
+              icon: const Icon(Icons.storefront_rounded),
+              tooltip: '接单广场',
+              onPressed: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ClaimPlazaPage()),
+                );
+                if (mounted) {
+                  _refreshData();
+                }
+              },
+            ),
             IconButton(
               icon: const Icon(Icons.qr_code_scanner_rounded),
               tooltip: '接单',

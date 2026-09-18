@@ -28,6 +28,23 @@ class TicketService {
     return [];
   }
 
+  // 接单广场：全部待接单工单（服务端 /v1/ticket/plaza，仅技术员/管理员可调）。
+  // 列表带 order_hash，供接单时直接走 giveTicket；不带 transcode（转单码不应对全广场下发）。
+  Future<List<TicketModel>> getPlazaTickets() async {
+    final res = await _client.get(ApiConstants.plazaTickets);
+    if (res.success && res.raw != null && res.raw is Map) {
+      final listData = res.raw['data'];
+      if (listData is List) {
+        return listData
+            .map(
+              (item) => TicketModel.fromJson(Map<String, dynamic>.from(item)),
+            )
+            .toList();
+      }
+    }
+    return [];
+  }
+
   // 发起新报修
   Future<ApiResponse<dynamic>> submitTicket({
     String? uid,

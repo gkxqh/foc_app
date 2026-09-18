@@ -19,6 +19,7 @@ class TicketModel {
   final String? technicianName;
   final String? transcode; // 服务端下发的 6 位转单验证码
   final String? orderHash; // 服务端接单凭据哈希（getTicket SELECT * 随响应下发）
+  final bool isUrgent; // 加急单（从存档重新提单而来，接单广场置顶展示）
 
   TicketModel({
     required this.id,
@@ -41,6 +42,7 @@ class TicketModel {
     this.technicianName,
     this.transcode,
     this.orderHash,
+    this.isUrgent = false,
   });
 
   /// 技术员「扫码接单」凭证，与服务端 getTicket 下发的 qrcode_url 内容同构：
@@ -87,7 +89,15 @@ class TicketModel {
       technicianName: json['assigned_technician_nickname']?.toString(),
       transcode: json['transcode']?.toString(),
       orderHash: json['order_hash']?.toString(),
+      isUrgent: _parseUrgent(json['urgent']),
     );
+  }
+
+  // 服务端 2026-09 后已把 urgent 规整为 int；兼容旧响应/其他端可能的字符串与布尔
+  static bool _parseUrgent(dynamic value) {
+    if (value is bool) return value;
+    if (value is int) return value == 1;
+    return int.tryParse(value?.toString() ?? '') == 1;
   }
 
   Map<String, dynamic> toJson() {
@@ -112,6 +122,7 @@ class TicketModel {
       'assigned_technician_nickname': technicianName,
       'transcode': transcode,
       'order_hash': orderHash,
+      'urgent': isUrgent ? 1 : 0,
     };
   }
 
@@ -136,6 +147,7 @@ class TicketModel {
     String? technicianName,
     String? transcode,
     String? orderHash,
+    bool? isUrgent,
   }) {
     return TicketModel(
       id: id ?? this.id,
@@ -158,6 +170,7 @@ class TicketModel {
       technicianName: technicianName ?? this.technicianName,
       transcode: transcode ?? this.transcode,
       orderHash: orderHash ?? this.orderHash,
+      isUrgent: isUrgent ?? this.isUrgent,
     );
   }
 }
