@@ -213,7 +213,7 @@ class _HomePageState extends State<HomePage> {
             ),
             IconButton(
               icon: const Icon(Icons.qr_code_scanner_rounded),
-              tooltip: '接单',
+              tooltip: '扫一扫',
               onPressed: () async {
                 final changed = await Navigator.push<bool>(
                   context,
@@ -675,7 +675,6 @@ class _HomePageState extends State<HomePage> {
               icon: Icons.done_all_rounded,
               image: 'assets/illustrations/fy_q.png',
               title: '当前没有进行中的工单',
-              subtitle: '如需接单，请点击右上角扫码接单',
               minHeight: 220,
             ),
           ],

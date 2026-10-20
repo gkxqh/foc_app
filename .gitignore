@@ -53,6 +53,8 @@ AGENT.md
 PROJECT_HANDOVER_MEMO.md
 backend_addons/
 .zcode/
+.workbuddy/
+release_notes/
 key.properties
 *.jks
 *.keystore
