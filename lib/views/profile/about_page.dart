@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 import '../common/responsive_center.dart';
@@ -105,7 +106,7 @@ class _AboutPageState extends State<AboutPage> {
                           ),
                           // 应用仅经 GitHub Releases 侧载分发（Android），无商店更新通道，
                           // 其他平台没有可安装的产物，不展示检查更新入口
-                          if (Platform.isAndroid) ...[
+                          if (!kIsWeb && Platform.isAndroid) ...[
                             const SizedBox(height: AppSpacing.lg),
                             Consumer<UpdateProvider>(
                               builder: (context, update, _) {

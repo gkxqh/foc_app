@@ -4,6 +4,7 @@ import 'package:foc_app/models/ticket_model.dart';
 import 'package:foc_app/models/user_model.dart';
 import 'package:foc_app/providers/auth_provider.dart';
 import 'package:foc_app/providers/config_provider.dart';
+import 'package:foc_app/providers/dev_options_provider.dart';
 import 'package:foc_app/providers/ticket_provider.dart';
 import 'package:foc_app/providers/update_provider.dart';
 import 'package:foc_app/views/home/ticket_detail_view.dart';
@@ -31,12 +32,20 @@ void main() {
     transcode: '654321',
   );
 
-  Widget host(TicketModel ticket, {required String role}) {
+  Widget host(
+    TicketModel ticket, {
+    required String role,
+    bool directFinish = false,
+  }) {
     final auth = AuthProvider();
     auth.setUserForTest(UserModel(role: role, nickname: '测试用户'));
+    // 「无需确认直接结束工单」受开发者选项控制，默认关闭
+    final dev = DevOptionsProvider();
+    if (directFinish) dev.setDirectFinishEnabled(true);
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<AuthProvider>.value(value: auth),
+        ChangeNotifierProvider<DevOptionsProvider>.value(value: dev),
         ChangeNotifierProvider<ConfigProvider>(create: (_) => ConfigProvider()),
         ChangeNotifierProvider<TicketProvider>(create: (_) => TicketProvider()),
         ChangeNotifierProvider<UpdateProvider>(create: (_) => UpdateProvider()),
@@ -49,6 +58,7 @@ void main() {
     WidgetTester tester,
     TicketModel ticket, {
     required String role,
+    bool directFinish = false,
   }) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1.0;
@@ -56,7 +66,7 @@ void main() {
       tester.view.resetPhysicalSize();
       tester.view.resetDevicePixelRatio();
     });
-    await tester.pumpWidget(host(ticket, role: role));
+    await tester.pumpWidget(host(ticket, role: role, directFinish: directFinish));
     // 固定时长推进：视图初始化含网络请求，测试环境快速失败，避免 pumpAndSettle 卡计时器
     await tester.pump(const Duration(milliseconds: 600));
     await tester.pump(const Duration(milliseconds: 400));
@@ -95,7 +105,9 @@ void main() {
     expect(find.text('请求用户确认完成'), findsNothing);
   });
 
-  testWidgets('技术员在等待用户确认时仅见灰置「等待用户确认」', (tester) async {
+  testWidgets('技术员在等待用户确认时默认仅见灰置「等待用户确认」，直接结束入口默认隐藏', (
+    tester,
+  ) async {
     await pumpDetail(
       tester,
       ticketWithStatus('UserConfirming'),
@@ -104,7 +116,38 @@ void main() {
     await scrollToText(tester, '等待用户确认');
     expect(find.text('等待用户确认'), findsOneWidget);
     expect(elevatedButtonEnabled(tester, '等待用户确认'), isFalse);
+    // 直接结束入口受开发者选项控制，默认（含老版本升级后）关闭
+    expect(find.text('无需确认直接结束工单'), findsNothing);
     expect(find.text('请求用户确认完成'), findsNothing);
+  });
+
+  testWidgets('开发者选项开启后，等待用户确认状态显示「无需确认直接结束工单」', (
+    tester,
+  ) async {
+    await pumpDetail(
+      tester,
+      ticketWithStatus('UserConfirming'),
+      role: 'technician',
+      directFinish: true,
+    );
+    await scrollToText(tester, '等待用户确认');
+    expect(find.text('等待用户确认'), findsOneWidget);
+    // 懒构建 ListView：底部按钮需继续滚入视口后才会构建
+    await scrollToText(tester, '无需确认直接结束工单');
+    expect(find.text('无需确认直接结束工单'), findsOneWidget);
+  });
+
+  testWidgets('开发者选项开启后，维修中状态显示「无需确认直接结束工单」', (tester) async {
+    await pumpDetail(
+      tester,
+      ticketWithStatus('Repairing'),
+      role: 'technician',
+      directFinish: true,
+    );
+    await scrollToText(tester, '请求用户确认完成');
+    expect(find.text('请求用户确认完成'), findsOneWidget);
+    await scrollToText(tester, '无需确认直接结束工单');
+    expect(find.text('无需确认直接结束工单'), findsOneWidget);
   });
 
   testWidgets('用户在等待用户确认时可见可点的「确认电脑维修完成」', (tester) async {
@@ -130,11 +173,11 @@ void main() {
     expect(find.text('确认电脑维修完成'), findsNothing);
   });
 
-  testWidgets('回归：维修中状态两侧确认按钮保持不变', (tester) async {
+  testWidgets('回归：维修中状态两侧确认按钮保持不变（直接结束默认隐藏）', (tester) async {
     await pumpDetail(tester, ticketWithStatus('Repairing'), role: 'technician');
     await scrollToText(tester, '请求用户确认完成');
     expect(find.text('请求用户确认完成'), findsOneWidget);
-    expect(find.text('无需确认直接结束工单'), findsOneWidget);
+    expect(find.text('无需确认直接结束工单'), findsNothing);
 
     await pumpDetail(tester, ticketWithStatus('Repairing'), role: 'user');
     await scrollToText(tester, '确认电脑维修完成');

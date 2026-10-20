@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import 'core/layout/window_class.dart';
 import 'core/theme/app_theme.dart';
 import 'providers/auth_provider.dart';
 import 'providers/config_provider.dart';
+import 'providers/dev_options_provider.dart';
 import 'providers/plaza_provider.dart';
 import 'providers/ticket_provider.dart';
 import 'providers/theme_provider.dart';
@@ -75,6 +77,8 @@ class _FeiyangAppState extends State<FeiyangApp> {
         ChangeNotifierProvider(create: (_) => ConfigProvider()),
         ChangeNotifierProvider(create: (_) => TicketProvider()),
         ChangeNotifierProvider(create: (_) => PlazaProvider()),
+        // 开发者选项：异步读取本地偏好，读取前为默认关闭态
+        ChangeNotifierProvider(create: (_) => DevOptionsProvider()..load()),
         ChangeNotifierProvider(create: (_) => UpdateProvider()),
       ],
       // Consumer 必须位于 MultiProvider 内部：订阅主题偏好变化，
@@ -92,11 +96,16 @@ class _FeiyangAppState extends State<FeiyangApp> {
             darkTheme: AppTheme.darkTheme,
             themeMode: theme.themeMode,
             builder: (context, child) {
-              // 全局文字缩放（软件设置 → 界面设置）
+              // 全局文字缩放（软件设置 → 界面设置）；
+              // 布局覆盖（开发者选项）挂在 Navigator 之上，所有路由的断点函数统一受控
               return MediaQuery(
                 data: MediaQuery.of(context)
                     .copyWith(textScaler: TextScaler.linear(theme.textScale)),
-                child: child!,
+                child: Consumer<DevOptionsProvider>(
+                  builder: (_, dev, inner) =>
+                      LayoutOverride(mode: dev.layoutMode, child: inner!),
+                  child: child!,
+                ),
               );
             },
             home: child,

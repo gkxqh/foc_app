@@ -257,21 +257,33 @@ class AuthProvider extends ChangeNotifier {
     return res;
   }
 
-  // 登录/注册成功后的公共收尾：拉取资料、落缓存、按需保存账号、刷新小组件
-  Future<void> _finishLogin(String phone) async {
+  /// 扫码登录：出码方轮询拿到 token（QrLoginService 已写入 ApiClient）后的收尾，
+  /// 手机号以服务端资料为准
+  Future<void> completeQrLogin() async {
+    _isLoading = true;
+    notifyListeners();
+    await _finishLogin(null);
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  // 登录/注册成功后的公共收尾：拉取资料、落缓存、按需保存账号、刷新小组件。
+  // phone 为 null（扫码登录）时以拉取到的资料手机号为准
+  Future<void> _finishLogin(String? phone) async {
     final userInfo = await _authService.getUserInfo();
-    _user = userInfo ?? UserModel(phone: phone);
+    _user = userInfo ?? UserModel(phone: phone ?? '');
     _isLoggedIn = true;
     // 无论能否拉到完整资料都落缓存，保证冷启动后登录态与资料一致
     await _saveUserToCache(_user!);
     // 「记住此设备」开启时保存账号到本机列表，退出后可在登录页一键切换
     final prefs = await SharedPreferences.getInstance();
-    if (prefs.getBool(_kRememberEnabled) ?? true) {
+    final accountPhone = _user!.phone.isNotEmpty ? _user!.phone : (phone ?? '');
+    if ((prefs.getBool(_kRememberEnabled) ?? true) && accountPhone.isNotEmpty) {
       final token = _client.accessToken;
       if (token != null && token.isNotEmpty) {
         await upsertSavedAccount(
           SavedAccount(
-            phone: phone,
+            phone: accountPhone,
             token: token,
             nickname: _user?.nickname ?? '',
             avatarUrl: _user?.avatarUrl ?? '',

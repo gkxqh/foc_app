@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:foc_app/models/ticket_model.dart';
 import 'package:foc_app/models/user_model.dart';
 import 'package:foc_app/providers/auth_provider.dart';
+import 'package:foc_app/providers/dev_options_provider.dart';
 import 'package:foc_app/views/home/ticket_detail_view.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -34,8 +35,13 @@ Widget _wrap(TicketModel ticket, {bool tech = false}) {
       role: tech ? 'technician' : 'user',
     ),
   );
-  return ChangeNotifierProvider<AuthProvider>.value(
-    value: auth,
+  return MultiProvider(
+    providers: [
+      ChangeNotifierProvider<AuthProvider>.value(value: auth),
+      ChangeNotifierProvider<DevOptionsProvider>(
+        create: (_) => DevOptionsProvider(),
+      ),
+    ],
     child: MaterialApp(
       home: Scaffold(body: TicketDetailView(ticket: ticket)),
     ),

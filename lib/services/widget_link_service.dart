@@ -40,7 +40,7 @@ class WidgetLinkService {
 
   /// runApp 后调用一次：登记冷启动落点 + 订阅运行中的热点击。
   static void init() {
-    if (_initialized) return;
+    if (kIsWeb || _initialized) return;
     _initialized = true;
     _log('init');
 

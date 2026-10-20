@@ -14,6 +14,7 @@ import '../common/app_snackbar.dart';
 import '../common/confirm_dialog.dart';
 import '../common/page_insets.dart';
 import 'privacy_consent.dart';
+import 'qr_login_page.dart';
 import 'register_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -141,6 +142,19 @@ class _LoginPageState extends State<LoginPage> {
     } else {
       showAppSnackBar(context, '验证码错误或登录失败', type: SnackBarType.error);
     }
+  }
+
+  // 扫码登录：出码页轮询拿到 token 并完成收尾后以 true 返回，此处统一提示并关闭登录页
+  Future<void> _openQrLogin() async {
+    if (!await _ensurePrivacyAgreed()) return;
+    if (!mounted) return;
+    final ok = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(builder: (_) => const QrLoginPage()),
+    );
+    if (!mounted || ok != true) return;
+    showAppSnackBar(context, '登录成功！', type: SnackBarType.success);
+    Navigator.pop(context);
   }
 
   @override
@@ -423,6 +437,16 @@ class _LoginPageState extends State<LoginPage> {
                     child: const Text('手机号注册'),
                   ),
                 ],
+              ),
+              // 扫码登录：用已登录设备扫码授权，不消耗短信验证码（2026-09-18 新增）
+              TextButton.icon(
+                onPressed: _openQrLogin,
+                icon: const Icon(Icons.qr_code_2_rounded, size: 18),
+                label: const Text('已有登录设备？扫码登录，免短信验证'),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  minimumSize: const Size(0, 36),
+                ),
               ),
             ],
           ),

@@ -22,6 +22,11 @@ class ApiConstants {
   // App/网页端手机号注册（2026-09-14 新增，服务端 phoneregsend.php / phoneregister.php）
   static const String phoneRegSend = '/v1/user/phoneregsend';
   static const String phoneRegister = '/v1/user/phoneregister';
+  // 扫码登录（2026-09-18 新增，服务端 qrlogin_create/confirm/poll.php）：
+  // 待登录设备出码并轮询换 token；已登录设备扫码确认。会话 120 秒、一次性
+  static const String qrLoginCreate = '/v1/user/qrlogin_create';
+  static const String qrLoginConfirm = '/v1/user/qrlogin_confirm';
+  static const String qrLoginPoll = '/v1/user/qrlogin_poll';
   static const String userDelete = '/v1/user/delete';
   static const String newPhone = '/v1/user/newphone';
   static const String phoneVerify = '/v1/user/phonechange_verify';

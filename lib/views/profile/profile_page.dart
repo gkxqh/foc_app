@@ -12,6 +12,7 @@ import 'app_settings_page.dart';
 import 'feedback_page.dart';
 import 'history_page.dart';
 import 'settings_page.dart';
+import '../home/scan_give_page.dart';
 import '../home/tech_id_card_page.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -189,6 +190,34 @@ class ProfilePage extends StatelessWidget {
             Card(
               child: Column(
                 children: [
+                  // 扫一扫：所有登录用户可扫码授权其他设备登录（免短信）；技术员兼扫码接单
+                  ListTile(
+                    leading: const Icon(
+                      Icons.qr_code_scanner_rounded,
+                      color: AppTheme.primaryBlue,
+                    ),
+                    title: const Text('扫一扫'),
+                    subtitle: Text(
+                      auth.isTechnician
+                          ? '扫码登录其他设备 · 扫码接单'
+                          : '扫描网页版/电脑版的登录二维码，免短信登录',
+                      style: AppText.captionSm,
+                    ),
+                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                    onTap: () {
+                      if (!auth.isLoggedIn) {
+                        _showLoginPrompt(context);
+                        return;
+                      }
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ScanGivePage(title: '扫一扫'),
+                        ),
+                      );
+                    },
+                  ),
+                  const Divider(height: 1),
                   ListTile(
                     leading: const Icon(
                       Icons.history_rounded,

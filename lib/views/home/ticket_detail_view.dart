@@ -9,6 +9,7 @@ import '../../core/network/api_client.dart';
 import '../../core/theme/app_theme.dart';
 import '../../models/ticket_model.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/dev_options_provider.dart';
 import '../../providers/ticket_provider.dart';
 import '../common/app_snackbar.dart';
 import '../common/confirm_dialog.dart';
@@ -401,6 +402,10 @@ class _TicketDetailViewState extends State<TicketDetailView> {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     final isTech = auth.isTechnician;
+    // 「无需确认直接结束工单」默认隐藏，仅在开发者选项中开启后显示
+    final directFinishEnabled = context
+        .watch<DevOptionsProvider>()
+        .directFinishEnabled;
     final stepIndex = _getStepIndex(_ticket.repairStatus);
 
     return ListView(
@@ -651,16 +656,18 @@ class _TicketDetailViewState extends State<TicketDetailView> {
                 icon: const Icon(Icons.check_circle_outline),
                 label: const Text('请求用户确认完成'),
               ),
-              const SizedBox(height: AppSpacing.sm),
-              TextButton(
-                onPressed: _completeDirectly,
-                child: Text(
-                  '无需确认直接结束工单',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+              if (directFinishEnabled) ...[
+                const SizedBox(height: AppSpacing.sm),
+                TextButton(
+                  onPressed: _completeDirectly,
+                  child: Text(
+                    '无需确认直接结束工单',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ),
-              ),
+              ],
             ],
             if (_ticket.repairStatus == 'TechConfirming') ...[
               const SizedBox(height: AppSpacing.sm),
@@ -677,6 +684,19 @@ class _TicketDetailViewState extends State<TicketDetailView> {
                 icon: const Icon(Icons.hourglass_top),
                 label: const Text('等待用户确认'),
               ),
+              // 用户长期不确认时技术员可跳过等待直接结束（服务端 complete 允许该状态）
+              if (directFinishEnabled) ...[
+                const SizedBox(height: AppSpacing.sm),
+                TextButton(
+                  onPressed: _completeDirectly,
+                  child: Text(
+                    '无需确认直接结束工单',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ],
             ],
             const SizedBox(height: AppSpacing.sm),
             TextButton.icon(

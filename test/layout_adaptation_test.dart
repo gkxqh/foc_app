@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:foc_app/main.dart';
 import 'package:foc_app/providers/auth_provider.dart';
 import 'package:foc_app/providers/config_provider.dart';
+import 'package:foc_app/providers/dev_options_provider.dart';
 import 'package:foc_app/providers/ticket_provider.dart';
 import 'package:foc_app/providers/update_provider.dart';
 import 'package:foc_app/views/activity/number_page.dart';
@@ -61,6 +62,9 @@ void main() {
       ChangeNotifierProvider<ConfigProvider>(create: (_) => ConfigProvider()),
       ChangeNotifierProvider<TicketProvider>(create: (_) => TicketProvider()),
       ChangeNotifierProvider<UpdateProvider>(create: (_) => UpdateProvider()),
+      ChangeNotifierProvider<DevOptionsProvider>(
+        create: (_) => DevOptionsProvider(),
+      ),
     ],
     child: MaterialApp(home: child),
   );

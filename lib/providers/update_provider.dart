@@ -56,7 +56,7 @@ class UpdateProvider extends ChangeNotifier {
   /// 视为无更新，由首页自动检查调用。
   Future<UpdateCheckResult> checkForUpdate({bool auto = false}) async {
     // 更新渠道只有 Android 侧载 APK，其他平台无安装包可下
-    if (!Platform.isAndroid) return UpdateCheckResult.upToDate;
+    if (kIsWeb || !Platform.isAndroid) return UpdateCheckResult.upToDate;
     // 检查中/下载中不重复发起，避免并发请求与状态互踩
     if (isBusy || _status == UpdateStatus.checking) {
       return _info != null ? UpdateCheckResult.newVersion : UpdateCheckResult.upToDate;

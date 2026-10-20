@@ -13,6 +13,7 @@ import '../../providers/theme_provider.dart';
 import '../common/app_snackbar.dart';
 import '../common/page_insets.dart';
 import 'about_page.dart';
+import 'developer_options_page.dart';
 
 /// 软件设置：界面外观（主题模式、文字大小、应用图标）与关于信息。
 /// 偏好持久化在本地，仅影响本设备。
@@ -405,6 +406,28 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => const AboutPage()),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          _groupTitle('开发者'),
+          Card(
+            clipBehavior: Clip.antiAlias,
+            child: ListTile(
+              leading: Icon(
+                Icons.developer_mode_rounded,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              title: const Text('开发者选项'),
+              subtitle: const Text('诊断信息与实验功能'),
+              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const DeveloperOptionsPage(),
+                  ),
                 );
               },
             ),

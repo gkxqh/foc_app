@@ -7,16 +7,21 @@ import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/ticket_provider.dart';
+import '../../services/qr_login_service.dart';
+import '../common/confirm_dialog.dart';
 
 import 'give_order_page.dart';
 
-/// 技术员扫码接单页
-/// 识别两类二维码：
-/// 1. 服务端 getTicket 下发的 `[give];单号;order_hash` 接单码
-/// 2. 工单详情页分享的 "单号+6位tvcode" 转单文本
+/// 扫码页（技术员「扫码接单」/ 所有用户「扫一扫」共用）
+/// 识别三类二维码：
+/// 1. 服务端 getTicket 下发的 `[give];单号;order_hash` 接单码（仅技术员）
+/// 2. 工单详情页分享的 "单号+6位tvcode" 转单文本（仅技术员）
+/// 3. 待登录设备出码页的 `[fylogin];session_id` 登录码（所有已登录用户，确认后授权该设备登录）
 /// 支持实时相机扫描、相册图片二维码识别与手动输入转单码
 class ScanGivePage extends StatefulWidget {
-  const ScanGivePage({super.key});
+  const ScanGivePage({super.key, this.title = '扫码接单'});
+
+  final String title;
 
   @override
   State<ScanGivePage> createState() => _ScanGivePageState();
@@ -34,24 +39,38 @@ class _ScanGivePageState extends State<ScanGivePage> {
     super.dispose();
   }
 
-  Future<void> _processCode(String code) async {
-    setState(() => _submitting = true);
-    final ticketProvider = context.read<TicketProvider>();
-    final err = await ticketProvider.transferTicket(code);
-
+  // 结果用振动强化反馈：成功中振、失败强振（视线可能还停在取景框上）
+  void _showResult(bool success, String message) {
     if (!mounted) return;
     setState(() {
       _submitting = false;
-      _success = err == null;
-      _resultMessage = err ?? '接单成功！';
+      _success = success;
+      _resultMessage = message;
     });
-
-    // 接单结果用振动强化反馈：成功中振、失败强振（视线可能还停在取景框上）
-    if (err == null) {
+    if (success) {
       HapticFeedback.mediumImpact();
     } else {
       HapticFeedback.heavyImpact();
     }
+  }
+
+  Future<void> _processCode(String code) async {
+    setState(() => _submitting = true);
+
+    final loginSessionId = QrLoginCodec.parseSessionId(code);
+    if (loginSessionId != null) {
+      await _processLoginCode(loginSessionId);
+      return;
+    }
+    if (!context.read<AuthProvider>().isTechnician) {
+      _showResult(false, '这不是登录二维码；工单接单码仅技术员可用');
+      return;
+    }
+
+    final ticketProvider = context.read<TicketProvider>();
+    final err = await ticketProvider.transferTicket(code);
+    if (!mounted) return;
+    _showResult(err == null, err ?? '接单成功！');
 
     if (err == null) {
       final auth = context.read<AuthProvider>();
@@ -59,6 +78,42 @@ class _ScanGivePageState extends State<ScanGivePage> {
         ticketProvider.fetchTickets(role: auth.user!.role, uid: auth.user!.uid);
       }
       // 成功后稍作停留让用户看到结果，再返回上一页
+      await Future.delayed(const Duration(milliseconds: 1200));
+      if (mounted) Navigator.pop(context, true);
+    }
+  }
+
+  /// 登录码：先 scan 取出码设备信息 → 确认弹窗 → confirm/cancel。
+  /// 服务端只在出码方轮询时签发 token，本机不会接触到任何凭据。
+  Future<void> _processLoginCode(String sessionId) async {
+    final service = QrLoginService();
+    final requester = await service.scan(sessionId);
+    if (!mounted) return;
+    if (requester == null) {
+      _showResult(false, service.lastError ?? '登录码无效或已过期');
+      return;
+    }
+    final platform = requester.platform.isEmpty ? '未知设备' : requester.platform;
+    final ip = requester.maskedIp.isEmpty ? '未知' : requester.maskedIp;
+    final ok = await showConfirmDialog(
+      context,
+      title: '允许在新设备上登录？',
+      content:
+          '设备：$platform\nIP：$ip\n\n'
+          '确认后该设备将直接登录你的账号。如果不是你本人在操作，请点「取消」。',
+      confirmText: '允许登录',
+    );
+    if (!mounted) return;
+    if (!ok) {
+      await service.cancel(sessionId);
+      if (!mounted) return;
+      _showResult(false, '已拒绝本次登录请求');
+      return;
+    }
+    final err = await service.confirm(sessionId);
+    if (!mounted) return;
+    _showResult(err == null, err ?? '已允许登录，请在另一台设备上继续');
+    if (err == null) {
       await Future.delayed(const Duration(milliseconds: 1200));
       if (mounted) Navigator.pop(context, true);
     }
@@ -158,8 +213,12 @@ class _ScanGivePageState extends State<ScanGivePage> {
 
   @override
   Widget build(BuildContext context) {
+    final isTech = context.watch<AuthProvider>().isTechnician;
+    final hint = isTech
+        ? '对准工单二维码即可接单；对准登录二维码可授权其他设备登录'
+        : '对准另一台设备上的登录二维码，即可授权其登录你的账号';
     return Scaffold(
-      appBar: AppBar(title: const Text('扫码接单')),
+      appBar: AppBar(title: Text(widget.title)),
       body: Column(
         children: [
           Expanded(
@@ -197,7 +256,7 @@ class _ScanGivePageState extends State<ScanGivePage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    _resultMessage ?? '将取景框对准工单二维码即可自动接单',
+                    _resultMessage ?? hint,
                     textAlign: TextAlign.center,
                     style: AppText.body.copyWith(
                       color: _resultMessage == null
@@ -230,20 +289,22 @@ class _ScanGivePageState extends State<ScanGivePage> {
                             ),
                           ),
                         ),
-                        OutlinedButton.icon(
-                          onPressed: _openManualInput,
-                          icon: const Icon(
-                            Icons.keyboard_alt_outlined,
-                            size: 18,
-                          ),
-                          label: const Text('手动输码'),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppSpacing.lg,
-                              vertical: AppSpacing.sm,
+                        // 手动输码只对转单码有意义，非技术员不展示
+                        if (isTech)
+                          OutlinedButton.icon(
+                            onPressed: _openManualInput,
+                            icon: const Icon(
+                              Icons.keyboard_alt_outlined,
+                              size: 18,
+                            ),
+                            label: const Text('手动输码'),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppSpacing.lg,
+                                vertical: AppSpacing.sm,
+                              ),
                             ),
                           ),
-                        ),
                       ],
                     ),
                   ],
@@ -280,20 +341,21 @@ class _ScanGivePageState extends State<ScanGivePage> {
                             ),
                           ),
                         ),
-                        OutlinedButton.icon(
-                          onPressed: _openManualInput,
-                          icon: const Icon(
-                            Icons.keyboard_alt_outlined,
-                            size: 18,
-                          ),
-                          label: const Text('输码'),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppSpacing.md,
-                              vertical: AppSpacing.sm,
+                        if (isTech)
+                          OutlinedButton.icon(
+                            onPressed: _openManualInput,
+                            icon: const Icon(
+                              Icons.keyboard_alt_outlined,
+                              size: 18,
+                            ),
+                            label: const Text('输码'),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppSpacing.md,
+                                vertical: AppSpacing.sm,
+                              ),
                             ),
                           ),
-                        ),
                       ],
                     ),
                   ],
