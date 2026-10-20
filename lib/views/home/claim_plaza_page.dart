@@ -239,9 +239,10 @@ class _ClaimPlazaPageState extends State<ClaimPlazaPage> {
       child: Row(
         children: [
           Expanded(
+            // 必须保持默认裁剪：手机窄屏下标签放不下会溢出，若关闭裁剪
+            // 会直接绘制到右侧排序按钮上造成重叠
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              clipBehavior: Clip.none,
               child: Row(
                 children: [
                   for (final campus in campusOptions)
